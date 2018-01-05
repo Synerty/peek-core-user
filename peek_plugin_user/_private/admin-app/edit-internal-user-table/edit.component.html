@@ -1,0 +1,127 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Edit Internal Users
+        <div class="btn-toolbar pull-right">
+            <div class="btn-group">
+                <div class="btn btn-default btn-sm" (click)='save()'>
+                    Save
+                </div>
+                <div class="btn btn-default btn-sm" (click)='load()'>
+                    Reset
+                </div>
+                <div class="btn btn-default btn-sm" (click)='addRow()'>
+                    Add
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="likeTitle">Title Search : </label>
+                    <input type="text" class="form-control" [(ngModel)]="likeTitle"
+                           [ngModelOptions]="{standalone: true}"
+                           id="likeTitle" (change)="load()">
+                </div>
+            </form>
+        </div>
+
+        <p *ngIf="needFilter()">
+            Enter a filter with a length of 3 or more.
+        </p>
+
+        <p *ngIf="!needFilter() && !haveItems()">
+            No users found!
+        </p>
+
+        <table class="table" *ngIf="haveItems()">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Uuid</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+
+            <tbody *ngFor="let item of items">
+            <tr>
+                <td>
+                    <input [(ngModel)]="item.userName"
+                           class="form-control input-sm"
+                           required
+                           type="text"/>
+                </td>
+                <td>
+                    <input [(ngModel)]="item.userTitle"
+                           class="form-control input-sm"
+                           required
+                           type="text"/>
+                </td>
+                <td>
+                    <input [(ngModel)]="item.userUuid"
+                           class="form-control input-sm"
+                           required
+                           type="text"/>
+                </td>
+                <td>
+                    <input [(ngModel)]="item.mobile"
+                           class="form-control input-sm"
+                           type="text"/>
+                </td>
+                <td>
+                    <input [(ngModel)]="item.email"
+                           class="form-control input-sm"
+                           type="email"/>
+                </td>
+                <td>
+                    <div class="btn btn-default btn-sm" (click)='setPassword(item)'>
+                        <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="btn btn-default btn-sm" (click)='removeRow(item)'>
+                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="btn btn-default btn-sm" (click)='addGroupRow(item)'>
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr  *ngFor="let groupId of item.groupIds; let i=index">
+
+                <td></td>
+                <td></td>
+                <td></td>
+                <th>Group</th>
+                <td *ngIf="groupId == null">
+
+                    <select (change)="updateGroup(item, i, $event.target.value)"
+                           class="form-control input-sm">
+                        <option value=""> -- Select -- </option>
+                        <option *ngFor="let group of groups"
+                                [value]="group.id">{{group.groupName}}</option>
+                    </select>
+                </td>
+
+                <td *ngIf="groupId != null">
+                    {{groupNameForId(groupId)}}
+                </td>
+                <td>
+                    <div class="btn btn-default btn-sm" (click)='removeGroupRow(item, i)'>
+                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    </div>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

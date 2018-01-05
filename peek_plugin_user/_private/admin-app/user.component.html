@@ -1,0 +1,47 @@
+<div class="container">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <!-- Home Tab -->
+        <li role="presentation" class="active">
+            <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a>
+        </li>
+        <!-- Edit Internal User Tab -->
+        <li role="presentation">
+            <a href="#editInternalUser" aria-controls="editInternalUser" role="tab"
+               data-toggle="tab">Edit Internal Users</a>
+        </li>
+        <!-- Edit Internal Group Tab -->
+        <li role="presentation">
+            <a href="#editInternalGroup" aria-controls="editInternalGroup" role="tab"
+               data-toggle="tab">Edit Internal Groups</a>
+        </li>
+        <!-- Edit Settings Tab -->
+        <li role="presentation">
+            <a href="#editSetting" aria-controls="editSetting" role="tab"
+               data-toggle="tab">Edit Settings</a>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <!-- Edit Settings Tab -->
+        <div role="tabpanel" class="tab-pane" id="editSetting">
+            <pl-user-edit-setting></pl-user-edit-setting>
+        </div>
+        <!-- Edit Internal User Tab -->
+        <div role="tabpanel" class="tab-pane" id="editInternalUser">
+            <pl-user-edit-internal-user></pl-user-edit-internal-user>
+        </div>
+        <!-- Edit Internal Group Tab -->
+        <div role="tabpanel" class="tab-pane" id="editInternalGroup">
+            <pl-user-edit-internal-group></pl-user-edit-internal-group>
+        </div>
+        <!-- Home Tab -->
+        <div role="tabpanel" class="tab-pane active" id="home">
+            <h1 class="text-center">User Plugin</h1>
+            <p>Angular2 Lazy Loaded Module</p>
+            <p>This is the root of the admin app for the User plugin</p>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="peek-nav-section">
+    <!--
+        The following 'div' groups button to the left of the Nav Bar.
+        Can contain one to many buttons
+    -->
+    <div class="btn-group pull-left" role="group">
+
+    </div>
+
+    <!--
+        The following 'div' groups button to the right of the Nav Bar.
+        Can contain one to many buttons
+    -->
+    <div class="btn-group pull-right" role="group">
+        <button class="nav-section-btn"
+                role="group"
+                [disabled]="isAuthenticating"
+                (click)="doLogout()">
+            <fa name="sign-out"></fa>
+            Logout
+        </button>
+    </div>
+</div>
+
+<div class="peek-nav-bar-padding">
+    <!-- This div provides padding for the screen under the Navigation Section -->
+
+</div>
+
+<div class="plugin-user">
+    <div class="bg-danger" *ngFor="let error of errors">
+        {{error}}
+    </div>
+
+    <div class="bg-warning" *ngFor="let warning of warnings">
+        {{warning}}
+    </div>
+
+    <div class="user-message">
+        <fa name="sign-in"></fa>
+        Logged in as {{loggedInUserText()}}
+    </div>
+</div>

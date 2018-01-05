@@ -1,0 +1,30 @@
+<StackLayout>
+    <GridLayout class="peek-nav-section"
+                rows="auto" columns="auto, *, auto">
+        <GridLayout class="btn-group"
+                    rows="auto" columns="auto"
+                    row="0" col="2">
+            <Button class="nav-section-btn fa"
+                    [class.nav-section-btn-disabled]="isAuthenticating"
+                    row="0" col="0"
+                    text="{{'fa-sign-out' | fonticon }} Logout"
+                    (tap)="doLogout()"></Button>
+        </GridLayout>
+    </GridLayout>
+    <StackLayout class="hr"></StackLayout>
+
+    <ActivityIndicator *ngIf="isAuthenticating" [busy]="1"></ActivityIndicator>
+
+    <Label class="bg-danger"
+           *ngFor="let error of errors"
+           [text]="error"></Label>
+
+    <Label class="bg-warning"
+           *ngFor="let warning of warnings"
+           [text]="warning"></Label>
+
+    <StackLayout class="plugin-user">
+        <label class="user-message" text="Logged in as {{loggedInUserText()}}"></label>
+
+    </StackLayout>
+</StackLayout>

@@ -1,0 +1,45 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Edit Internal Groups
+        <div class="btn-toolbar pull-right">
+            <div class="btn-group">
+                <div class="btn btn-default btn-sm" (click)='save()'>
+                    Save
+                </div>
+                <div class="btn btn-default btn-sm" (click)='loader.load()'>
+                    Reset
+                </div>
+                <div class="btn btn-default btn-sm" (click)='addRow()'>
+                    Add
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th></th>
+            </tr>
+            <tr *ngFor="let item of items">
+                <td>
+                    <input [(ngModel)]="item.groupName"
+                           class="form-control input-sm"
+                           required
+                           type="text"/>
+                </td>
+                <td>
+                    <input [(ngModel)]="item.groupTitle"
+                           class="form-control input-sm"
+                           required
+                           type="text"/>
+                </td>
+                <td>
+                    <div class="btn btn-default" (click)='removeRow(item)'>
+                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+{
+  "plugin": {
+    "title": "Login / Logout",
+    "packageName": "peek_plugin_user",
+    "version":"0.7.9.3",
+    "buildNumber": "#PLUGIN_BUILD#",
+    "buildDate": "#BUILD_DATE#",
+    "creator": "Synerty Pty Ltd",
+    "website": "www.synerty.com"
+  },
+  "requiresServices": [
+    "client",
+    "server",
+    "storage",
+    "mobile",
+    "desktop",
+    "admin",
+    "agent",
+    "worker"
+  ],
+  "mobile": {
+    "appDir": "_private/mobile-app",
+    "moduleDir": "plugin-module",
+    "assetDir": "_private/mobile-assets",
+    "appModule": "plugin-user.module#PluginUserModule",
+    "icon": "/assets/peek_plugin_user/plugin_icon.png",
+    "rootServices": [
+      {
+        "file": "services/logged-in.guard",
+        "class": "LoggedInGuard"
+      },
+      {
+        "file": "services/logged-out.guard",
+        "class": "LoggedOutGuard"
+      },
+      {
+        "file": "services/user.service",
+        "class": "UserService",
+        "persistent": true
+      }
+    ]
+  },
+  "desktop": {
+    "moduleDir": "plugin-module"
+  },
+  "admin": {
+    "homeLinkText": "Users",
+    "moduleDir": "plugin-module",
+    "appDir": "_private/admin-app",
+    "appModule": "user.module#UserModule"
+  },
+  "client": {
+  },
+  "server": {
+  },
+  "agent": {
+  },
+  "worker": {
+  },
+  "storage": {
+    "alembicDir": "_private/alembic"
+  }
+}

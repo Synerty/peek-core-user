@@ -1,0 +1,33 @@
+@import '~@synerty/peek-theme/scss/_variables.ns';
+
+$general_margin_1: 1 !default;
+$general_font_size_5: 1 !default;
+$general_margin_3: 1 !default;
+$general_padding_3: 1 !default;
+
+.plugin-user {
+  /*
+      Contains the user component classes
+  */
+  margin: $general_margin_1;
+
+  .user-message {
+    /*
+        Contains the message attributes
+    */
+    font-size: $general_font_size_5;
+    margin-top: $general_margin_3;
+    margin-bottom: $general_margin_3;
+
+  }
+
+  .editable {
+    /*
+        Contains the message attributes
+    */
+    border-width: $general_border;
+    border-radius: $general_border_radius;
+    border-color: $grey;
+
+  }
+}
