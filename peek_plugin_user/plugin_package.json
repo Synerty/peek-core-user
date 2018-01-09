@@ -2,7 +2,7 @@
   "plugin": {
     "title": "Login / Logout",
     "packageName": "peek_plugin_user",
-    "version":"0.8.0",
+    "version":"0.8.1",
     "buildNumber": "#PLUGIN_BUILD#",
     "buildDate": "#BUILD_DATE#",
     "creator": "Synerty Pty Ltd",
