@@ -53,7 +53,4 @@ if [ -d  $RELEASE_DIR ]; then
     cp ./dist/${PIP_PACKAGE}-$VER.tar.gz $RELEASE_DIR
 fi
 
-#echo "If you're happy with this you can now run :"
-#echo
-#echo "python setup.py sdist upload -r pypi"
-#echo
+#echo "If you're ha
