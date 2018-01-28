@@ -10,6 +10,7 @@ from peek_plugin_user._private.server.api.UserHookApi import UserHookApi
 from peek_plugin_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_plugin_user._private.server.controller.PasswordUpdateController import \
     PasswordUpdateController
+from peek_plugin_user._private.storage.InternalUserPassword import InternalUserPassword
 from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_plugin_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
@@ -53,18 +54,19 @@ class UserLoginApi(UserLoginApiABC):
         if not password:
             return False
 
-        users = (
+        passObjs = (
             ormSession
-                .query(InternalUserTuple)
+                .query(InternalUserPassword)
+                .join(InternalUserTuple)
                 .filter(InternalUserTuple.userName == userName)
                 .all()
         )
 
-        if not users:
+        if not passObjs:
             raise UserNotFoundException(userName)
 
-        user = users[0]
-        return user.password == PasswordUpdateController.hashPass(password)
+        passObj = passObjs[0]
+        return passObj.password == PasswordUpdateController.hashPass(password)
 
     @deferToThreadWrapWithLogger(logger)
     def _logoutInDb(self, logoutTuple: UserLogoutAction):
@@ -153,8 +155,8 @@ class UserLoginApi(UserLoginApiABC):
 
             # Find any current login sessions
             userLoggedIn = (ormSession.query(UserLoggedIn)
-                .filter(UserLoggedIn.userName == userName)
-                .all())
+                            .filter(UserLoggedIn.userName == userName)
+                            .all())
             userLoggedIn = userLoggedIn[0] if userLoggedIn else None
 
             loggedInElsewhere = (
@@ -200,6 +202,7 @@ class UserLoginApi(UserLoginApiABC):
 
                 responseTuple.deviceToken = userLoggedIn.deviceToken
                 responseTuple.deviceDescription = sameDeviceDescription
+                responseTuple.succeeded = True
                 return responseTuple
 
             anotherUserOnThatDevice = (

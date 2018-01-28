@@ -1,8 +1,10 @@
 import logging
 
 import hashlib
+from sqlalchemy.orm.exc import NoResultFound
 from twisted.internet.defer import Deferred
 
+from peek_plugin_user._private.storage.InternalUserPassword import InternalUserPassword
 from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_plugin_user._private.tuples.InternalUserUpdatePasswordAction import \
     InternalUserUpdatePasswordAction
@@ -40,15 +42,19 @@ s
 
         ormSession = self.ormSessionCreator()
         try:
-            user = (
-                ormSession
-                    .query(InternalUserTuple)
-                    .filter(InternalUserTuple.id == tupleAction.userId)
-                    .one()
-            )
+            try:
+                password = (
+                    ormSession
+                        .query(InternalUserPassword)
+                        .filter(InternalUserPassword.userId == tupleAction.userId)
+                        .one()
+                )
+            except NoResultFound:
+                password = InternalUserPassword()
+                password.userId = tupleAction.userId
+                ormSession.add(password)
 
-            user.password = self.hashPass(tupleAction.newPassword)
-
+            password.password = self.hashPass(tupleAction.newPassword)
             ormSession.commit()
 
         finally:

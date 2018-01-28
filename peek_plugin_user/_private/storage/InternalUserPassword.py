@@ -10,7 +10,7 @@
 
 import logging
 
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Integer, String, Index
 from sqlalchemy.orm import relationship
 
@@ -19,36 +19,28 @@ from peek_plugin_user._private.storage.DeclarativeBase import DeclarativeBase
 from peek_plugin_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_plugin_user._private.storage.InternalUserGroupTuple import \
     InternalUserGroupTuple
+from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
 from vortex.Tuple import Tuple, addTupleType, TupleField
 
 logger = logging.getLogger(__name__)
 
 
-@addTupleType
-class InternalUserTuple(Tuple, DeclarativeBase):
+class InternalUserPassword(DeclarativeBase):
     """ Internal
 
     This table doesn't do anything
 
     """
-    __tupleType__ = userPluginTuplePrefix + 'InternalUserTuple'
-    __tablename__ = 'InternalUser'
+    __tablename__ = 'InternalUserPassword'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    userName = Column(String(50), unique=True, nullable=False)
-    userTitle = Column(String(50), unique=True, nullable=False)
-    userUuid = Column(String(50), unique=True, nullable=False)
 
-    importHash = Column(String(50))
+    userId = Column(Integer, ForeignKey('InternalUser.id', ondelete='CASCADE'),
+                    nullable=False)
+    user = relationship(InternalUserTuple)
 
-    mobile = Column(String(50))
-    email = Column(String(50))
-
-    groups = relationship(InternalGroupTuple, secondary=InternalUserGroupTuple.__table__)
-
-    #: This field is ussed for the admin-app to edit the groups
-    groupIds = TupleField()
+    password = Column(String(50), nullable=False)
 
     __table_args__ = (
-        Index("idx_InternalUserTable_importHash", importHash),
+        Index("idx_InternalUserTable_importHash", userId, unique=True),
     )

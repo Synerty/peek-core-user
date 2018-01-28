@@ -230,7 +230,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
         });
 
         this._lastUserSubscriptions.push(
-            this.tupleDataObserver.subscribeToTupleSelector(tupleSelector)
+            this.tupleDataObserver
+                .subscribeToTupleSelector(tupleSelector, false)
                 .subscribe((tuples: UserLoggedInTuple[]) => this.userLoggedInReceived(tuples))
         );
 
