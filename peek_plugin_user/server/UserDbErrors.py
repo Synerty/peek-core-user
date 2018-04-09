@@ -21,7 +21,7 @@ class UserNotFoundException(Exception):
         self.userName = userName
 
     def __str__(self):
-        if self.userName is 'None':
+        if self.userName is None:
             return "User name not selected"
         else:
             return "User %s is not found in database" % self.userName
