@@ -13,7 +13,7 @@ class UserIsNotLoggedInToThisDeviceError(Exception):
         self.userName = userName
 
     def __str__(self):
-        return "User %s is not logged in this device" % self.userName
+        return "User %s is not logged into this device" % self.userName
 
 
 class UserNotFoundException(Exception):
@@ -21,4 +21,7 @@ class UserNotFoundException(Exception):
         self.userName = userName
 
     def __str__(self):
-        return "User %s is foind in database" % self.userName
+        if self.userName is 'None':
+            return "User name not selected"
+        else:
+            return "User %s is not found in database" % self.userName
