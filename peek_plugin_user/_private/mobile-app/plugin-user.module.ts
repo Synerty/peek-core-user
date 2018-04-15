@@ -1,6 +1,6 @@
 import {NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
-import {PeekModuleFactory} from "@synerty/peek-util/index.web";
+import {PeekModuleFactory} from "@synerty/peek-util-web";
 import {UserLoginModule} from "./user-login/user-login.module";
 import {UserLogoutModule} from "./user-logout/user-logout.module";
 import {pluginRoutes} from "./plugin-user.routes";

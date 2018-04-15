@@ -8,13 +8,12 @@ import {Component} from "@angular/core";
 import {ComponentLifecycleEventEmitter, TupleActionPushService} from "@synerty/vortexjs";
 import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
 import {TitleService} from "@synerty/peek-util";
-import {switchStyleUrls} from "@synerty/peek-util/index.web";
 
 
 @Component({
     selector: './peek-plugin-user-logout',
     templateUrl: './user-logout.component.web.html',
-    styleUrls: [switchStyleUrls('../scss/plugin-user.web.scss')],
+    styleUrls: ['../scss/plugin-user.web.scss'],
     moduleId: module.id
 })
 export class UserLogoutComponent extends ComponentLifecycleEventEmitter {

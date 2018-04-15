@@ -1,7 +1,7 @@
 import {CommonModule} from "@angular/common";
 import {NgModule} from "@angular/core";
 import {UserLogoutComponent} from "./user-logout.component";
-import {PeekModuleFactory} from "@synerty/peek-util/index.web";
+import {PeekModuleFactory} from "@synerty/peek-util-web";
 
 
 @NgModule({
