@@ -21,5 +21,7 @@ class GroupDetailTupleProvider(TuplesProviderABC):
     @inlineCallbacks
     def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
         tuples = yield self._ourApi.infoApi.groups()
-        vortexMsg = yield Payload(filt=filt, tuples=tuples).toVortexMsgDefer()
+
+        payloadEnvelope = yield Payload(filt=filt, tuples=tuples).toEncodedPayloadDefer()
+        vortexMsg = yield payloadEnvelope.toVortexMsgDefer()
         return vortexMsg

@@ -10,6 +10,7 @@ from peek_plugin_user._private.tuples.UserListItemTuple import \
     UserListItemTuple
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
 from peek_plugin_user.tuples.GroupDetailTuple import GroupDetailTuple
+from vortex.DeferUtil import deferToThreadWrapWithLogger
 from vortex.Payload import Payload
 from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler, \
     TuplesProviderABC
@@ -19,8 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class Dummy(TuplesProviderABC):
+    @deferToThreadWrapWithLogger(logger)
     def makeVortexMsg(self, filt: dict, *args):
-        return Payload(filt, tuples=[]).toVortexMsg()
+        return Payload(filt, tuples=[]).makePayloadEnvelope().toVortexMsg()
 
 
 def makeTupleDataObservableHandler(dbSessionCreator, ourApi):
