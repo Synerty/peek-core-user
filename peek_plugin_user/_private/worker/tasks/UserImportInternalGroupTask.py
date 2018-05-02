@@ -30,7 +30,7 @@ def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> Intern
 
     importGroups: List[ImportInternalGroupTuple] = (
         Payload()
-            .fromVortexMsg(groupsVortexMsg)
+            .fromEncodedPayload(groupsVortexMsg)
             .tuples
     )
 

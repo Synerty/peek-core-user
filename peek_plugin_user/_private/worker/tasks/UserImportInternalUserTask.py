@@ -37,7 +37,7 @@ def importInternalUsers(self, importHash: str,
 
     importUsers: List[ImportInternalUserTuple] = (
         Payload()
-            .fromVortexMsg(usersVortexMsg)
+            .fromEncodedPayload(usersVortexMsg)
             .tuples
     )
 

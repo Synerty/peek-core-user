@@ -29,6 +29,7 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
 
         tuple_ = UserLoggedInTuple(userName=userName, deviceToken=deviceToken)
 
-        payloadEnvelope = yield Payload(filt=filt, tuples=[tuple_]).toEncodedPayloadDefer()
+        payload = Payload(filt=filt, tuples=[tuple_])
+        payloadEnvelope = yield payload.makePayloadEnvelopeDefer()
         vortexMsg = yield payloadEnvelope.toVortexMsgDefer()
         return vortexMsg

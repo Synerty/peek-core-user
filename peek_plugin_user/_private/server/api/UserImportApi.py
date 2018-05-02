@@ -16,8 +16,8 @@ class UserImportApi(UserImportApiABC):
     def shutdown(self):
         pass
 
-    def importInternalUsers(self, importHash: str, usersVortexMsg: bytes) -> Deferred:
-        return self._importController.importInternalUsers(importHash, usersVortexMsg)
+    def importInternalUsers(self, importHash: str, usersEncodedPayload: bytes) -> Deferred:
+        return self._importController.importInternalUsers(importHash, usersEncodedPayload)
 
-    def importInternalGroups(self, importHash: str, groupsVortexMsg: bytes) -> Deferred:
-        return self._importController.importInternalGroups(importHash, groupsVortexMsg)
+    def importInternalGroups(self, importHash: str, groupsEncodedPayload: bytes) -> Deferred:
+        return self._importController.importInternalGroups(importHash, groupsEncodedPayload)

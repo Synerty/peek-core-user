@@ -35,7 +35,8 @@ class UserListItemTupleProvider(TuplesProviderABC):
             tuples.append(UserListItemTuple(userId=userDetails.userName,
                                             displayName=userDetails.userTitle))
 
-        paylodEnvelope = yield Payload(filt=filt, tuples=tuples).makePayloadEnvelopeDefer()
+        payload = Payload(filt=filt, tuples=tuples)
+        paylodEnvelope = yield payload.makePayloadEnvelopeDefer()
         vortexMsg = yield paylodEnvelope.toVortexMsgDefer()
         return vortexMsg
 

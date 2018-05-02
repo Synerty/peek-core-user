@@ -4,13 +4,13 @@ from twisted.internet.defer import Deferred
 
 class UserImportApiABC(metaclass=ABCMeta):
     @abstractmethod
-    def importInternalUsers(self, importHash: str, usersVortexMsg: bytes) -> Deferred:
+    def importInternalUsers(self, importHash: str, usersEncodedPayload: bytes) -> Deferred:
         """ Import Internal Users
 
         Add, replace and remove users in the internal DB
 
         :param importHash: A string representing this group of items to import
-        :param usersVortexMsg: A List[ImportInternalUserTuple] to import,
+        :param usersEncodedPayload: A List[ImportInternalUserTuple] to import,
                 wrapped in a serialised payload.
 
         Wrap the disps list with ::
@@ -25,13 +25,13 @@ class UserImportApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def importInternalGroups(self, importHash: str, groupsVortexMsg: bytes) -> Deferred:
+    def importInternalGroups(self, importHash: str, groupsEncodedPayload: bytes) -> Deferred:
         """ Import Internal Groups
 
         Add, replace and remove users in the internal DB
 
         :param importHash: A string representing this group of items to import
-        :param groupsVortexMsg: A List[ImportInternalGroupTuple] to import,
+        :param groupsEncodedPayload: A List[ImportInternalGroupTuple] to import,
                 wrapped in a serialised payload.
 
         Wrap the disps list with ::
