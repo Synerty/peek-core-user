@@ -18,17 +18,10 @@ import {
     TupleActionPushNameService,
     TupleActionPushService,
     TupleDataObservableNameService,
-    TupleDataObserverService
+    TupleDataObserverService,
+    TupleDataOfflineObserverService
 } from "@synerty/vortexjs";
 
-
-export function tupleDataObservableNameServiceFactory() {
-    return new TupleDataObservableNameService(userObservableName, userFilt);
-}
-
-export function tupleActionPushNameServiceFactory() {
-    return new TupleActionPushNameService(userActionProcessorName, userFilt);
-}
 
 @NgModule({
     imports: [
@@ -44,14 +37,6 @@ export function tupleActionPushNameServiceFactory() {
     ],
     declarations: [],
     providers: [
-        TupleDataObserverService, {
-            provide: TupleDataObservableNameService,
-            useFactory: tupleDataObservableNameServiceFactory
-        },
-        TupleActionPushService, {
-            provide: TupleActionPushNameService,
-            useFactory: tupleActionPushNameServiceFactory
-        }
     ]
 })
 export class PluginUserModule {

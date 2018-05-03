@@ -5,11 +5,15 @@ import {
     UserService,
     UserLoginResponseTuple
 } from "@peek/peek_plugin_user";
+import {
+    UserTupleService
+} from "@peek/peek_plugin_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
 import {
     ComponentLifecycleEventEmitter,
     TupleActionPushService,
     TupleDataObserverService,
+    TupleDataOfflineObserverService,
     TupleSelector
 } from "@synerty/vortexjs";
 import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
@@ -34,8 +38,7 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     warningKeys: string[] = [];
 
     constructor(private balloonMsg: Ng2BalloonMsgService,
-                private tupleDataObserver: TupleDataObserverService,
-                private tupleActionService: TupleActionPushService,
+                private tupleService: UserTupleService,
                 private userService: UserService,
                 private router: Router,
                 titleService: TitleService) {
@@ -46,13 +49,14 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
         selectAUser.displayName = "Select a User";
 
         let tupleSelector = new TupleSelector(UserListItemTuple.tupleName, {});
-        tupleDataObserver.subscribeToTupleSelector(tupleSelector)
+        this.tupleService.observer.subscribeToTupleSelector(tupleSelector)
             .takeUntil(this.onDestroyEvent)
             .subscribe((tuples: UserListItemTuple[]) => {
                 let blank = new UserListItemTuple();
                 blank.displayName = '--- select ---';
                 this.users = [blank];
-                this.users.add(tuples)
+                this.users.add(tuples);
+                console.log("UserListItemTuple Tuples len = " + tuples.length.toString());
             });
     }
 
@@ -90,7 +94,7 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
             .filter(item => item.userId === this.selectedUser.userName)[0];
 
         this.isAuthenticating = true;
-        this.userService.login(tupleAction, userDetails, this.tupleActionService)
+        this.userService.login(tupleAction, userDetails)
             .then((response: UserLoginResponseTuple) => {
 
                 if (response.succeeded) {

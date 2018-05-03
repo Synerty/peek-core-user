@@ -37,6 +37,11 @@
         "file": "services/user.service",
         "class": "UserService",
         "persistent": true
+      },
+      {
+        "file": "_private/user-tuple.service",
+        "class": "UserTupleService",
+        "persistent": true
       }
     ]
   },

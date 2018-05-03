@@ -4,6 +4,9 @@ import {
     UserLogoutAction,
     UserLogoutResponseTuple
 } from "@peek/peek_plugin_user";
+import {
+    UserTupleService
+} from "@peek/peek_plugin_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
 import {ComponentLifecycleEventEmitter, TupleActionPushService} from "@synerty/vortexjs";
 import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
@@ -26,7 +29,7 @@ export class UserLogoutComponent extends ComponentLifecycleEventEmitter {
     warningKeys: string[] = [];
 
     constructor(private balloonMsg: Ng2BalloonMsgService,
-                private tupleActionService: TupleActionPushService,
+                private tupleService: UserTupleService,
                 private userService: UserService,
                 private router: Router,
                 titleService: TitleService) {
@@ -44,7 +47,7 @@ export class UserLogoutComponent extends ComponentLifecycleEventEmitter {
         tupleAction.acceptedWarningKeys = this.warningKeys;
 
         this.isAuthenticating = true;
-        this.userService.logout(tupleAction, this.tupleActionService)
+        this.userService.logout(tupleAction)
             .then((response: UserLogoutResponseTuple) => {
 
                 if (response.succeeded) {

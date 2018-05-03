@@ -33,6 +33,7 @@ import {UserLogoutAction} from "../tuples/login/UserLogoutAction";
 import {UserLogoutResponseTuple} from "../tuples/login/UserLogoutResponseTuple";
 import {UserLoginAction} from "../tuples/login/UserLoginAction";
 import {UserLoginResponseTuple} from "../tuples/login/UserLoginResponseTuple";
+import {UserTupleService} from "../_private/user-tuple.service";
 
 
 @addTupleType
@@ -56,9 +57,6 @@ export class UserService extends ComponentLifecycleEventEmitter {
     private _users: UserListItemTuple[] = [];
     private _userDisplayNameById: {};
 
-    private tupleDataObserver: TupleDataObserverService;
-
-    private offlineStorage: TupleOfflineStorageService;
 
     private state: UserServiceStateTuple = new UserServiceStateTuple();
     private readonly stateSelector = new TupleSelector(UserServiceStateTuple.tupleName, {});
@@ -70,36 +68,15 @@ export class UserService extends ComponentLifecycleEventEmitter {
 
     constructor(private router: Router,
                 private balloonMsg: Ng2BalloonMsgService,
-                storageFactory: TupleStorageFactoryService,
                 private deviceEnrolmentService: DeviceEnrolmentService,
-                vortexService: VortexService,
-                vortexStatusService: VortexStatusService) {
+                private tupleService: UserTupleService) {
         super();
-
-        // Create the observers that we need
-
-        // Create the offline storage
-        this.offlineStorage = new TupleOfflineStorageService(
-            storageFactory,
-            new TupleOfflineStorageNameService(userTupleOfflineServiceName)
-        );
-
-        let tupleDataObservableName = new TupleDataObservableNameService(
-            userObservableName, userFilt);
-
-        let tupleDataOfflineObserver = new TupleDataOfflineObserverService(
-            vortexService,
-            vortexStatusService,
-            tupleDataObservableName,
-            this.offlineStorage);
-
-        this.tupleDataObserver = new TupleDataObserverService(tupleDataOfflineObserver);
 
         // Continue service initialisation
 
         // Maintain a list of users, lets hope this doesn't grow too large
         let tupleSelector = new TupleSelector(UserListItemTuple.tupleName, {});
-        this.tupleDataObserver.subscribeToTupleSelector(tupleSelector)
+        this.tupleService.observer.subscribeToTupleSelector(tupleSelector)
             .takeUntil(this.onDestroyEvent)
             .subscribe((tuples: UserListItemTuple[]) => {
                 this._users = tuples;
@@ -132,7 +109,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     private loadState(): void {
-        this.offlineStorage.loadTuples(this.stateSelector)
+        this.tupleService.offlineStorage.loadTuples(this.stateSelector)
             .then((tuples: UserServiceStateTuple[]) => {
                 let wasLoaded = this._hasLoaded;
                 this._hasLoaded = true;
@@ -153,18 +130,17 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     private storeState(): void {
-        this.offlineStorage.saveTuples(this.stateSelector, [this.state])
+        this.tupleService.offlineStorage.saveTuples(this.stateSelector, [this.state])
             .catch(e => console.log(`UserService: Error storing state ${e}`));
     }
 
     login(userLoginAction: UserLoginAction,
-          userDetails: UserListItemTuple,
-          tupleActionService: TupleActionPushService): Promise<UserLoginResponseTuple> {
+          userDetails: UserListItemTuple): Promise<UserLoginResponseTuple> {
 
         userLoginAction.deviceToken = this.deviceEnrolmentService.enrolmentToken();
 
 
-        return tupleActionService.pushAction(userLoginAction)
+        return this.tupleService.action.pushAction(userLoginAction)
             .then((responses: UserLoginResponseTuple[]) => {
                 if (responses == null || responses.length == 0) {
                     throw new Error(
@@ -187,8 +163,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
             });
     }
 
-    logout(tupleAction: UserLogoutAction,
-           tupleActionService: TupleActionPushService): Promise<UserLogoutResponseTuple> {
+    logout(tupleAction: UserLogoutAction): Promise<UserLogoutResponseTuple> {
 
         if (!this.loggedIn) {
             throw new Error("Can't logout, we're already logged out");
@@ -196,7 +171,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
 
         tupleAction.deviceToken = this.deviceEnrolmentService.enrolmentToken();
 
-        return tupleActionService.pushAction(tupleAction)
+        return this.tupleService.action.pushAction(tupleAction)
             .catch(err => {
                 if (err.indexOf("not logged in") != -1) {
                     this.setLogout();
@@ -233,7 +208,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
         });
 
         this._lastUserSubscriptions.push(
-            this.tupleDataObserver
+            this.tupleService.observer
                 .subscribeToTupleSelector(tupleSelector, false)
                 .subscribe((tuples: UserLoggedInTuple[]) => this.userLoggedInReceived(tuples))
         );
