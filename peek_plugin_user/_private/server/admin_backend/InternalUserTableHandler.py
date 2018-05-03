@@ -47,7 +47,7 @@ class __CrudHandler(OrmCrudHandler):
     def _create(self, session, payloadFilt):
         tuples = self.createDeclarative(session, payloadFilt)
         self._ext.afterCreate(tuples, session, payloadFilt)
-        return Payload(tuples=tuples)
+        return Payload(tuples=tuples).makePayloadEnvelope()
 
 
 class __ExtUpdateObservable(OrmCrudHandlerExtension):

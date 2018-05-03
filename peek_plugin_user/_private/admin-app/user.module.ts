@@ -1,23 +1,28 @@
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {NgModule} from "@angular/core";
-import {Routes, RouterModule} from "@angular/router";
+import {RouterModule, Routes} from "@angular/router";
 import {EditInternalUserComponent} from "./edit-internal-user-table/edit.component";
 import {EditInternalGroupComponent} from "./edit-internal-group-table/edit.component";
 import {EditSettingComponent} from "./edit-setting-table/edit.component";
-
 
 
 import {
     TupleActionPushNameService,
     TupleActionPushService,
     TupleDataObservableNameService,
-    TupleDataObserverService
+    TupleDataObserverService,
+    TupleDataOfflineObserverService,
+    TupleOfflineStorageNameService,
+    TupleOfflineStorageService
 } from "@synerty/vortexjs";
 // Import our components
 import {UserComponent} from "./user.component";
 import {
-    userObservableName, userFilt, userActionProcessorName
+    userActionProcessorName,
+    userFilt,
+    userObservableName,
+    userTupleOfflineServiceName
 } from "@peek/peek_plugin_user/_private";
 
 
@@ -27,6 +32,10 @@ export function tupleDataObservableNameServiceFactory() {
 
 export function tupleActionPushNameServiceFactory() {
     return new TupleActionPushNameService(userActionProcessorName, userFilt);
+}
+
+export function tupleOfflineStorageNameServiceFactory() {
+    return new TupleOfflineStorageNameService(userTupleOfflineServiceName);
 }
 
 // Define the routes for this Angular module
@@ -47,14 +56,18 @@ export const pluginRoutes: Routes = [
     ],
     exports: [],
     providers: [
-        TupleDataObserverService, {
-            provide: TupleDataObservableNameService,
-            useFactory: tupleDataObservableNameServiceFactory
-        },
         TupleActionPushService, {
             provide: TupleActionPushNameService,
             useFactory: tupleActionPushNameServiceFactory
-        }
+        },
+        TupleOfflineStorageService, {
+            provide: TupleOfflineStorageNameService,
+            useFactory: tupleOfflineStorageNameServiceFactory
+        },
+        TupleDataObserverService, TupleDataOfflineObserverService, {
+            provide: TupleDataObservableNameService,
+            useFactory: tupleDataObservableNameServiceFactory
+        },
     ],
     declarations: [UserComponent,
         EditInternalUserComponent,
