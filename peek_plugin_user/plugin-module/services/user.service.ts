@@ -16,7 +16,8 @@ import {
     TupleSelector,
     TupleStorageFactoryService,
     VortexService,
-    VortexStatusService
+    VortexStatusService,
+    TupleDataOfflineObserverService
 } from "@synerty/vortexjs";
 import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
 import {UserListItemTuple} from "../tuples/UserListItemTuple";
@@ -72,26 +73,27 @@ export class UserService extends ComponentLifecycleEventEmitter {
                 storageFactory: TupleStorageFactoryService,
                 private deviceEnrolmentService: DeviceEnrolmentService,
                 vortexService: VortexService,
-                vortexStatusService: VortexStatusService,
-                zone: NgZone) {
+                vortexStatusService: VortexStatusService) {
         super();
 
         // Create the observers that we need
-
-        let tupleDataObservableName = new TupleDataObservableNameService(
-            userObservableName, userFilt);
-
-        this.tupleDataObserver = new TupleDataObserverService(
-            vortexService,
-            vortexStatusService,
-            zone,
-            tupleDataObservableName);
 
         // Create the offline storage
         this.offlineStorage = new TupleOfflineStorageService(
             storageFactory,
             new TupleOfflineStorageNameService(userTupleOfflineServiceName)
         );
+
+        let tupleDataObservableName = new TupleDataObservableNameService(
+            userObservableName, userFilt);
+
+        let tupleDataOfflineObserver = new TupleDataOfflineObserverService(
+            vortexService,
+            vortexStatusService,
+            tupleDataObservableName,
+            this.offlineStorage);
+
+        this.tupleDataObserver = new TupleDataObserverService(tupleDataOfflineObserver);
 
         // Continue service initialisation
 
