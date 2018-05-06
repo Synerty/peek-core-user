@@ -6,6 +6,7 @@
                     rows="auto" columns="auto"
                     row="0" col="2">
             <Button class="nav-section-btn submit-button"
+                    [isEnabled]="isLoginEnabled()"
                     [class.nav-section-btn-disabled]="!isLoginEnabled()"
                     row="0" col="0"
                     [text]="loginText()"
@@ -26,18 +27,33 @@
                *ngFor="let warning of warnings"
                [text]="warning"></Label>
 
-        <StackLayout orientation="horizontal" [isEnabled]="!isAuthenticating" row="1"
-                     col="0" class="p-10 input-field">
-            <Label class="user-message" text="Password :"></Label>
+        <GridLayout [isEnabled]="!isAuthenticating"
+                    columns="*, 2*" rows="auto" class="p-10 input-field">
+            <Label row="0" col="0" class="user-message" text="Password :"></Label>
 
-            <TextField #password secure="true" [isEnabled]="!isAuthenticating"
+            <TextField row="0" col="1"
+                       #password secure="true" [isEnabled]="!isAuthenticating"
                        class="input input-border user-message editable"
                        hint="Enter Password" autocorrect="false"
                        (textChange)="selectedUser.password = password.text"
                        returnKeyType="done"
                        (returnPress)="doLogin()">
             </TextField>
-        </StackLayout>
+        </GridLayout>
+
+        <GridLayout [isEnabled]="!isAuthenticating"
+                    columns="*, 2*" rows="auto" class="p-10 input-field">
+            <Label row="0" col="0" class="user-message" text="Vehicle :"></Label>
+
+            <TextField row="0" col="1"
+                       #vehicleId [isEnabled]="!isAuthenticating"
+                       class="input input-border user-message editable"
+                       hint="Enter Vehicle ID" autocorrect="false"
+                       (textChange)="selectedUser.vehicleId = vehicleId.text"
+                       returnKeyType="done"
+                       (returnPress)="doLogin()">
+            </TextField>
+        </GridLayout>
 
         <GridLayout rows="*" columns="*">
             <ListView class="p-10"

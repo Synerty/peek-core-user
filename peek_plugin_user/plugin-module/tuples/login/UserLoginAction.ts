@@ -11,8 +11,9 @@ export class UserLoginAction extends TupleActionABC {
     }
 
     userName: string;
-    password: string;
+    password: string = '';
     deviceToken: string;
+    vehicleId: string = '';
 
     // A list of accepted warning keys
     // If any server side warnings occur and they are in this list then the logon

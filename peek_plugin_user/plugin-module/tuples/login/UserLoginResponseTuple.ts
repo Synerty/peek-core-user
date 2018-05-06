@@ -1,5 +1,6 @@
 import {addTupleType, Tuple} from "@synerty/vortexjs";
 import {userTuplePrefix} from "../../_private/PluginNames";
+import {UserDetailTuple} from "../UserDetailTuple";
 
 
 @addTupleType
@@ -14,6 +15,9 @@ export class UserLoginResponseTuple extends Tuple {
     userToken: string;
     deviceToken: string;
     deviceDescription: string;
+    vehicleId: string = '';
+
+    userDetail: UserDetailTuple;
 
     succeeded: boolean = true;
 

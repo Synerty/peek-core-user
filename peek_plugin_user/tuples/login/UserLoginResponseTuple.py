@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from peek_plugin_user._private.PluginNames import userPluginTuplePrefix
+from peek_plugin_user.tuples.UserDetailTuple import UserDetailTuple
 from vortex.Tuple import addTupleType, Tuple, TupleField
 
 
@@ -11,6 +12,9 @@ class UserLoginResponseTuple(Tuple):
     userToken: str = TupleField()
     deviceToken: str = TupleField()
     deviceDescription: str = TupleField()
+    vehicleId: str = TupleField()
+
+    userDetail: UserDetailTuple = TupleField()
 
     succeeded: bool = TupleField(True)
 
@@ -27,5 +31,5 @@ class UserLoginResponseTuple(Tuple):
     def setFailed(self) -> None:
         self.succeeded = False
 
-    def addWarning(self, key:str, displayText:str):
+    def addWarning(self, key: str, displayText: str):
         self.warnings[key] = displayText

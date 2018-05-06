@@ -9,6 +9,7 @@ class UserLogoutResponseTuple(Tuple):
     __tupleType__ = userPluginTuplePrefix + "UserLogoutResponseTuple"
     userName: str = TupleField()
     deviceToken: str = TupleField()
+    deviceDescription: str = TupleField()
 
     succeeded: bool = TupleField(True)
 

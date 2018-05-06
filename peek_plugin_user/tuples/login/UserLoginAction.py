@@ -12,6 +12,7 @@ class UserLoginAction(TupleActionABC):
     userName: str = TupleField()
     password: str = TupleField()
     deviceToken: str = TupleField()
+    vehicleId: str = TupleField()
 
     #: A list of accepted warning keys
     # If any server side warnings occur and they are in this list then the logon

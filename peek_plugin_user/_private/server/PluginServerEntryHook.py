@@ -16,6 +16,8 @@ from peek_plugin_user._private.server.admin_backend import makeAdminBackendHandl
 from peek_plugin_user._private.server.api.UserApi import UserApi
 from peek_plugin_user._private.server.controller.ImportController import \
     ImportController
+from peek_plugin_user._private.server.controller.LoginLogoutController import \
+    LoginLogoutController
 from peek_plugin_user._private.server.controller.MainController import MainController
 from peek_plugin_user.server.UserApiABC import UserApiABC
 
@@ -49,19 +51,26 @@ class PluginServerEntryHook(PluginServerEntryHookABC,
         importController = ImportController()
         self._handlers.append(importController)
 
+        loginLogoutController = LoginLogoutController(deviceApi, self.dbSessionCreator)
+
+        self._handlers.append(importController)
+
         self._userApi = UserApi(deviceApi,
                                 self.dbSessionCreator,
-                                importController)
+                                importController,
+                                loginLogoutController)
 
         mainController = MainController(self.dbSessionCreator, self._userApi)
         self._handlers.append(mainController)
 
         tupleObservable = makeTupleDataObservableHandler(
-                self.dbSessionCreator, self._userApi
+            self.dbSessionCreator, self._userApi
         )
         self._handlers.append(tupleObservable)
 
-        self._userApi.setTupleObserver(tupleObservable)
+        loginLogoutController.setup(tupleObservable,
+                                    self._userApi.hookApi,
+                                    self._userApi.infoApi)
         importController.setTupleObserver(tupleObservable)
 
         self._handlers.append(makeTupleActionProcessorHandler(mainController))

@@ -2,12 +2,10 @@ import {Router} from "@angular/router";
 import {
     UserListItemTuple,
     UserLoginAction,
-    UserService,
-    UserLoginResponseTuple
+    UserLoginResponseTuple,
+    UserService
 } from "@peek/peek_plugin_user";
-import {
-    UserTupleService
-} from "@peek/peek_plugin_user/_private/user-tuple.service";
+import {UserTupleService} from "@peek/peek_plugin_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
 import {
     ComponentLifecycleEventEmitter,
@@ -80,7 +78,10 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     }
 
     isLoginEnabled(): boolean {
-        return !this.isSelectedUserNull() && !this.isAuthenticating;
+        return !this.isSelectedUserNull()
+            && !this.isAuthenticating
+            && this.selectedUser.password.length != 0
+            && this.selectedUser.vehicleId.length != 0;
     }
 
     doLogin() {
@@ -123,6 +124,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
                     alert("Login Failed. The server didn't respond.");
                     this.isAuthenticating = false;
                     return;
+                } else if (err.toString().length == 0) {
+                    alert("An error occurred when logging in.");
                 }
                 alert(err);
                 this.isAuthenticating = false;

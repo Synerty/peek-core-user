@@ -1,11 +1,8 @@
 import logging
-import uuid
 
 from sqlalchemy.orm import subqueryload
 
 from peek_plugin_user._private.PluginNames import userPluginFilt
-from peek_plugin_user._private.server.controller.PasswordUpdateController import \
-    PasswordUpdateController
 from peek_plugin_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_plugin_user._private.tuples.UserListItemTuple import UserListItemTuple
@@ -85,18 +82,6 @@ class __ExtUpdateObservable(OrmCrudHandlerExtension):
 
     afterUpdateCommit = _afterCommit
     afterDeleteCommit = _afterCommit
-
-    def beforeUpdate(self, tuple_, tuples, session, payloadFilt):
-        """ Before Update
-
-        Set the password if it's saved with out a password
-
-        """
-        for tuple in tuples:
-            if tuple.id is None and not tuple.password:
-                tuple.password = PasswordUpdateController.hashPass(str(uuid.uuid4()))
-
-        return True
 
     def middleUpdate(self, tuple_, tuples, session, payloadFilt):
         groupsById = {g.id: g for g in session.query(InternalGroupTuple)}

@@ -7,6 +7,8 @@ from peek_plugin_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_plugin_user._private.server.api.UserLoginApi import UserLoginApi
 from peek_plugin_user._private.server.controller.ImportController import \
     ImportController
+from peek_plugin_user._private.server.controller.LoginLogoutController import \
+    LoginLogoutController
 from peek_plugin_user.server.UserApiABC import UserApiABC
 from peek_plugin_user.server.UserHookApiABC import UserHookApiABC
 from peek_plugin_user.server.UserImportApiABC import UserImportApiABC
@@ -20,8 +22,8 @@ class UserApi(UserApiABC):
 
     def __init__(self, deviceApi: DeviceApiABC,
                  dbSessionCreator,
-                 importController:ImportController):
-
+                 importController: ImportController,
+                 loginLogoutController: LoginLogoutController):
         self._hookApi = UserHookApi()
 
         self._importApi = UserImportApi(importController=importController)
@@ -29,13 +31,7 @@ class UserApi(UserApiABC):
         self._infoApi = UserInfoApi(deviceApi=deviceApi,
                                     dbSessionCreator=dbSessionCreator)
 
-        self._loginApi = UserLoginApi(deviceApi=deviceApi,
-                                      dbSessionCreator=dbSessionCreator,
-                                      hookApi=self._hookApi,
-                                      infoApi=self._infoApi)
-
-    def setTupleObserver(self, tupleObservable):
-        self._loginApi.setTupleObserver(tupleObservable)
+        self._loginApi = UserLoginApi(loginLogoutController=loginLogoutController)
 
     def shutdown(self):
         self._loginApi.shutdown()
@@ -48,19 +44,18 @@ class UserApi(UserApiABC):
         self._hookApi = None
         self._infoApi = None
 
-
     @property
-    def loginApi(self) -> UserLoginApiABC:
+    def loginApi(self) -> UserLoginApi:
         return self._loginApi
 
     @property
-    def importApi(self) -> UserImportApiABC:
+    def importApi(self) -> UserImportApi:
         return self._importApi
 
     @property
-    def hookApi(self) -> UserHookApiABC:
+    def hookApi(self) -> UserHookApi:
         return self._hookApi
 
     @property
-    def infoApi(self) -> UserInfoApiABC:
+    def infoApi(self) -> UserInfoApi:
         return self._infoApi

@@ -12,6 +12,7 @@ export class UserLogoutResponseTuple extends Tuple {
 
     userName: string;
     deviceToken: string;
+    deviceDescription: string;
 
     succeeded: boolean = true;
 
