@@ -80,8 +80,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     isLoginEnabled(): boolean {
         return !this.isSelectedUserNull()
             && !this.isAuthenticating
-            && this.selectedUser.password.length != 0
-            && this.selectedUser.vehicleId.length != 0;
+            && this.selectedUser.password && this.selectedUser.password.length != 0
+            && this.selectedUser.vehicleId && this.selectedUser.vehicleId.length != 0;
     }
 
     doLogin() {
