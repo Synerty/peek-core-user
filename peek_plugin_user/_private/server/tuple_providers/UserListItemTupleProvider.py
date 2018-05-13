@@ -4,7 +4,7 @@ from twisted.internet.defer import Deferred, inlineCallbacks
 
 from peek_plugin_user._private.server.api.UserApi import UserApi
 from peek_plugin_user._private.storage.Setting import globalSetting, MOBILE_LOGIN_GROUP
-from peek_plugin_user._private.tuples.UserListItemTuple import \
+from peek_plugin_user.tuples.UserListItemTuple import \
     UserListItemTuple
 from vortex.DeferUtil import deferToThreadWrapWithLogger
 from vortex.Payload import Payload

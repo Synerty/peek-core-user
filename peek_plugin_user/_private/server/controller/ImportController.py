@@ -4,7 +4,7 @@ from twisted.internet.defer import inlineCallbacks
 
 from peek_plugin_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
-from peek_plugin_user._private.tuples.UserListItemTuple import UserListItemTuple
+from peek_plugin_user.tuples.UserListItemTuple import UserListItemTuple
 from peek_plugin_user.tuples.GroupDetailTuple import GroupDetailTuple
 from peek_plugin_user.tuples.UserDetailTuple import UserDetailTuple
 from vortex.TupleSelector import TupleSelector

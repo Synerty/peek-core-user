@@ -10,5 +10,16 @@ logger = logging.getLogger(__name__)
 class UserListItemTuple(Tuple):
     __tupleType__ = userPluginTuplePrefix + "UserListItemTuple"
 
-    userId = TupleField(comment="The unique ID of the user", typingType=str)
-    displayName = TupleField(comment="The nice name of the user", typingType=str)
+    #:  The unique ID of the user
+    userId: str = TupleField()
+
+    #:  The nice name of the user
+    displayName: str = TupleField()
+
+    @property
+    def userName(self) -> str:
+        return self.userId
+
+    @property
+    def userTitle(self) -> str:
+        return self.displayName

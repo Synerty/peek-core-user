@@ -6,7 +6,7 @@ from peek_plugin_user._private.server.tuple_providers.GroupDetailTupleProvider i
     GroupDetailTupleProvider
 from peek_plugin_user._private.server.tuple_providers.UserLoggedInTupleProvider import \
     UserLoggedInTupleProvider
-from peek_plugin_user._private.tuples.UserListItemTuple import \
+from peek_plugin_user.tuples.UserListItemTuple import \
     UserListItemTuple
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
 from peek_plugin_user.tuples.GroupDetailTuple import GroupDetailTuple

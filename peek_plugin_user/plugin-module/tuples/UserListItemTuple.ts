@@ -10,4 +10,12 @@ export class UserListItemTuple extends Tuple {
 
     userId: string;
     displayName: string;
+
+    get userName(): string {
+        return this.userId;
+    }
+
+    get userTitle(): string {
+        return this.displayName;
+    }
 }

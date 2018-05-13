@@ -16,7 +16,7 @@ from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTupl
 from peek_plugin_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
 from peek_plugin_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError, \
-    UserNotFoundException, UserPasswordNotSetException
+    UserPasswordNotSetException
 from peek_plugin_user.tuples.login.UserLoginAction import UserLoginAction
 from peek_plugin_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_plugin_user.tuples.login.UserLogoutAction import UserLogoutAction
