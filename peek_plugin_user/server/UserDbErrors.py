@@ -25,3 +25,15 @@ class UserNotFoundException(Exception):
             return "User name not selected"
         else:
             return "User %s is not found in database" % self.userName
+
+
+
+class UserPasswordNotSetException(Exception):
+    def __init__(self, userName):
+        self.userName = userName
+
+    def __str__(self):
+        if self.userName is None:
+            return "UserPasswordNotSetException:User name not selected"
+        else:
+            return "No password set for user %s" % self.userName

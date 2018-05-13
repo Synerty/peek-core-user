@@ -16,7 +16,7 @@ from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTupl
 from peek_plugin_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
 from peek_plugin_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError, \
-    UserNotFoundException
+    UserNotFoundException, UserPasswordNotSetException
 from peek_plugin_user.tuples.login.UserLoginAction import UserLoginAction
 from peek_plugin_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_plugin_user.tuples.login.UserLogoutAction import UserLogoutAction
@@ -65,7 +65,7 @@ class LoginLogoutController:
         )
 
         if not passObjs:
-            raise UserNotFoundException(userName)
+            raise UserPasswordNotSetException(userName)
 
         passObj = passObjs[0]
         return passObj.password == PasswordUpdateController.hashPass(password)
