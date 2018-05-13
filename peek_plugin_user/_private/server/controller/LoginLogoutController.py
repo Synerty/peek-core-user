@@ -196,14 +196,24 @@ class LoginLogoutController:
                     otherDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
                         loggedInElsewhere.deviceToken
                     )
-                    responseTuple.setFailed()
-                    responseTuple.addWarning(
-                        USER_ALREADY_LOGGED_ON_KEY,
-                        "User %s is already logged in, on device %s" % (
-                            userName, otherDeviceDescription)
-                    )
 
-                    return responseTuple
+                    # This is false if the logged in device has been removed from
+                    # enrollment
+                    if otherDeviceDescription:
+                        responseTuple.setFailed()
+                        responseTuple.addWarning(
+                            USER_ALREADY_LOGGED_ON_KEY,
+                            "User %s is already logged in, on device %s" % (
+                                userName, otherDeviceDescription)
+                        )
+
+                        return responseTuple
+
+                    # Else, The old device has been deleted,
+                    # Just let them login to the same device.
+                    self._forceLogout(ormSession,
+                                      loggedInElsewhere.userName,
+                                      loggedInElsewhere.deviceToken)
 
             # If we're logging into the same device, but already logged in
             if sameDevice:  # Logging into the same device
