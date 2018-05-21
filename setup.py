@@ -7,7 +7,7 @@ from setuptools import find_packages
 pip_package_name = "peek-plugin-user"
 py_package_name = "peek_plugin_user"
 
-package_version = '0.10.0'
+package_version = '0.10.1'
 
 egg_info = "%s.egg-info" % pip_package_name
 if os.path.isdir(egg_info):
