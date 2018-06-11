@@ -5,7 +5,7 @@ from peek_plugin_base.client.PluginClientEntryHookABC import PluginClientEntryHo
 from peek_plugin_base.server.PluginServerEntryHookABC import PluginServerEntryHookABC
 from peek_plugin_base.worker.PluginWorkerEntryHookABC import PluginWorkerEntryHookABC
 
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 
 
 def peekClientEntryHook() -> Type[PluginClientEntryHookABC]:
