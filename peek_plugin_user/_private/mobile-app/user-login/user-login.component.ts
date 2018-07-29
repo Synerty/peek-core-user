@@ -62,6 +62,12 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
         return this.selectedUser.userName == null || this.selectedUser.userName === '';
     }
 
+    isUserSelected(item: UserListItemTuple): boolean {
+        if (this.isSelectedUserNull())
+            return false;
+        return this.selectedUser.userName == item.userId
+    }
+
     webDisplayText(item: UserListItemTuple): string {
         if (item.userId == null || item.userId === '')
             return item.displayName; // For the --select-- case
@@ -85,6 +91,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     }
 
     doLogin() {
+        if (!this.isLoginEnabled())
+            return;
 
         let tupleAction = this.selectedUser;
 
