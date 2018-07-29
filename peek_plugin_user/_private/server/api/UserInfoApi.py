@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+from sqlalchemy import or_
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -57,8 +58,8 @@ class UserInfoApi(UserInfoApiABC):
 
         try:
             user = (ormSession.query(InternalUserTuple)
-                .filter(InternalUserTuple.userName == userName)
-                .one())
+                    .filter(InternalUserTuple.userName == userName)
+                    .one())
 
             return self._makeUserDetails(user)
 
@@ -99,7 +100,10 @@ class UserInfoApi(UserInfoApiABC):
             )
 
         if likeTitle:
-            qry = qry.filter(InternalUserTuple.userTitle.ilike('%' + likeTitle + '%'))
+            qry = qry.filter(or_(
+                InternalUserTuple.userTitle.ilike('%' + likeTitle + '%'),
+                InternalUserTuple.userName.ilike('%' + likeTitle + '%')
+            ))
 
         ormUsers = qry.all()
 
@@ -149,8 +153,8 @@ class UserInfoApi(UserInfoApiABC):
         session = self._dbSessionCreator()
         try:
             result = (session.query(UserLoggedIn)
-                .filter(UserLoggedIn.userName == userName)
-                .one())
+                      .filter(UserLoggedIn.userName == userName)
+                      .one())
 
             return result.deviceToken
 

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from peek_plugin_user._private.PluginNames import userPluginTuplePrefix
 from vortex.Tuple import addTupleType, Tuple, TupleField
@@ -25,3 +25,6 @@ class UserDetailTuple(Tuple):
 
     #:  A list of group names that this user belongs to
     groupNames: List[str] = TupleField()
+
+    #: A field for additional data
+    data: Optional[Dict] = TupleField()

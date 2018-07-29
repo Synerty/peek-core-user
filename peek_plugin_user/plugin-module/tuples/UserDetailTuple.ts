@@ -25,4 +25,7 @@ export class UserDetailTuple extends Tuple {
 
     //  A list of group names that this user belongs to
     groupNames: number[];
+
+    // A field for additional data
+    data: { [key: string]: any } | null;
 }
