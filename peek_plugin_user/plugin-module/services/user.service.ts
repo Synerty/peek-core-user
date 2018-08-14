@@ -255,6 +255,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     get loggedInUserDetails(): null | UserListItemTuple {
+        if (this.userDetails == null)
+            throw new Error("loggedInUserDetails called when it's null");
         return this.userDetails;
     }
 
