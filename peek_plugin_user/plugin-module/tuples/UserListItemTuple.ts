@@ -1,6 +1,7 @@
-import {Tuple} from "@synerty/vortexjs";
+import {addTupleType, Tuple} from "@synerty/vortexjs";
 import {userTuplePrefix} from "../_private/PluginNames";
 
+@addTupleType
 export class UserListItemTuple extends Tuple {
     public static readonly tupleName = userTuplePrefix + "UserListItemTuple";
 
