@@ -127,8 +127,8 @@ export class EditInternalUserComponent extends ComponentLifecycleEventEmitter {
             .then(() => this.balloonMsg.showSuccess("Save Successful"))
             .catch(e => this.balloonMsg.showError(e));
     }
-    groupNameForId(id:number):string {
-        return this.groupsById[id].groupName;
+    groupTitleForId(id:number):string {
+        return this.groupsById[id].groupTitle;
     }
 
     addGroupRow(user: InternalUserTuple) {

@@ -106,12 +106,12 @@
                            class="form-control input-sm">
                         <option value=""> -- Select -- </option>
                         <option *ngFor="let group of groups"
-                                [value]="group.id">{{group.groupName}}</option>
+                                [value]="group.id">{{group.groupTitle}}</option>
                     </select>
                 </td>
 
                 <td *ngIf="groupId != null">
-                    {{groupNameForId(groupId)}}
+                    {{groupTitleForId(groupId)}}
                 </td>
                 <td>
                     <div class="btn btn-default btn-sm" (click)='removeGroupRow(item, i)'>
