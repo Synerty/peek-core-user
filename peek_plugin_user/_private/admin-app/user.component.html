@@ -5,6 +5,11 @@
         <li role="presentation" class="active">
             <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a>
         </li>
+        <!-- Managed Logged in Users -->
+        <li role="presentation">
+            <a href="#manageLogins" aria-controls="manageLogins" role="tab"
+               data-toggle="tab">Manage Logged In Users</a>
+        </li>
         <!-- Edit Internal User Tab -->
         <li role="presentation">
             <a href="#editInternalUser" aria-controls="editInternalUser" role="tab"
@@ -24,6 +29,10 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
+        <!-- Managed Logged in Users -->
+        <div role="tabpanel" class="tab-pane" id="manageLogins">
+            <pl-user-manage-logged-in-user></pl-user-manage-logged-in-user>
+        </div>
         <!-- Edit Settings Tab -->
         <div role="tabpanel" class="tab-pane" id="editSetting">
             <pl-user-edit-setting></pl-user-edit-setting>
@@ -38,9 +47,11 @@
         </div>
         <!-- Home Tab -->
         <div role="tabpanel" class="tab-pane active" id="home">
-            <h1 class="text-center">User Plugin</h1>
-            <p>Angular2 Lazy Loaded Module</p>
-            <p>This is the root of the admin app for the User plugin</p>
+            <h1 class="text-center">User Management</h1>
+            <p>This plugin provides the ability to set user passwords, manage user groups
+                and login/logout users.</p>
+
+            <fa name="users-cog" size="5x"></fa>
         </div>
 
     </div>

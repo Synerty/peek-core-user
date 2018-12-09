@@ -8,6 +8,8 @@ from peek_plugin_base.server.PluginServerStorageEntryHookABC import \
     PluginServerStorageEntryHookABC
 from peek_plugin_base.server.PluginServerWorkerEntryHookABC import \
     PluginServerWorkerEntryHookABC
+from peek_plugin_user._private.server.AdminTupleDataObservable import \
+    makeAdminTupleDataObservableHandler
 from peek_plugin_user._private.server.ClientTupleActionProcessor import \
     makeTupleActionProcessorHandler
 from peek_plugin_user._private.server.ClientTupleDataObservable import \
@@ -19,6 +21,8 @@ from peek_plugin_user._private.server.controller.ImportController import \
 from peek_plugin_user._private.server.controller.LoginLogoutController import \
     LoginLogoutController
 from peek_plugin_user._private.server.controller.MainController import MainController
+from peek_plugin_user._private.tuples.LoggedInUserStatusTuple import \
+    LoggedInUserStatusTuple
 from peek_plugin_user.server.UserApiABC import UserApiABC
 
 logger = logging.getLogger(__name__)
@@ -46,38 +50,76 @@ class PluginServerEntryHook(PluginServerEntryHookABC,
         logger.debug("loaded")
 
     def start(self):
+        """ Start
+
+        This will be called when the plugin is loaded, just after the db is migrated.
+        Place any custom initialiastion steps here.
+
+        """
+        # ----------------
+        # Setup the APIs
         deviceApi: DeviceApiABC = self.platform.getOtherPluginApi("peek_core_device")
 
+        # ----------------
+        # Import Controller
         importController = ImportController()
         self._handlers.append(importController)
 
+        # ----------------
+        # Login / Logout Controller
         loginLogoutController = LoginLogoutController(deviceApi, self.dbSessionCreator)
-
         self._handlers.append(importController)
 
+        # ----------------
+        # Setup our API
         self._userApi = UserApi(deviceApi,
                                 self.dbSessionCreator,
                                 importController,
                                 loginLogoutController)
 
+        # ----------------
+        # Main Controller
         mainController = MainController(self.dbSessionCreator, self._userApi)
         self._handlers.append(mainController)
 
-        tupleObservable = makeTupleDataObservableHandler(
+        # ----------------
+        # Client Tuple Observable
+        clientTupleObservable = makeTupleDataObservableHandler(
             self.dbSessionCreator, self._userApi
         )
-        self._handlers.append(tupleObservable)
+        self._handlers.append(clientTupleObservable)
 
-        loginLogoutController.setup(tupleObservable,
+        # ----------------
+        # Admin Tuple Observable
+        adminTupleObservable = makeAdminTupleDataObservableHandler(
+            self.dbSessionCreator, deviceApi, self._userApi
+        )
+        self._handlers.append(clientTupleObservable)
+
+        # ----------------
+        # Setup controllers.
+        loginLogoutController.setup(clientTupleObservable,
+                                    adminTupleObservable,
                                     self._userApi.hookApi,
                                     self._userApi.infoApi)
-        importController.setTupleObserver(tupleObservable)
+        importController.setTupleObserver(clientTupleObservable)
 
+        # Make the admin observable send an update when device online / offline
+        # state changes occur
+        deviceApi.deviceOnlineStatus().subscribe(
+            lambda _: adminTupleObservable.notifyOfTupleUpdateForTuple(
+                LoggedInUserStatusTuple.tupleType()
+            )
+        )
+
+        # ----------------
+        # Setup the Action Processor
         self._handlers.append(makeTupleActionProcessorHandler(mainController))
 
-        # Add the backend handlers
+        # ----------------
+        # Setup admin backend
         self._handlers.extend(
-            makeAdminBackendHandlers(tupleObservable, self.dbSessionCreator)
+            makeAdminBackendHandlers(clientTupleObservable, self.dbSessionCreator)
         )
 
         logger.debug("started")

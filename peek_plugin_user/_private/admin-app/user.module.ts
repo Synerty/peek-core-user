@@ -24,6 +24,8 @@ import {
     userObservableName,
     userTupleOfflineServiceName
 } from "@peek/peek_plugin_user/_private";
+import {AngularFontAwesomeModule} from "angular-font-awesome";
+import {ManageLoggedInUserComponent} from "./logged-in-user/logged-in-user.component";
 
 
 export function tupleDataObservableNameServiceFactory() {
@@ -52,7 +54,8 @@ export const pluginRoutes: Routes = [
     imports: [
         CommonModule,
         RouterModule.forChild(pluginRoutes),
-        FormsModule
+        FormsModule,
+        AngularFontAwesomeModule
     ],
     exports: [],
     providers: [
@@ -69,7 +72,9 @@ export const pluginRoutes: Routes = [
             useFactory: tupleDataObservableNameServiceFactory
         },
     ],
-    declarations: [UserComponent,
+    declarations: [
+        UserComponent,
+        ManageLoggedInUserComponent,
         EditInternalUserComponent,
         EditInternalGroupComponent,
         EditSettingComponent]

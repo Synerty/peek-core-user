@@ -1,4 +1,6 @@
-export {UserLogoutAction} from "../tuples/login/UserLogoutAction";
-export {UserLogoutResponseTuple} from "../tuples/login/UserLogoutResponseTuple";
-export {UserLoginAction} from "../tuples/login/UserLoginAction";
-export {UserLoginResponseTuple} from "../tuples/login/UserLoginResponseTuple";
+
+
+export {UserLogoutAction} from "./login/UserLogoutAction";
+export {UserLogoutResponseTuple} from "./login/UserLogoutResponseTuple";
+export {UserLoginAction} from "./login/UserLoginAction";
+export {UserLoginResponseTuple} from "./login/UserLoginResponseTuple";
