@@ -2,8 +2,8 @@
 import {Injectable, NgZone} from "@angular/core";
 import {Router} from "@angular/router";
 
-import { Observable } from "rxjs/Observable";
-import { Subject } from "rxjs/Subject";
+import {Observable} from "rxjs/Observable";
+import {Subject} from "rxjs/Subject";
 import {
     addTupleType,
     ComponentLifecycleEventEmitter,
@@ -11,23 +11,18 @@ import {
     TupleActionPushService,
     TupleDataObservableNameService,
     TupleDataObserverService,
+    TupleDataOfflineObserverService,
     TupleOfflineStorageNameService,
     TupleOfflineStorageService,
     TupleSelector,
     TupleStorageFactoryService,
     VortexService,
-    VortexStatusService,
-    TupleDataOfflineObserverService
+    VortexStatusService
 } from "@synerty/vortexjs";
 import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
 import {UserListItemTuple} from "../tuples/UserListItemTuple";
 import {DeviceEnrolmentService} from "@peek/peek_core_device";
-import {
-    userFilt,
-    userObservableName,
-    userTupleOfflineServiceName,
-    userTuplePrefix
-} from "../_private/PluginNames";
+import {userTuplePrefix} from "../_private/PluginNames";
 import {UserLoggedInTuple} from "../_private";
 import {UserLogoutAction} from "../tuples/login/UserLogoutAction";
 import {UserLogoutResponseTuple} from "../tuples/login/UserLogoutResponseTuple";
@@ -245,7 +240,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
 
         // Else, log out
         this.balloonMsg.showMessage(
-            "This user has been logged out due to a login on another device",
+            "This user has been logged out due to a login on another device," +
+            " or an administrative logout",
             UsrMsgLevel.Error,
             UsrMsgType.Confirm
         );

@@ -11,4 +11,4 @@ def makeAdminBackendHandlers(tupleObservable: TupleDataObservableHandler,
     yield makeInternalGroupTableHandler(tupleObservable, dbSessionCreator)
 
     yield makeSettingPropertyHandler(dbSessionCreator)
-    pass
+

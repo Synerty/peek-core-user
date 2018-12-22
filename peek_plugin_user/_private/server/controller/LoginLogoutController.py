@@ -4,6 +4,9 @@ from datetime import datetime
 import pytz
 from twisted.cred.error import LoginDenied
 from twisted.internet.defer import Deferred, inlineCallbacks
+from vortex.DeferUtil import deferToThreadWrapWithLogger
+from vortex.TupleSelector import TupleSelector
+from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
@@ -14,6 +17,8 @@ from peek_plugin_user._private.server.controller.PasswordUpdateController import
 from peek_plugin_user._private.storage.InternalUserPassword import InternalUserPassword
 from peek_plugin_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_plugin_user._private.storage.UserLoggedIn import UserLoggedIn
+from peek_plugin_user._private.tuples.LoggedInUserStatusTuple import \
+    LoggedInUserStatusTuple
 from peek_plugin_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
 from peek_plugin_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError, \
     UserPasswordNotSetException
@@ -21,8 +26,6 @@ from peek_plugin_user.tuples.login.UserLoginAction import UserLoginAction
 from peek_plugin_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_plugin_user.tuples.login.UserLogoutAction import UserLogoutAction
 from peek_plugin_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
-from vortex.DeferUtil import deferToThreadWrapWithLogger
-from vortex.TupleSelector import TupleSelector
 
 logger = logging.getLogger(__name__)
 
@@ -38,17 +41,20 @@ class LoginLogoutController:
         self._hookApi: UserHookApi = None
         self._infoApi: UserInfoApi = None
         self._dbSessionCreator: DbSessionCreator = dbSessionCreator
-        self._tupleObservable = None
+        self._clientTupleObservable: TupleDataObservableHandler = None
+        self._adminTupleObservable: TupleDataObservableHandler = None
 
-    def setup(self, tupleObservable,
+    def setup(self, clientTupleObservable,
+              adminTupleObservable,
               hookApi: UserHookApi,
               infoApi: UserInfoApi):
-        self._tupleObservable = tupleObservable
+        self._clientTupleObservable = clientTupleObservable
+        self._adminTupleObservable = adminTupleObservable
         self._hookApi = hookApi
         self._infoApi = infoApi
 
     def shutdown(self):
-        self._tupleObservable = None
+        self._clientTupleObservable = None
         self._hookApi = None
         self._infoApi = None
 
@@ -105,7 +111,6 @@ class LoginLogoutController:
         :return A deferred that fires with List[UserLogoutResponseTuple]
         """
 
-
         deviceDescription = yield self._deviceApi.deviceDescription(
             logoutTuple.deviceToken
         )
@@ -124,9 +129,13 @@ class LoginLogoutController:
         if response.succeeded:
             yield self._logoutInDb(logoutTuple)
 
-        self._tupleObservable.notifyOfTupleUpdate(
+        self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(UserLoggedInTuple.tupleType(),
                           selector=dict(userName=logoutTuple.userName))
+        )
+
+        self._adminTupleObservable.notifyOfTupleUpdateForTuple(
+            LoggedInUserStatusTuple.tupleType()
         )
 
         return response
@@ -143,6 +152,7 @@ class LoginLogoutController:
         password = loginTuple.password
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
         deviceToken = loginTuple.deviceToken
+        vehicle = loginTuple.vehicleId
 
         responseTuple = UserLoginResponseTuple(
             userName=userName,
@@ -255,7 +265,8 @@ class LoginLogoutController:
 
             newUser = UserLoggedIn(userName=userName,
                                    loggedInDateTime=datetime.now(pytz.utc),
-                                   deviceToken=deviceToken)
+                                   deviceToken=deviceToken,
+                                   vehicle=vehicle)
             ormSession.add(newUser)
             ormSession.commit()
 
@@ -303,9 +314,13 @@ class LoginLogoutController:
 
             raise e
 
-        self._tupleObservable.notifyOfTupleUpdate(
+        self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(UserLoggedInTuple.tupleType(),
                           selector=dict(userName=loginTuple.userName))
+        )
+
+        self._adminTupleObservable.notifyOfTupleUpdateForTuple(
+            LoggedInUserStatusTuple.tupleType()
         )
 
         return loginResponse

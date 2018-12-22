@@ -34,3 +34,4 @@ class UserLoggedIn(Tuple, DeclarativeBase):
     loggedInDateTime = Column(DateTime(True), nullable=False)
     userName = Column(String(50), unique=True)
     deviceToken = Column(String(100), unique=True, nullable=False)
+    vehicle = Column(String)
