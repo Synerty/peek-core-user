@@ -57,7 +57,31 @@
         ]
     },
     "desktop": {
-        "moduleDir": "plugin-module"
+        "appDir": "_private/mobile-app",
+        "moduleDir": "plugin-module",
+        "assetDir": "_private/mobile-assets",
+        "appModule": "plugin-user.module#PluginUserModule",
+        "icon": "/assets/peek_plugin_user/plugin_icon.png",
+        "rootServices": [
+            {
+                "file": "services/logged-in.guard",
+                "class": "LoggedInGuard"
+            },
+            {
+                "file": "services/logged-out.guard",
+                "class": "LoggedOutGuard"
+            },
+            {
+                "file": "services/user.service",
+                "class": "UserService",
+                "persistent": true
+            },
+            {
+                "file": "_private/user-tuple.service",
+                "class": "UserTupleService",
+                "persistent": true
+            }
+        ]
     },
     "admin": {
         "homeLinkText": "Users",
