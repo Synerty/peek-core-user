@@ -1,8 +1,8 @@
 import os
 import shutil
-from setuptools import setup
 
 from setuptools import find_packages
+from setuptools import setup
 
 pip_package_name = "peek-plugin-user"
 py_package_name = "peek_plugin_user"
@@ -16,10 +16,14 @@ if os.path.isdir(egg_info):
 if os.path.isfile('MANIFEST'):
     os.remove('MANIFEST')
 
-
 excludePathContains = ('__pycache__', 'node_modules', 'platforms', 'dist')
 excludeFilesEndWith = ('.pyc', '.js', '.js.map', '.lastHash')
 excludeFilesStartWith = ()
+
+dependencies = [
+    'peek-plugin-base',
+    'python-ldap'
+]
 
 
 def find_package_files():
@@ -39,14 +43,15 @@ def find_package_files():
 
     return paths
 
+
 package_files = find_package_files()
 
 setup(
     name=pip_package_name,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     package_data={'': package_files},
-    install_requires=['peek-plugin-base'],
-    zip_safe=False,version=package_version,
+    install_requires=dependencies,
+    zip_safe=False, version=package_version,
     description='Peek Plugin - UserDb - This is the No Operation test/example plugin',
     author='Synerty',
     author_email='contact@synerty.com',

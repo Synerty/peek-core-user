@@ -258,3 +258,50 @@ def globalSetting(ormSession, key=None, value=None):
 
 MOBILE_LOGIN_GROUP = PropertyKey('Mobile Login Group', 'peek-mobile-login',
                                  propertyDict=globalProperties)
+
+
+# =============================================================================
+# LDAP INTEGRATION PROPERTIES
+# =============================================================================
+
+ldapProperties = {}
+LDAP_SETTING_TYPE = "LDAP"
+
+
+def ldapSetting(ormSession, key=None, value=None):
+    return _getSetting(LDAP_SETTING_TYPE, ormSession, ldapProperties, key=key,
+                       value=value)
+
+
+LDAP_DOMAIN_NAME = PropertyKey('LDAP Domain Name',
+                               'domain.example.com',
+                               propertyDict=ldapProperties)
+
+LDAP_URI = PropertyKey('LDAP URI',
+                        'ldap://ad1.domain.example.com',
+                        propertyDict=ldapProperties)
+
+LDAP_CN_FOLDERS = PropertyKey('LDAP CN Folders',
+                        '/Users',
+                        propertyDict=ldapProperties)
+
+LDAP_OU_FOLDERS = PropertyKey('LDAP OU Folders',
+                        '/MyBusiness/Users',
+                        propertyDict=ldapProperties)
+
+LDAP_ENABLED = PropertyKey('LDAP Enabled',
+                                   False,
+                                   propertyDict=ldapProperties)
+
+LDAP_ADMIN_GROUP = PropertyKey('LDAP Attune Admin Group',
+                               'attune-admin',
+                               propertyDict=ldapProperties)
+
+LDAP_JOB_GROUP = PropertyKey('LDAP Attune Job Group',
+                             'attune-job',
+                             propertyDict=ldapProperties)
+
+LDAP_DASHBOARD_GROUP = PropertyKey('LDAP Attune Dashboard Group',
+                                   'attune-dashboard',
+                                   propertyDict=ldapProperties)
+
