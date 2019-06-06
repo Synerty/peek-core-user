@@ -4,8 +4,8 @@ import shutil
 from setuptools import find_packages
 from setuptools import setup
 
-pip_package_name = "peek-plugin-user"
-py_package_name = "peek_plugin_user"
+pip_package_name = "peek-core-user"
+py_package_name = "peek_core_user"
 
 package_version = '1.3.0'
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-PY_PACKAGE="peek_plugin_user"
-PIP_PACKAGE="peek-plugin-user"
+PY_PACKAGE="peek_core_user"
+PIP_PACKAGE="peek-core-user"
 
 set -o nounset
 set -o errexit
