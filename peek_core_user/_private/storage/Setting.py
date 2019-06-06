@@ -5,9 +5,9 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.sql.expression import cast, null, case
 from sqlalchemy.sql.schema import Index
 from sqlalchemy.types import Integer, String, Boolean
+from vortex.Tuple import Tuple, addTupleType
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
-from vortex.Tuple import Tuple, addTupleType
 from .DeclarativeBase import DeclarativeBase
 
 """Mapping a polymorphic-valued vertical table as a dictionary.
@@ -259,6 +259,11 @@ def globalSetting(ormSession, key=None, value=None):
 MOBILE_LOGIN_GROUP = PropertyKey('Mobile Login Group', 'peek-mobile-login',
                                  propertyDict=globalProperties)
 
+SHOW_LOGIN_AS_LIST = PropertyKey('Show Login as List', True,
+                                 propertyDict=globalProperties)
+
+SHOW_VEHICLE_INPUT = PropertyKey('Show Vehicle Input', True,
+                                 propertyDict=globalProperties)
 
 # =============================================================================
 # LDAP INTEGRATION PROPERTIES
@@ -278,17 +283,17 @@ LDAP_DOMAIN_NAME = PropertyKey('LDAP Domain Name',
                                propertyDict=ldapProperties)
 
 LDAP_URI = PropertyKey('LDAP URI',
-                        'ldap://ad1.domain.example.com',
-                        propertyDict=ldapProperties)
+                       'ldap://ad1.domain.example.com',
+                       propertyDict=ldapProperties)
 
 LDAP_CN_FOLDERS = PropertyKey('LDAP CN Folders',
-                        '/Users',
-                        propertyDict=ldapProperties)
+                              '/Users',
+                              propertyDict=ldapProperties)
 
 LDAP_OU_FOLDERS = PropertyKey('LDAP OU Folders',
-                        '/MyBusiness/Users',
-                        propertyDict=ldapProperties)
+                              '/MyBusiness/Users',
+                              propertyDict=ldapProperties)
 
 LDAP_ENABLED = PropertyKey('LDAP Enabled',
-                                   False,
-                                   propertyDict=ldapProperties)
+                           False,
+                           propertyDict=ldapProperties)

@@ -31,9 +31,9 @@
     },
     "mobile": {
         "showHomeLink": false,
-        "appDir": "_private/mobile-app",
+        "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
-        "assetDir": "_private/mobile-assets",
+        "assetDir": "_private/both-assets",
         "icon": "/assets/peek_core_user/plugin_icon.png",
         "rootServices": [
             {
@@ -58,9 +58,9 @@
     },
     "desktop": {
         "showHomeLink": false,
-        "appDir": "_private/mobile-app",
+        "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
-        "assetDir": "_private/mobile-assets",
+        "assetDir": "_private/both-assets",
         "icon": "/assets/peek_core_user/plugin_icon.png",
         "rootServices": [
             {

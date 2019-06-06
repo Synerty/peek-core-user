@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
-PY_PACKAGE="peek_core_user"
-PIP_PACKAGE="peek-core-user"
-
 set -o nounset
 set -o errexit
-#set -x
+
+#------------------------------------------------------------------------------
+# Configure package preferences here
+PY_PACKAGE="peek_core_user"
+
+# Leave blank not to publish
+# Or select one of the index servers defined in ~/.pypirc
+PYPI_PUBLISH="pypi"
+
+#------------------------------------------------------------------------------
+PIP_PACKAGE=${PY_PACKAGE//_/-} # Replace _ with -
+HAS_GIT=`ls -d .git 2> /dev/null`
+
 
 if [ -n "$(git status --porcelain)" ]; then
     echo "There are uncommitted changes, please make sure all changes are committed" >&2
@@ -36,21 +45,32 @@ sed -i "s;.*version.*;__version__ = '${VER}';" ${PY_PACKAGE}/__init__.py
 # "version": "#PLUGIN_VER#",
 sed -i 's;.*"version".*:.*".*;    "version":"'${VER}'",;' ${PY_PACKAGE}/plugin_package.json
 
-## Build the source dist package
-# TODO: This should be a binary dist
-python setup.py  sdist --format=gztar
-
 # Reset the commit, we don't want versions in the commit
-git commit -a -m "Updated to version ${VER}"
 
-git tag ${VER}
-git push
-git push --tags
+if [ $HAS_GIT ]; then
+    git commit -a -m "Updated to version ${VER}"
 
+    git tag ${VER}
+    git push
+    git push --tags
+fi
+
+#------------------------------------------------------------------------------
+# Upload to test pypi
+PIPY_ALIAS="${2-$PYPI_PUBLISH}"
+
+if [ -n "${PIPY_ALIAS}" ]; then
+    echo "Pushing to pypi index server PIPY_ALIAS"
+    python setup.py sdist --format=gztar upload
+else
+    echo "Not publishing to any pypi indexes"
+fi
+
+#------------------------------------------------------------------------------
+# Copy to local release dir if it exists
 RELEASE_DIR=${RELEASE_DIR-/media/psf/release}
 if [ -d  $RELEASE_DIR ]; then
     rm -rf $RELEASE_DIR/${PIP_PACKAGE}*.gz || true
     cp ./dist/${PIP_PACKAGE}-$VER.tar.gz $RELEASE_DIR
 fi
 
-#echo "If you're ha

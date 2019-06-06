@@ -7,15 +7,10 @@ import {
 } from "@peek/peek_core_user";
 import {UserTupleService} from "@peek/peek_core_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
-import {
-    ComponentLifecycleEventEmitter,
-    TupleActionPushService,
-    TupleDataObserverService,
-    TupleDataOfflineObserverService,
-    TupleSelector
-} from "@synerty/vortexjs";
+import {ComponentLifecycleEventEmitter, TupleSelector} from "@synerty/vortexjs";
 import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
 import {TitleService} from "@synerty/peek-util";
+import {UserLoginUiSettingTuple} from "../tuples/UserLoginUiSettingTuple";
 
 @Component({
     selector: './peek-core-user-login',
@@ -35,6 +30,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     warnings: string[] = [];
     warningKeys: string[] = [];
 
+    setting: UserLoginUiSettingTuple = new UserLoginUiSettingTuple();
+
     constructor(private balloonMsg: Ng2BalloonMsgService,
                 private tupleService: UserTupleService,
                 private userService: UserService,
@@ -45,6 +42,21 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
 
         let selectAUser = new UserListItemTuple();
         selectAUser.displayName = "Select a User";
+
+
+        let ts = new TupleSelector(UserLoginUiSettingTuple.tupleName, {});
+        this.tupleService.observer.subscribeToTupleSelector(ts)
+            .takeUntil(this.onDestroyEvent)
+            .filter(items => items.length != 0)
+            .subscribe((tuples: UserLoginUiSettingTuple[]) => {
+                this.setting = tuples[0];
+                if (this.setting.showUsersAsList)
+                    this.loadUsersList();
+            });
+    }
+
+    private loadUsersList(): void {
+
 
         let tupleSelector = new TupleSelector(UserListItemTuple.tupleName, {});
         this.tupleService.observer.subscribeToTupleSelector(tupleSelector)
@@ -84,10 +96,16 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     }
 
     isLoginEnabled(): boolean {
+        const isPassSet = this.selectedUser.password
+            && this.selectedUser.password.length != 0;
+
+        const isVehicleSet = !this.setting.showVehicleInput
+            || this.selectedUser.vehicleId && this.selectedUser.vehicleId.length != 0;
+
         return !this.isSelectedUserNull()
             && !this.isAuthenticating
-            && this.selectedUser.password && this.selectedUser.password.length != 0
-            && this.selectedUser.vehicleId && this.selectedUser.vehicleId.length != 0;
+            && isPassSet
+            && isVehicleSet;
     }
 
     doLogin() {
@@ -99,8 +117,15 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
         // Add any warnings
         tupleAction.acceptedWarningKeys = this.warningKeys;
 
-        let userDetails: UserListItemTuple = this.users
-            .filter(item => item.userId === this.selectedUser.userName)[0];
+        let userDetails: UserListItemTuple;
+        if (this.setting.showUsersAsList) {
+            userDetails = this.users
+                .filter(item => item.userId === this.selectedUser.userName)[0];
+        } else {
+            userDetails = new UserListItemTuple();
+            userDetails.userId = this.selectedUser.userName;
+            userDetails.displayName = this.selectedUser.userName;
+        }
 
         this.isAuthenticating = true;
         this.userService.login(tupleAction, userDetails)

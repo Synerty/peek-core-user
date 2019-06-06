@@ -31,7 +31,9 @@
                        [text]="warning"></Label>
             </StackLayout>
 
-            <GridLayout row="1" rows="*" columns="*">
+            <!-- Login with user list selection -->
+            <GridLayout *ngIf="setting.showUsersAsList"
+                        row="1" rows="*" columns="*">
                 <ListView class="p-x-10"
                           [items]="users"
                           [isEnabled]="!isAuthenticating">
@@ -52,6 +54,20 @@
                 </ListView>
             </GridLayout>
 
+            <!-- Login with user input box -->
+            <GridLayout *ngIf="setting.showUsersAsList"
+                        row="1" [isEnabled]="!isAuthenticating"
+                        columns="*, 2*" rows="auto" class="p-x-10 input-field">
+                <Label row="0" col="0" class="user-message" text="Username :"></Label>
+
+                <TextField row="0" col="1"
+                           #username [isEnabled]="!isAuthenticating"
+                           class="input input-border user-message editable"
+                           hint="Enter Username" autocorrect="false"
+                           (textChange)="selectedUser.userName = username.text">
+                </TextField>
+            </GridLayout>
+
             <GridLayout row="2" [isEnabled]="!isAuthenticating"
                         columns="*, 2*" rows="auto" class="p-x-10 input-field">
                 <Label row="0" col="0" class="user-message" text="Password :"></Label>
@@ -66,7 +82,8 @@
                 </TextField>
             </GridLayout>
 
-            <GridLayout row="3" [isEnabled]="!isAuthenticating"
+            <GridLayout *ngIf="setting.showVehicleInput"
+                    row="3" [isEnabled]="!isAuthenticating"
                         columns="*, 2*" rows="auto" class="p-x-10 input-field">
                 <Label row="0" col="0" class="user-message" text="Vehicle :"></Label>
 

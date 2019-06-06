@@ -39,21 +39,31 @@
             </div>
 
             <div class="form-group">
-                <label for="userNameField" class="user-message">User</label>
-                <select id="userNameField" class="form-control" name="userName"
+                <label for="username" class="user-message">User</label>
+
+                <!-- Login with user list selection -->
+                <select *ngIf="setting.showUsersAsList"
+                        id="username" class="form-control" name="userName"
                         [(ngModel)]="selectedUser.userName">
                     <option [value]="user.userId" *ngFor="let user of users">
                         {{webDisplayText(user)}}
                     </option>
                 </select>
+                <input *ngIf="!setting.showUsersAsList"
+                       class="form-control" type="text" id="username"
+                       name="password"
+                       [(ngModel)]="selectedUser.userName">
             </div>
+
+            <!-- Login with user input box -->
             <div class="form-group">
-                <label class="user-message" for="passwordField">Password :</label>
-                <input class="form-control" type="password" id="passwordField"
+                <label class="user-message" for="password">Password :</label>
+                <input class="form-control" type="password" id="password"
                        name="password"
                        [(ngModel)]="selectedUser.password">
             </div>
-            <div class="form-group">
+            <div *ngIf="setting.showVehicleInput"
+                 class="form-group">
                 <label class="user-message" for="vehicleIdField">Vehicle :</label>
                 <input class="form-control" type="text" id="vehicleIdField"
                        name="vehicleId"

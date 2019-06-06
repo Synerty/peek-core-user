@@ -1,31 +1,30 @@
 import logging
 from datetime import datetime
+from typing import List
 
 import pytz
-from twisted.cred.error import LoginDenied
+from twisted.cred.error import LoginDenied, LoginFailed
 from twisted.internet.defer import Deferred, inlineCallbacks
 from vortex.DeferUtil import deferToThreadWrapWithLogger
 from vortex.TupleSelector import TupleSelector
 from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_plugin_base.storage.DbConnection import DbSessionCreator
 from peek_core_user._private.server.api.UserHookApi import UserHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
-from peek_core_user._private.server.controller.PasswordUpdateController import \
-    PasswordUpdateController
-from peek_core_user._private.storage.InternalUserPassword import InternalUserPassword
-from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
+from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
+from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
+from peek_core_user._private.storage.Setting import ldapSetting, LDAP_ENABLED
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
     LoggedInUserStatusTuple
 from peek_core_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
-from peek_core_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError, \
-    UserPasswordNotSetException
+from peek_core_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError
 from peek_core_user.tuples.login.UserLoginAction import UserLoginAction
 from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_core_user.tuples.login.UserLogoutAction import UserLogoutAction
 from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
+from peek_plugin_base.storage.DbConnection import DbSessionCreator
 
 logger = logging.getLogger(__name__)
 
@@ -58,23 +57,17 @@ class LoginLogoutController:
         self._hookApi = None
         self._infoApi = None
 
-    def _checkPassBlocking(self, ormSession, userName, password) -> bool:
+    def _checkPassBlocking(self, ormSession, userName, password) -> List[str]:
         if not password:
-            return False
+            raise LoginFailed("Password is empty")
 
-        passObjs = (
-            ormSession
-                .query(InternalUserPassword)
-                .join(InternalUserTuple)
-                .filter(InternalUserTuple.userName == userName)
-                .all()
-        )
+        if ldapSetting(ormSession, LDAP_ENABLED):
+            return LdapAuth().checkPassBlocking(ormSession, userName, password)
 
-        if not passObjs:
-            raise UserPasswordNotSetException(userName)
+        return InternalAuth().checkPassBlocking(ormSession, userName, password)
 
-        passObj = passObjs[0]
-        return passObj.password == PasswordUpdateController.hashPass(password)
+    def _checkGroupBlocking(self, ormSession, groups:List[str]):
+        pass
 
     @deferToThreadWrapWithLogger(logger)
     def _logoutInDb(self, logoutTuple: UserLogoutAction):
@@ -169,8 +162,8 @@ class LoginLogoutController:
 
         ormSession = self._dbSessionCreator()
         try:
-            if not self._checkPassBlocking(ormSession, userName, password):
-                raise LoginDenied("Username or Password is incorrect")
+            groups = self._checkPassBlocking(ormSession, userName, password)
+            self._checkGroupBlocking(ormSession, groups)
 
             responseTuple.userDetail = self._infoApi.userBlocking(userName, ormSession)
 

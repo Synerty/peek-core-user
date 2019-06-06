@@ -1,9 +1,13 @@
 import logging
-from vortex.sqla_orm.OrmCrudHandler import OrmCrudHandler
+
+from vortex.TupleSelector import TupleSelector
+from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
+from vortex.sqla_orm.OrmCrudHandler import OrmCrudHandler, OrmCrudHandlerExtension
 
 from peek_core_user._private.PluginNames import userPluginFilt
 from peek_core_user._private.storage.Setting import SettingProperty, globalSetting, \
     ldapSetting
+from peek_core_user._private.tuples.UserLoginUiSettingTuple import UserLoginUiSettingTuple
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +30,32 @@ class __CrudHandler(OrmCrudHandler):
         raise Exception("%s is not a known settings group" % settingType)
 
 
+class __ExtUpdateObservable(OrmCrudHandlerExtension):
+    """ Update Observable ORM Crud Extension
+
+    This extension is called after events that will alter data,
+    it then notifies the observer.
+
+    """
+
+    def __init__(self, tupleDataObserver: TupleDataObservableHandler):
+        self._tupleDataObserver = tupleDataObserver
+
+    def _afterCommit(self, tuple_, tuples, session, payloadFilt):
+        self._tupleDataObserver.notifyOfTupleUpdate(
+            TupleSelector(UserLoginUiSettingTuple.tupleName(), {})
+        )
+        return True
+
+    afterUpdateCommit = _afterCommit
+    afterDeleteCommit = _afterCommit
+
+
 # This method creates an instance of the handler class.
-def makeSettingPropertyHandler(dbSessionCreator):
+def makeSettingPropertyHandler(tupleObservable, dbSessionCreator):
     handler = __CrudHandler(dbSessionCreator, SettingProperty,
                             filtKey, retreiveAll=True)
+    handler.addExtension(SettingProperty, __ExtUpdateObservable(tupleObservable))
 
     logger.debug("Started")
     return handler
