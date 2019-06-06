@@ -34,7 +34,6 @@
         "appDir": "_private/mobile-app",
         "moduleDir": "plugin-module",
         "assetDir": "_private/mobile-assets",
-        "appModule": "plugin-user.module#PluginUserModule",
         "icon": "/assets/peek_core_user/plugin_icon.png",
         "rootServices": [
             {
@@ -62,7 +61,6 @@
         "appDir": "_private/mobile-app",
         "moduleDir": "plugin-module",
         "assetDir": "_private/mobile-assets",
-        "appModule": "plugin-user.module#PluginUserModule",
         "icon": "/assets/peek_core_user/plugin_icon.png",
         "rootServices": [
             {

@@ -1,5 +1,14 @@
 <div class="panel panel-default">
     <div class="panel-body">
+        Section:
+        <select ng-model="pageData.settingsType"
+                class="form-control"
+                id="labelForSettingsType"
+                (ngChange)="settingTypeChanged()">
+            <option value="Global">Server Settings</option>
+            <option value="LDAP">LDAP Settings</option>
+        </select>
+
         <form autocomplete="off" novalidate>
             <table class="table">
                 <tr>
@@ -7,13 +16,13 @@
                     <th>Value</th>
                 </tr>
                 <tr *ngFor="let item of items">
-                    <td>{{item.key}}</td>
+                    <td>{{ item.key }}</td>
                     <td *ngIf="item.type == 'boolean' ">
                         <Button class="btn"
                                 [class.btn-success]="item.boolean_value"
                                 [class.btn-danger]="!item.boolean_value"
                                 (click)="item.boolean_value = ! item.boolean_value">
-                            {{item.boolean_value ? "True" : "False"}}
+                            {{ item.boolean_value ? "True" : "False"}}
                         </Button>
                     </td>
                     <td *ngIf="item.type == 'integer' ">
@@ -47,6 +56,7 @@
                     </div>
                 </div>
             </div>
+
         </form>
     </div>
 </div>
