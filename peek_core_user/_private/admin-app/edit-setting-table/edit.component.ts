@@ -31,7 +31,7 @@ export class EditSettingComponent extends ComponentLifecycleEventEmitter {
         super();
 
         this.loader = vortexService.createTupleLoader(
-            this, extend({settingType: this.settingsType},
+            this, () => extend({settingType: this.settingsType},
                  this.filt, userFilt)
         );
 
@@ -49,6 +49,10 @@ export class EditSettingComponent extends ComponentLifecycleEventEmitter {
         this.loader.load()
             .then(() => this.balloonMsg.showSuccess("Reset Successful"))
             .catch(e => this.balloonMsg.showError(e));
+    }
+
+    settingTypeChanged() {
+        this.loader.load();
     }
 
 }

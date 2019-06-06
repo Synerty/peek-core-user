@@ -1,10 +1,10 @@
 <div class="panel panel-default">
     <div class="panel-body">
         Section:
-        <select ng-model="pageData.settingsType"
+        <select [(ngModel)]="settingsType"
                 class="form-control"
                 id="labelForSettingsType"
-                (ngChange)="settingTypeChanged()">
+                (ngModelChange)="settingTypeChanged()">
             <option value="Global">Server Settings</option>
             <option value="LDAP">LDAP Settings</option>
         </select>

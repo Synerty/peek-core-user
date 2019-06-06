@@ -269,7 +269,7 @@ LDAP_SETTING_TYPE = "LDAP"
 
 
 def ldapSetting(ormSession, key=None, value=None):
-    return _getSetting(LDAP_SETTING_TYPE, ormSession, ldapProperties, key=key,
+    return _getSetting(ormSession, LDAP_SETTING_TYPE, ldapProperties, key=key,
                        value=value)
 
 
@@ -292,16 +292,3 @@ LDAP_OU_FOLDERS = PropertyKey('LDAP OU Folders',
 LDAP_ENABLED = PropertyKey('LDAP Enabled',
                                    False,
                                    propertyDict=ldapProperties)
-
-LDAP_ADMIN_GROUP = PropertyKey('LDAP Attune Admin Group',
-                               'attune-admin',
-                               propertyDict=ldapProperties)
-
-LDAP_JOB_GROUP = PropertyKey('LDAP Attune Job Group',
-                             'attune-job',
-                             propertyDict=ldapProperties)
-
-LDAP_DASHBOARD_GROUP = PropertyKey('LDAP Attune Dashboard Group',
-                                   'attune-dashboard',
-                                   propertyDict=ldapProperties)
-
