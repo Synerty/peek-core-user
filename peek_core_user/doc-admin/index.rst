@@ -2,9 +2,13 @@
 Administration
 ==============
 
-This plugin provides shared data structures or Vortex Tuples, that are used across
-multiple plugins.
+The user plugin provides support for user authentication, login forms and
+profiles.
 
-For example, The PoF SQL Plugin provides field switching tuples that are used by the
-Field Switching plugin.
+.. toctree::
+    :maxdepth: 3
+    :caption: Contents:
+
+    overview
+    admin-ui/admin-ui
 

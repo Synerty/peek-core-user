@@ -13,13 +13,13 @@ import logging
 from sqlalchemy import Column
 from sqlalchemy import Integer, String, Index
 from sqlalchemy.orm import relationship
+from vortex.Tuple import Tuple, addTupleType, TupleField
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.storage.DeclarativeBase import DeclarativeBase
 from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_core_user._private.storage.InternalUserGroupTuple import \
     InternalUserGroupTuple
-from vortex.Tuple import Tuple, addTupleType, TupleField
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +35,14 @@ class InternalUserTuple(Tuple, DeclarativeBase):
     __tablename__ = 'InternalUser'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    userName = Column(String(50), unique=True, nullable=False)
-    userTitle = Column(String(50), unique=True, nullable=False)
-    userUuid = Column(String(50), unique=True, nullable=False)
+    userName = Column(String, unique=True, nullable=False)
+    userTitle = Column(String, unique=True, nullable=False)
+    userUuid = Column(String, unique=True, nullable=False)
 
-    importHash = Column(String(50))
+    importHash = Column(String)
 
-    mobile = Column(String(50))
-    email = Column(String(50))
+    mobile = Column(String)
+    email = Column(String)
 
     groups = relationship(InternalGroupTuple, secondary=InternalUserGroupTuple.__table__)
 

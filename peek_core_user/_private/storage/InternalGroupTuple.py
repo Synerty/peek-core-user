@@ -31,10 +31,10 @@ class InternalGroupTuple(Tuple, DeclarativeBase):
     __tablename__ = 'InternalGroup'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    groupName = Column(String(50), unique=True, nullable=False)
+    groupName = Column(String, unique=True, nullable=False)
     groupTitle = Column(String, unique=True, nullable=False)
 
-    importHash = Column(String(50))
+    importHash = Column(String)
 
     __table_args__ = (
         Index("idx_InternalGroupTable_importHash", importHash),

@@ -3,12 +3,39 @@ from typing import List
 
 from twisted.cred.error import LoginFailed
 
+from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
+
 __author__ = 'synerty'
 
 logger = logging.getLogger(__name__)
 
 import ldap
 
+'''
+{'objectClass': [b'top', b'person', b'organizationalPerson', b'user'], 'cn': [b'attest'],
+ 'givenName': [b'attest'],
+ 'distinguishedName': [b'CN=attest,OU=testou,DC=synad,DC=synerty,DC=com'],
+ 'instanceType': [b'4'], 'whenCreated': [b'20170505160836.0Z'],
+ 'whenChanged': [b'20190606130621.0Z'], 'displayName': [b'attest'],
+ 'uSNCreated': [b'16498'],
+ 'memberOf': [b'CN=Domain Admins,CN=Users,DC=synad,DC=synerty,DC=com',
+              b'CN=Enterprise Admins,CN=Users,DC=synad,DC=synerty,DC=com',
+              b'CN=Administrators,CN=Builtin,DC=synad,DC=synerty,DC=com'],
+ 'uSNChanged': [b'73784'], 'name': [b'attest'],
+ 'objectGUID': [b'\xee\x1bV\x8dQ\xackE\x82\xd9%_\x18\xadjO'],
+ 'userAccountControl': [b'66048'], 'badPwdCount': [b'0'], 'codePage': [b'0'],
+ 'countryCode': [b'0'], 'badPasswordTime': [b'132042996316396717'], 'lastLogoff': [b'0'],
+ 'lastLogon': [b'132042996806397639'], 'pwdLastSet': [b'132042997225927009'],
+ 'primaryGroupID': [b'513'], 'objectSid': [
+    b'\x01\x05\x00\x00\x00\x00\x00\x05\x15\x00\x00\x00D:3|X\x8f\xc7\x08\xe6\xeaV\xc8Q\x04\x00\x00'],
+ 'adminCount': [b'1'], 'accountExpires': [b'9223372036854775807'], 'logonCount': [b'36'],
+ 'sAMAccountName': [b'attest'], 'sAMAccountType': [b'805306368'],
+ 'userPrincipalName': [b'attest@synad.synerty.com'], 'lockoutTime': [b'0'],
+ 'objectCategory': [b'CN=Person,CN=Schema,CN=Configuration,DC=synad,DC=synerty,DC=com'],
+ 'dSCorePropagationData': [b'20190606130621.0Z', b'20190606130016.0Z',
+                           b'20170506090346.0Z', b'16010101000000.0Z'],
+ 'lastLogonTimestamp': [b'132042996806397639']}
+'''
 
 class LdapNotEnabledError(Exception):
     pass
@@ -82,7 +109,42 @@ class LdapAuth:
                 group = group.split('=')[1]
             groups.append(group)
 
+        userTitle = None
+        if userDetails['displayName']:
+            userTitle = userDetails['displayName'][0].decode()
+
+        email = None
+        if userDetails['userPrincipalName']:
+            email = userDetails['userPrincipalName'][0].decode()
+
+        userUuid = None
+        if userDetails['distinguishedName']:
+            userUuid = userDetails['distinguishedName'][0].decode()
+
+        self._makeOrCreateInternalUserBlocking(dbSession,
+                                               userName, userTitle, userUuid, email)
+
         return groups
+
+    def _makeOrCreateInternalUserBlocking(self, dbSession,
+                                          userName, userTitle, userUuid, email):
+
+        internalUser = dbSession.query(InternalUserTuple) \
+            .filter(InternalUserTuple.userName == userName) \
+            .all()
+
+        if internalUser:
+            return
+
+        newInternalUser = InternalUserTuple(
+            userName=userName,
+            userTitle=userTitle,
+            userUuid=userUuid,
+            email=email
+        )
+
+        dbSession.add(newInternalUser)
+        dbSession.commit()
 
     def _loadLdapSettings(self, dbSession):
 

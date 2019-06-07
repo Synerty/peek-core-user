@@ -5,7 +5,7 @@
                 class="form-control"
                 id="labelForSettingsType"
                 (ngModelChange)="settingTypeChanged()">
-            <option value="Global">Server Settings</option>
+            <option value="Global">General Settings</option>
             <option value="LDAP">LDAP Settings</option>
         </select>
 
@@ -22,7 +22,7 @@
                                 [class.btn-success]="item.boolean_value"
                                 [class.btn-danger]="!item.boolean_value"
                                 (click)="item.boolean_value = ! item.boolean_value">
-                            {{ item.boolean_value ? "True" : "False"}}
+                            {{ item.boolean_value ? "True" : "False" L}}
                         </Button>
                     </td>
                     <td *ngIf="item.type == 'integer' ">

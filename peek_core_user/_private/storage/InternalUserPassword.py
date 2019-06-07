@@ -39,8 +39,8 @@ class InternalUserPassword(DeclarativeBase):
                     nullable=False)
     user = relationship(InternalUserTuple)
 
-    password = Column(String(50), nullable=False)
+    password = Column(String, nullable=False)
 
     __table_args__ = (
-        Index("idx_InternalUserTable_importHash", userId, unique=True),
+        Index("idx_InternalUserPassword_userId", userId, unique=True),
     )

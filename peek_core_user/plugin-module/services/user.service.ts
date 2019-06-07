@@ -1,5 +1,5 @@
 // user.service.ts
-import {Injectable, NgZone} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 
 import {Observable} from "rxjs/Observable";
@@ -8,16 +8,7 @@ import {
     addTupleType,
     ComponentLifecycleEventEmitter,
     Tuple,
-    TupleActionPushService,
-    TupleDataObservableNameService,
-    TupleDataObserverService,
-    TupleDataOfflineObserverService,
-    TupleOfflineStorageNameService,
-    TupleOfflineStorageService,
-    TupleSelector,
-    TupleStorageFactoryService,
-    VortexService,
-    VortexStatusService
+    TupleSelector
 } from "@synerty/vortexjs";
 import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
 import {UserListItemTuple} from "../tuples/UserListItemTuple";
@@ -239,14 +230,14 @@ export class UserService extends ComponentLifecycleEventEmitter {
         this.setLogout();
 
         // Else, log out
-        this.balloonMsg.showMessage(
-            "This user has been logged out due to a login on another device," +
-            " or an administrative logout",
-            UsrMsgLevel.Error,
-            UsrMsgType.Confirm
-        );
-
-        this.router.navigate(['']);
+        this.balloonMsg
+            .showMessage(
+                "This user has been logged out due to a login on another device," +
+                " or an administrative logout",
+                UsrMsgLevel.Error,
+                UsrMsgType.Confirm
+            )
+            .then(() => this.router.navigate(['peek_core_user', 'login']));
 
     }
 
