@@ -22,7 +22,7 @@
                                 [class.btn-success]="item.boolean_value"
                                 [class.btn-danger]="!item.boolean_value"
                                 (click)="item.boolean_value = ! item.boolean_value">
-                            {{ item.boolean_value ? "True" : "False" L}}
+                            {{ item.boolean_value ? "True" : "False" }}
                         </Button>
                     </td>
                     <td *ngIf="item.type == 'integer' ">
