@@ -7,7 +7,7 @@ from setuptools import setup
 pip_package_name = "peek-core-user"
 py_package_name = "peek_core_user"
 
-package_version = '1.3.2'
+package_version = '0.0.0'
 
 egg_info = "%s.egg-info" % pip_package_name
 if os.path.isdir(egg_info):
