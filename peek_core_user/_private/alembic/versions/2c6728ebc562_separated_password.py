@@ -25,19 +25,19 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('userId', sa.Integer(), nullable=False),
     sa.Column('password', sa.String(length=50), nullable=False),
-    sa.ForeignKeyConstraint(['userId'], ['pl_core.InternalUser.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['userId'], ['core_user.InternalUser.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    schema='pl_core'
+    schema='core_user'
     )
 
     op.execute('''
-    INSERT INTO pl_core."InternalUserPassword" ("userId", "password")
+    INSERT INTO core_user."InternalUserPassword" ("userId", "password")
     SELECT "id", "password"
-    FROM pl_core."InternalUser"
+    FROM core_user."InternalUser"
     WHERE "password" is not null
     ''')
 
-    op.drop_column('InternalUser', 'password', schema='pl_core')
+    op.drop_column('InternalUser', 'password', schema='core_user')
 
 
 

@@ -20,8 +20,8 @@ import geoalchemy2
 
 
 def upgrade():
-    # pl_core."UserLoggedIn"
-    op.execute('''ALTER TABLE pl_core."UserLoggedIn"
+    # core_user."UserLoggedIn"
+    op.execute('''ALTER TABLE core_user."UserLoggedIn"
                   ALTER COLUMN "loggedInDateTime" TYPE TIMESTAMP WITH TIME ZONE
                   USING "loggedInDateTime" AT TIME ZONE 'UTC'
                ''')
