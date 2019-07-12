@@ -28,7 +28,7 @@
 </div>
 
 <div class="plugin-user">
-    <form autocomplete="off" novalidate>
+    <form autocomplete="off" novalidate (keyup.enter)="doLogin()">
         <fieldset [disabled]="isAuthenticating">
             <div class="bg-danger" *ngFor="let error of errors">
                 {{error}}
