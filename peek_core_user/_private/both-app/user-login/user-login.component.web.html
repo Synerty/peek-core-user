@@ -11,7 +11,6 @@
         The following 'div' groups button to the right of the Nav Bar.
         Can contain one to many buttons
     -->
-
     <div class="btn-group pull-right" role="group">
         <button class="nav-section-btn"
                 role="group"
@@ -29,7 +28,7 @@
 </div>
 
 <div class="plugin-user">
-    <form autocomplete="off" novalidate ng-submit="doLogin()">
+    <form autocomplete="off" novalidate>
         <fieldset [disabled]="isAuthenticating">
             <div class="bg-danger" *ngFor="let error of errors">
                 {{error}}
@@ -70,15 +69,6 @@
                        name="vehicleId"
                        [(ngModel)]="selectedUser.vehicleId">
             </div>
-            <button class="nav-section-btn"
-                    id="submit"
-                    role="group"
-                    [disabled]="!isLoginEnabled()"
-                    (click)="doLogin()"
-                    type="submit">
-                <fa name="sign-in"></fa>
-                {{loginText()}}
-            </button>
         </fieldset>
     </form>
 </div>

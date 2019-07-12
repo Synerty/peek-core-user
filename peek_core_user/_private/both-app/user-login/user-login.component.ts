@@ -92,8 +92,7 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
         if (this.isSelectedUserNull())
             return "Login";
 
-        // return `I'm ${this.selectedUser.userName}, LOG ME IN`;
-        return "Login";
+        return `I'm ${this.selectedUser.userName}, LOG ME IN`;
     }
 
     isLoginEnabled(): boolean {
