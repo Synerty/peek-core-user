@@ -14,7 +14,8 @@ from peek_core_user._private.server.api.UserHookApi import UserHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
-from peek_core_user._private.storage.Setting import ldapSetting, LDAP_ENABLED
+from peek_core_user._private.storage.Setting import ldapSetting, LDAP_ENABLED, \
+    globalSetting, ALLOW_MULTI_DEVICE_LOGIN
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
     LoggedInUserStatusTuple
@@ -134,13 +135,12 @@ class LoginLogoutController:
         return response
 
     @deferToThreadWrapWithLogger(logger)
-    def _loginInDb(self, loginTuple: UserLoginAction, singleDevice: bool = True):
+    def _loginInDb(self, loginTuple: UserLoginAction):
         """
         Returns Deferred[UserLoginResponseTuple]
 
         """
 
-        assert singleDevice, "Multiple device login not implemented"
         userName = loginTuple.userName
         password = loginTuple.password
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
@@ -162,6 +162,7 @@ class LoginLogoutController:
 
         ormSession = self._dbSessionCreator()
         try:
+            singleDevice = not globalSetting(ormSession, ALLOW_MULTI_DEVICE_LOGIN)
             groups = self._checkPassBlocking(ormSession, userName, password)
             self._checkGroupBlocking(ormSession, groups)
 
@@ -179,7 +180,7 @@ class LoginLogoutController:
                     .filter(UserLoggedIn.userName == userName)
                     .all())
 
-            if len(loggedInElsewhere) not in (0, 1):
+            if singleDevice and len(loggedInElsewhere) not in (0, 1):
                 raise Exception("Found more than 1 ClientDevice for"
                                 + (" token %s" % deviceToken))
 
@@ -188,7 +189,7 @@ class LoginLogoutController:
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
             # If the user is logged in, but not to this client device, raise exception
-            if userLoggedIn and not sameDevice:
+            if singleDevice and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(ormSession,
                                       userName,

@@ -49,13 +49,12 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def peekDeviceTokenForUser(self, userName:str) -> Deferred:  # [Optional[str]]:
-        """Peek Device Token for Logged in User
+    def peekDeviceTokensForUser(self, userName:str) -> Deferred:  # List[str]:
+        """Peek Device Tokens for Logged in User
 
-        Return the first peek device token for a device this user is logged in to.
-        Otherwise, return None
+        Return all the peek device tokens for devices this user is logged in to.
 
-        :return Peek Device Token or None
+        :return A list of Peek Device Tokens
         """
 
 

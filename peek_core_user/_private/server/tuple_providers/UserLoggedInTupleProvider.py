@@ -25,11 +25,14 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
     def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
         userName = tupleSelector.selector["userName"]
 
-        deviceToken = yield self._ourApi.infoApi.peekDeviceTokenForUser(userName)
+        deviceTokens = yield self._ourApi.infoApi.peekDeviceTokensForUser(userName)
 
-        tuple_ = UserLoggedInTuple(userName=userName, deviceToken=deviceToken)
+        tuples = [
+            UserLoggedInTuple(userName=userName, deviceToken=dt)
+            for dt in deviceTokens
+        ]
 
-        payload = Payload(filt=filt, tuples=[tuple_])
+        payload = Payload(filt=filt, tuples=tuples)
         payloadEnvelope = yield payload.makePayloadEnvelopeDefer()
         vortexMsg = yield payloadEnvelope.toVortexMsgDefer()
         return vortexMsg

@@ -265,6 +265,9 @@ SHOW_LOGIN_AS_LIST = PropertyKey('Show Login as List', True,
 SHOW_VEHICLE_INPUT = PropertyKey('Show Vehicle Input', True,
                                  propertyDict=globalProperties)
 
+ALLOW_MULTI_DEVICE_LOGIN = PropertyKey('Allow Multi Device Logins', False,
+                                 propertyDict=globalProperties)
+
 # =============================================================================
 # LDAP INTEGRATION PROPERTIES
 # =============================================================================

@@ -220,12 +220,13 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     private userLoggedInReceived(tuples: UserLoggedInTuple[]): void {
-        let data = tuples[0];
         let deviceToken = this.deviceEnrolmentService.enrolmentToken();
 
         // Do nothing, this is normal
-        if (data.deviceToken == deviceToken)
-            return;
+        for (let data of tuples) {
+            if (data.deviceToken == deviceToken)
+                return;
+        }
 
         this.setLogout();
 

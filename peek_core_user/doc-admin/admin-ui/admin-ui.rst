@@ -55,6 +55,9 @@ Configure the General Settings to configure the user plugin.
 :Show Login as List: Should the Peek login screen show a list of users, or an
     input box for a user name. (See Mobile Login Group)
 
+:Allow Multiple Logins: Should the Peek only allow a user to login to the system
+    on one device at a time.
+
 .. image:: settings-general.png
 
 Edit LDAP Settings

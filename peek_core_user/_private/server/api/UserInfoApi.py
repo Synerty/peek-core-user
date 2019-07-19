@@ -149,17 +149,14 @@ class UserInfoApi(UserInfoApiABC):
         return groupDetail
 
     @deferToThreadWrapWithLogger(logger)
-    def peekDeviceTokenForUser(self, userName: str) -> Optional[str]:
+    def peekDeviceTokensForUser(self, userName: str) -> List[str]:
         session = self._dbSessionCreator()
         try:
             result = (session.query(UserLoggedIn)
                       .filter(UserLoggedIn.userName == userName)
-                      .one())
+                      .all())
 
-            return result.deviceToken
-
-        except NoResultFound:
-            return None
+            return [ r.deviceToken for r in result]
 
         finally:
             session.close()
