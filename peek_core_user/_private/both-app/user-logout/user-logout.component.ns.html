@@ -23,6 +23,10 @@
            *ngFor="let warning of warnings"
            [text]="warning"></Label>
 
+    <Label class="bg-info"
+           *ngIf="warnings != null && warnings.length != 0"
+           text="Click 'Logout' a second time to ignore these warnings."></Label>
+
     <StackLayout class="plugin-user">
         <label class="user-message" text="Logged in as {{loggedInUserText()}}"></label>
 

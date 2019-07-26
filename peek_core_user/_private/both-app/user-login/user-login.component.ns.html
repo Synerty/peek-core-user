@@ -29,6 +29,10 @@
                 <Label class="bg-warning"
                        *ngFor="let warning of warnings"
                        [text]="warning"></Label>
+
+                <Label class="bg-info"
+                       *ngIf="warnings != null && warnings.length != 0"
+                       text="Click 'Login' a second time to ignore these warnings."></Label>
             </StackLayout>
 
             <!-- Login with user list selection -->

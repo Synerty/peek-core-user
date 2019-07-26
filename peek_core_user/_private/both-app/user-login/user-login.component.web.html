@@ -38,6 +38,10 @@
                 {{warning}}
             </div>
 
+            <div class="bg-info" *ngIf="warnings != null && warnings.length != 0">
+                Click 'Login' a second time to ignore these warnings.
+            </div>
+
             <div class="form-group">
                 <label for="username" class="user-message">User</label>
 

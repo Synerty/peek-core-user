@@ -36,6 +36,10 @@
         {{warning}}
     </div>
 
+    <div class="bg-info" *ngIf="warnings != null && warnings.length != 0">
+        Click 'Logout' a second time to ignore these warnings.
+    </div>
+
     <div class="user-message">
         <fa name="sign-in"></fa>
         Logged in as {{loggedInUserText()}}
