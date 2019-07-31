@@ -1,0 +1,30 @@
+<div class="plugin-user">
+
+    <h4>Logout of Peek</h4>
+
+    <form>
+        <p class="user-message">
+            <fa name="user"></fa>
+            Logged in as {{loggedInUserText()}}
+        </p>
+    </form>
+
+    <p class="bg-danger" *ngFor="let error of errors">
+        {{error}}
+    </p>
+
+    <p class="bg-warning" *ngFor="let warning of warnings">
+        {{warning}}
+    </p>
+
+    <p class="bg-info" *ngIf="warnings != null && warnings.length != 0">
+        Click 'Logout' a second time to ignore these warnings.
+    </p>
+
+    <button class="form-control btn-success"
+            [disabled]="isAuthenticating"
+            (click)="doLogout()">
+        <fa name="sign-out"></fa>
+        Logout
+    </button>
+</div>

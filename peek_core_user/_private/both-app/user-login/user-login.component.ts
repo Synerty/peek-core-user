@@ -14,8 +14,8 @@ import {UserLoginUiSettingTuple} from "../tuples/UserLoginUiSettingTuple";
 
 @Component({
     selector: './peek-core-user-login',
-    templateUrl: './user-login.component.web.html',
-    styleUrls: ['../scss/plugin-user.web.scss'],
+    templateUrl: './user-login.component.dweb.html',
+    styleUrls: ['../scss/plugin-user.dweb.scss'],
     moduleId: module.id
 })
 export class UserLoginComponent extends ComponentLifecycleEventEmitter {

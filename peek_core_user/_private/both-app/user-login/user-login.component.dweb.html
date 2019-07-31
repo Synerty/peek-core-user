@@ -1,0 +1,63 @@
+<div class="plugin-user">
+
+    <h4>Login to Peek</h4>
+
+    <form autocomplete="off" novalidate (keyup.enter)="doLogin()">
+        <fieldset [disabled]="isAuthenticating">
+            <div class="form-group">
+                <label *ngIf="setting.showUsersAsList"
+                        for="username" class="user-message">User</label>
+
+                <!-- Login with user list selection -->
+                <select *ngIf="setting.showUsersAsList"
+                        id="username" class="form-control" name="userName"
+                        [(ngModel)]="selectedUser.userName">
+                    <option [value]="user.userId" *ngFor="let user of users">
+                        {{webDisplayText(user)}}
+                    </option>
+                </select>
+                <input *ngIf="!setting.showUsersAsList"
+                       class="form-control" type="text" id="username"
+                       name="password"
+                       placeholder="Username"
+                       [(ngModel)]="selectedUser.userName">
+            </div>
+
+            <!-- Login with user input box -->
+            <div class="form-group">
+                <input class="form-control" type="password" id="password"
+                       name="password"
+                       placeholder="password"
+                       [(ngModel)]="selectedUser.password">
+            </div>
+            <div *ngIf="setting.showVehicleInput"
+                 class="form-group">
+                <input class="form-control" type="text" id="vehicleIdField"
+                       name="vehicleId"
+                       placeholder="Vehical ID"
+                       [(ngModel)]="selectedUser.vehicleId">
+            </div>
+        </fieldset>
+    </form>
+
+    <p class="form-control bg-danger" *ngFor="let error of errors">
+        {{error}}
+    </p>
+
+    <p class="form-control bg-warning" *ngFor="let warning of warnings">
+        {{warning}}
+    </p>
+
+    <p class="form-control bg-info" *ngIf="warnings != null && warnings.length != 0">
+        Click 'Login' a second time to ignore these warnings.
+    </p>
+
+    <button class="form-control"
+            [class.btn-success]="isLoginEnabled()"
+            [disabled]="!isLoginEnabled()"
+            (click)="doLogin()">
+        <fa name="sign-in"></fa>
+        {{loginText()}}
+    </button>
+</div>
+

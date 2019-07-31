@@ -15,8 +15,8 @@ import {TitleService} from "@synerty/peek-util";
 
 @Component({
     selector: './peek-core-user-logout',
-    templateUrl: './user-logout.component.web.html',
-    styleUrls: ['../scss/plugin-user.web.scss'],
+    templateUrl: './user-logout.component.dweb.html',
+    styleUrls: ['../scss/plugin-user.dweb.scss'],
     moduleId: module.id
 })
 export class UserLogoutComponent extends ComponentLifecycleEventEmitter {
