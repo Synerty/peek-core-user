@@ -5,7 +5,9 @@ import {RouterModule, Routes} from "@angular/router";
 import {EditInternalUserComponent} from "./edit-internal-user-table/edit.component";
 import {EditInternalGroupComponent} from "./edit-internal-group-table/edit.component";
 import {EditSettingComponent} from "./edit-setting-table/edit.component";
-
+import {NzTabsModule} from 'ng-zorro-antd/tabs';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 import {
     TupleActionPushNameService,
@@ -26,7 +28,8 @@ import {
 } from "@peek/peek_core_user/_private";
 import {AngularFontAwesomeModule} from "angular-font-awesome";
 import {ManageLoggedInUserComponent} from "./logged-in-user/logged-in-user.component";
-
+import {NzSwitchModule} from 'ng-zorro-antd/switch';
+import {EditLdapSettingComponent} from "./edit-ldap-setting-table/edit.component";
 
 export function tupleDataObservableNameServiceFactory() {
     return new TupleDataObservableNameService(userObservableName, userFilt);
@@ -55,7 +58,11 @@ export const pluginRoutes: Routes = [
         CommonModule,
         RouterModule.forChild(pluginRoutes),
         FormsModule,
-        AngularFontAwesomeModule
+        AngularFontAwesomeModule,
+        NzTabsModule,
+        NzSwitchModule,
+        NzButtonModule,
+        NzIconModule
     ],
     exports: [],
     providers: [
@@ -77,7 +84,8 @@ export const pluginRoutes: Routes = [
         ManageLoggedInUserComponent,
         EditInternalUserComponent,
         EditInternalGroupComponent,
-        EditSettingComponent]
+        EditSettingComponent,
+        EditLdapSettingComponent]
 })
 export class UserModule {
 

@@ -1,58 +1,32 @@
 <div class="container">
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-        <!-- Home Tab -->
-        <li role="presentation" class="active">
-            <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a>
-        </li>
-        <!-- Managed Logged in Users -->
-        <li role="presentation">
-            <a href="#manageLogins" aria-controls="manageLogins" role="tab"
-               data-toggle="tab">Manage Logged In Users</a>
-        </li>
-        <!-- Edit Internal User Tab -->
-        <li role="presentation">
-            <a href="#editInternalUser" aria-controls="editInternalUser" role="tab"
-               data-toggle="tab">Edit Internal Users</a>
-        </li>
-        <!-- Edit Internal Group Tab -->
-        <li role="presentation">
-            <a href="#editInternalGroup" aria-controls="editInternalGroup" role="tab"
-               data-toggle="tab">Edit Internal Groups</a>
-        </li>
-        <!-- Edit Settings Tab -->
-        <li role="presentation">
-            <a href="#editSetting" aria-controls="editSetting" role="tab"
-               data-toggle="tab">Edit Settings</a>
-        </li>
-    </ul>
-
-    <!-- Tab panes -->
-    <div class="tab-content">
-        <!-- Managed Logged in Users -->
-        <div role="tabpanel" class="tab-pane" id="manageLogins">
-            <pl-user-manage-logged-in-user></pl-user-manage-logged-in-user>
-        </div>
-        <!-- Edit Settings Tab -->
-        <div role="tabpanel" class="tab-pane" id="editSetting">
-            <pl-user-edit-setting></pl-user-edit-setting>
-        </div>
-        <!-- Edit Internal User Tab -->
-        <div role="tabpanel" class="tab-pane" id="editInternalUser">
-            <pl-user-edit-internal-user></pl-user-edit-internal-user>
-        </div>
-        <!-- Edit Internal Group Tab -->
-        <div role="tabpanel" class="tab-pane" id="editInternalGroup">
-            <pl-user-edit-internal-group></pl-user-edit-internal-group>
-        </div>
-        <!-- Home Tab -->
-        <div role="tabpanel" class="tab-pane active" id="home">
+    <nz-tabset>
+        <nz-tab nzTitle="Home">
             <h1 class="text-center">User Management</h1>
             <p>This plugin provides the ability to set user passwords, manage user groups
                 and login/logout users.</p>
 
             <fa name="users-cog" size="5x"></fa>
-        </div>
+        </nz-tab>
 
-    </div>
+        <nz-tab nzTitle="Manage Logged In Users">
+            <pl-user-manage-logged-in-user></pl-user-manage-logged-in-user>
+        </nz-tab>
+
+        <nz-tab nzTitle="Edit Internal Users">
+            <pl-user-edit-internal-user></pl-user-edit-internal-user>
+        </nz-tab>
+
+        <nz-tab nzTitle="Edit Internal Groups">
+            <pl-user-edit-internal-group></pl-user-edit-internal-group>
+        </nz-tab>
+
+        <nz-tab nzTitle="Edit Settings">
+            <pl-user-edit-setting></pl-user-edit-setting>
+        </nz-tab>
+
+        <nz-tab nzTitle="Edit LDAP Settings">
+            <pl-user-edit-ldap-setting></pl-user-edit-ldap-setting>
+        </nz-tab>
+
+    </nz-tabset>
 </div>

@@ -1,3 +1,4 @@
+from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -7,7 +8,6 @@ from sqlalchemy.sql.schema import Index
 from sqlalchemy.types import Integer, String, Boolean
 from vortex.Tuple import Tuple, addTupleType
 
-from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from .DeclarativeBase import DeclarativeBase
 
 """Mapping a polymorphic-valued vertical table as a dictionary.
@@ -259,6 +259,12 @@ def globalSetting(ormSession, key=None, value=None):
 MOBILE_LOGIN_GROUP = PropertyKey('Mobile Login Group', 'peek-mobile-login',
                                  propertyDict=globalProperties)
 
+ADMIN_LOGIN_GROUP = PropertyKey('Admin Login Group', 'peek-admin-login',
+                                propertyDict=globalProperties)
+
+OFFICE_LOGIN_GROUP = PropertyKey('Office Login Group', 'peek-office-login',
+                                 propertyDict=globalProperties)
+
 SHOW_LOGIN_AS_LIST = PropertyKey('Show Login as List', True,
                                  propertyDict=globalProperties)
 
@@ -266,37 +272,20 @@ SHOW_VEHICLE_INPUT = PropertyKey('Show Vehicle Input', True,
                                  propertyDict=globalProperties)
 
 ALLOW_MULTI_DEVICE_LOGIN = PropertyKey('Allow Multi Device Logins', False,
-                                 propertyDict=globalProperties)
+                                       propertyDict=globalProperties)
 
-# =============================================================================
-# LDAP INTEGRATION PROPERTIES
-# =============================================================================
+INTERNAL_AUTH_ENABLED_FOR_ADMIN = PropertyKey('Internal Auth Enabled For Admin',
+                                              False,
+                                              propertyDict=globalProperties)
 
-ldapProperties = {}
-LDAP_SETTING_TYPE = "LDAP"
+INTERNAL_AUTH_ENABLED_FOR_FIELD = PropertyKey('Internal Auth Enabled For Field',
+                                              True,
+                                              propertyDict=globalProperties)
 
+INTERNAL_AUTH_ENABLED_FOR_OFFICE = PropertyKey('Internal Auth Enabled For Office',
+                                               False,
+                                               propertyDict=globalProperties)
 
-def ldapSetting(ormSession, key=None, value=None):
-    return _getSetting(ormSession, LDAP_SETTING_TYPE, ldapProperties, key=key,
-                       value=value)
-
-
-LDAP_DOMAIN_NAME = PropertyKey('LDAP Domain Name',
-                               'domain.example.com',
-                               propertyDict=ldapProperties)
-
-LDAP_URI = PropertyKey('LDAP URI',
-                       'ldap://ad1.domain.example.com',
-                       propertyDict=ldapProperties)
-
-LDAP_CN_FOLDERS = PropertyKey('LDAP CN Folders',
-                              '/Users',
-                              propertyDict=ldapProperties)
-
-LDAP_OU_FOLDERS = PropertyKey('LDAP OU Folders',
-                              '/MyBusiness/Users',
-                              propertyDict=ldapProperties)
-
-LDAP_ENABLED = PropertyKey('LDAP Enabled',
-                           False,
-                           propertyDict=ldapProperties)
+LDAP_AUTH_ENABLED = PropertyKey('LDAP Auth Enabled',
+                                False,
+                                propertyDict=globalProperties)

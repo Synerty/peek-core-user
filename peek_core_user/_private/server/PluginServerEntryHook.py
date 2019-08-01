@@ -3,6 +3,8 @@ import os
 
 from celery import Celery
 from jsoncfg.value_mappers import require_string
+from peek_core_user._private.server.controller.AdminAuthController import \
+    AdminAuthController
 from sqlalchemy import MetaData
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
@@ -121,11 +123,17 @@ class PluginServerEntryHook(PluginServerEntryHookABC,
         self._handlers.append(importController)
 
         # ----------------
+        # Login / Logout Controller
+        adminAuthController = AdminAuthController(self.dbSessionCreator)
+        self._handlers.append(adminAuthController)
+
+        # ----------------
         # Setup our API
         self._userApi = UserApi(deviceApi,
                                 self.dbSessionCreator,
                                 importController,
-                                loginLogoutController)
+                                loginLogoutController,
+                                adminAuthController)
 
         # ----------------
         # Main Controller

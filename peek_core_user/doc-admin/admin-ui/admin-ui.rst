@@ -46,17 +46,32 @@ Edit General Settings
 
 Configure the General Settings to configure the user plugin.
 
-:Mobile Login Group: Users in this group will show when the login screen shows a user
-    list instead of a text box.
+:Mobile Login Group: Users in this group will be permitted to login to the Peek Field UI.
+        This applies to the Internal Authentication.
+
+:Admin Login Group: Users in this group will be permitted to login to the Peek Admin UI.
+        This applies to the Internal Authentication.
 
 :Show Vehicle Input: Should the Peek login screen show a box to take the users
     vehicle ID.
 
-:Show Login as List: Should the Peek login screen show a list of users, or an
+:Show Login as List: Should the Peek Field UI login screen show a list of users, or an
     input box for a user name. (See Mobile Login Group)
 
 :Allow Multiple Logins: Should the Peek only allow a user to login to the system
     on one device at a time.
+
+:LDAP Auth Enabled: LDAP authentication is enabled, see **Edit LDAP Settings** for more
+    configuration.
+
+:Internal Auth Enabled For Field: Internal authentication will be tried for users logging
+    in from the Peek Field UI.
+
+:Internal Auth Enabled For Office: Internal authentication will be tried for users logging
+    in from the Peek Office UI.
+
+:Internal Auth Enabled For Admin: Internal authentication will be tried for users logging
+    in from the Peek Admin UI.
 
 .. image:: settings-general.png
 
@@ -67,6 +82,9 @@ Configure the LDAP Settings to configure the user plugin.
 
 Attunes LDAP works seamlessly against the Microsoft Active Directory
 Lightweight Directory Service (AD LDS).
+
+Peek provides support for multiple LDAP setting server settings. Each LDAP configuration
+that applies to the respective login (Admin, Field, Office), will be tried.
 
 ----
 
@@ -93,15 +111,19 @@ Now attempt to login with an LDAP user.
 
 ----
 
-:LDAP Enabled: Should Peek attempt LDAP authentication at all.
-    If LDAP authentication is disabled, Peek will authenticate against the internal
-    password table.
+:Title: A unique name for this LDAP entry.
 
-:LDAP Domain Name: The domain name of the LDAP installation,
+:For Admin: Should Peek attempt LDAP authentication for logins via the Peek Admin UI.
+
+:For Office: Should Peek attempt LDAP authentication for logins via the Peek Office UI.
+
+:For Field: Should Peek attempt LDAP authentication for logins via the Peek Field UI.
+
+:Domain Name: The domain name of the LDAP installation,
     for example :code:`domain.example.org` where domain.example.org is the name of your
     active directory domain.
 
-:LDAP URI: The connection string to the LDAP server, example values are:
+:URI: The connection string to the LDAP server, example values are:
 
     *  :code:`ldap://server1.example.org`
 
@@ -109,8 +131,13 @@ Now attempt to login with an LDAP user.
 
     *  :code:`ldaps://10.2.2.2`
 
-:LDAP CN Folders: This is a comma separated lost of CN paths to search during login
+:CN Folders: This is a comma separated lost of CN paths to search during login.
+        (Optional)
 
-:LDAP OU Folders: TThis is a comma separated lost of OU paths to search during login
+:OU Folders: This is a comma separated lost of OU paths to search during login.
+        (Optional)
+
+:LGroups: This is a comma separated list of groups. The user must belong to one of these
+        groups for a successful login. (Optional)
 
 

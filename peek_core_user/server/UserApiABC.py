@@ -3,6 +3,7 @@ from typing import Callable
 from abc import ABCMeta, abstractmethod
 from twisted.internet.defer import Deferred
 
+from peek_core_user.server.UserAdminAuthApiABC import UserAdminAuthApiABC
 from peek_core_user.server.UserHookApiABC import UserHookApiABC
 from peek_core_user.server.UserImportApiABC import UserImportApiABC
 from peek_core_user.server.UserInfoApiABC import UserInfoApiABC
@@ -56,4 +57,14 @@ class UserApiABC(metaclass=ABCMeta):
         Returns the API class that provides information about users
 
         :return A reference to the UserInfoApiABC class
+        """
+
+    @property
+    @abstractmethod
+    def adminAuth(self) -> UserAdminAuthApiABC:
+        """ Admin Auth API
+
+        Returns the API class admin authentication for the peek-server
+
+        :return A reference to the UserAdminAuthApiABC class
         """

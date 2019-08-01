@@ -5,8 +5,7 @@ from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 from vortex.sqla_orm.OrmCrudHandler import OrmCrudHandler, OrmCrudHandlerExtension
 
 from peek_core_user._private.PluginNames import userPluginFilt
-from peek_core_user._private.storage.Setting import SettingProperty, globalSetting, \
-    ldapSetting
+from peek_core_user._private.storage.Setting import SettingProperty, globalSetting
 from peek_core_user._private.tuples.UserLoginUiSettingTuple import UserLoginUiSettingTuple
 
 logger = logging.getLogger(__name__)
@@ -24,8 +23,8 @@ class __CrudHandler(OrmCrudHandler):
         settingType = payloadFilt.get('settingType')
         if settingType == "Global":
             return [p for p in globalSetting(session).propertyObjects]
-        elif settingType == 'LDAP':
-            return [p for p in ldapSetting(session).propertyObjects]
+        # elif settingType == 'LDAP':
+        #     return [p for p in ldapSetting(session).propertyObjects]
 
         raise Exception("%s is not a known settings group" % settingType)
 

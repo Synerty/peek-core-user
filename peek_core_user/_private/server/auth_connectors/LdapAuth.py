@@ -1,9 +1,9 @@
 import logging
 from typing import List
 
-from twisted.cred.error import LoginFailed
-
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
+from peek_core_user._private.storage.LdapSetting import LdapSetting
+from twisted.cred.error import LoginFailed
 
 __author__ = 'synerty'
 
@@ -37,38 +37,84 @@ import ldap
  'lastLogonTimestamp': [b'132042996806397639']}
 '''
 
+
 class LdapNotEnabledError(Exception):
     pass
 
 
 class LdapAuth:
+    FOR_ADMIN = 1
+    FOR_OFFICE = 2
+    FOR_FIELD = 3
 
-    def checkPassBlocking(self, dbSession, userName, password) -> List[str]:
+    def checkPassBlocking(self, dbSession, userName, password,
+                          forService: int) -> List[str]:
         """ Login User
 
+        :param forService:
         :param dbSession:
         :param userName: The username of the user.
         :param password: The users secret password.
         :rtype
         """
-        (ldapDoamin, ldapOuFolders, ldapCnFolders, ldapUri) = self._loadLdapSettings(
-            dbSession
-        )
 
+        assert forService in (1, 2, 3), "Unhandled for service type"
+
+        ldapSettings: List[LdapSetting] = dbSession.query(LdapSetting) \
+            .all()
+
+        if not ldapSettings:
+            raise Exception("No LDAP servers configured.")
+
+        firstException = None
+
+        for ldapSetting in ldapSettings:
+            if forService == self.FOR_ADMIN:
+                if not ldapSetting.adminEnabled:
+                    continue
+
+            elif forService == self.FOR_OFFICE:
+                if not ldapSetting.desktopEnabled:
+                    continue
+
+            elif forService == self.FOR_FIELD:
+                if not ldapSetting.mobileEnabled:
+                    continue
+
+            else:
+                raise Exception("InternalAuth:Unhandled forService type %s" % forService)
+
+            try:
+                return self._tryLdap(dbSession, userName, password, ldapSetting)
+            except LoginFailed as e:
+                if not firstException:
+                    firstException = e
+
+        logger.error("Login failed for %s, %s",
+                     userName, str(firstException))
+
+        if firstException:
+            raise firstException
+
+        raise LoginFailed("No LDAP providers found for this service")
+
+    def _tryLdap(self, dbSession, userName, password,
+                 ldapSetting: LdapSetting) -> List[str]:
         try:
 
-            conn = ldap.initialize(ldapUri)
+            conn = ldap.initialize(ldapSetting.ldapUri)
             conn.protocol_version = 3
             conn.set_option(ldap.OPT_REFERRALS, 0)
 
             # make the connection
-            conn.simple_bind_s('%s@%s' % (userName, ldapDoamin), password)
+            conn.simple_bind_s('%s@%s' % (userName, ldapSetting.ldapDomain), password)
             ldapFilter = "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))" % userName
 
-            dcParts = ','.join(['DC=%s' % part for part in ldapDoamin.split('.')])
+            dcParts = ','.join(['DC=%s' % part
+                                for part in ldapSetting.ldapDomain.split('.')])
 
-            ldapBases = self._makeLdapBase(ldapOuFolders, userName, "OU")
-            ldapBases += self._makeLdapBase(ldapCnFolders, userName, "CN")
+            ldapBases = self._makeLdapBase(ldapSetting.ldapOUFolders, userName, "OU")
+            ldapBases += self._makeLdapBase(ldapSetting.ldapCNFolders, userName, "CN")
 
             for ldapBase in ldapBases:
                 ldapBase = "%s,%s" % (ldapBase, dcParts)
@@ -85,20 +131,14 @@ class LdapAuth:
                     raise
 
         except ldap.NO_SUCH_OBJECT:
-            logger.error("Login failed for %s, failed to query LDAP for user groups",
-                         userName)
             raise LoginFailed(
                 "An internal error occurred, ask admin to check Attune logs")
 
         except ldap.INVALID_CREDENTIALS:
-            logger.error("Login failed for %s, invalid credentials", userName)
             raise LoginFailed("Username or password is incorrect")
 
         if not userDetails:
-            logger.error("Login failed for %s, failed to query LDAP for user groups",
-                         userName)
-            raise LoginFailed(
-                "An internal error occurred, ask admin to check Attune logs")
+            raise LoginFailed("User doesn't belong to the correct CN/OUs")
 
         userDetails = userDetails[0][1]
 
@@ -120,6 +160,12 @@ class LdapAuth:
         userUuid = None
         if userDetails['distinguishedName']:
             userUuid = userDetails['distinguishedName'][0].decode()
+
+        if ldapSetting.ldapGroups:
+            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(',')])
+
+            if not ldapGroups & set(groups):
+                raise LoginFailed("User is not apart of an authorised group")
 
         self._makeOrCreateInternalUserBlocking(dbSession,
                                                userName, userTitle, userUuid, email)
@@ -145,28 +191,6 @@ class LdapAuth:
 
         dbSession.add(newInternalUser)
         dbSession.commit()
-
-    def _loadLdapSettings(self, dbSession):
-
-        from peek_core_user._private.storage.Setting import ldapSetting, \
-            LDAP_DOMAIN_NAME, LDAP_URI, LDAP_CN_FOLDERS, \
-            LDAP_OU_FOLDERS
-
-        try:
-            ldapSettings = ldapSetting(dbSession)
-
-            ldapDoamin = ldapSettings[LDAP_DOMAIN_NAME]
-            ldapCnFolders = ldapSettings[LDAP_CN_FOLDERS]
-            ldapOuFolders = ldapSettings[LDAP_OU_FOLDERS]
-            ldapUri = ldapSettings[LDAP_URI]
-
-        except Exception as e:
-            logger.error("Failed to query for LDAP connection settings")
-            logger.exception(e)
-            raise LoginFailed(
-                "An internal error occurred, ask admin to check Attune logs")
-
-        return ldapDoamin, ldapOuFolders, ldapCnFolders, ldapUri
 
     def _makeLdapBase(self, ldapFolders, userName, propertyName):
         try:

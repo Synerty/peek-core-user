@@ -3,19 +3,14 @@ from datetime import datetime
 from typing import List
 
 import pytz
-from twisted.cred.error import LoginDenied, LoginFailed
-from twisted.internet.defer import Deferred, inlineCallbacks
-from vortex.DeferUtil import deferToThreadWrapWithLogger
-from vortex.TupleSelector import TupleSelector
-from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
-
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.server.api.UserHookApi import UserHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
-from peek_core_user._private.storage.Setting import ldapSetting, LDAP_ENABLED, \
-    globalSetting, ALLOW_MULTI_DEVICE_LOGIN
+from peek_core_user._private.storage.Setting import \
+    globalSetting, ALLOW_MULTI_DEVICE_LOGIN, INTERNAL_AUTH_ENABLED_FOR_FIELD, \
+    LDAP_AUTH_ENABLED, INTERNAL_AUTH_ENABLED_FOR_OFFICE
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
     LoggedInUserStatusTuple
@@ -26,6 +21,11 @@ from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponse
 from peek_core_user.tuples.login.UserLogoutAction import UserLogoutAction
 from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
+from twisted.cred.error import LoginFailed
+from twisted.internet.defer import Deferred, inlineCallbacks
+from vortex.DeferUtil import deferToThreadWrapWithLogger
+from vortex.TupleSelector import TupleSelector
+from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +62,43 @@ class LoginLogoutController:
         if not password:
             raise LoginFailed("Password is empty")
 
-        if ldapSetting(ormSession, LDAP_ENABLED):
-            return LdapAuth().checkPassBlocking(ormSession, userName, password)
+        # TODO Make the client tell us if it's for office or field
 
-        return InternalAuth().checkPassBlocking(ormSession, userName, password)
+        lastException = None
 
-    def _checkGroupBlocking(self, ormSession, groups:List[str]):
+        # TRY INTERNAL IF ITS ENABLED
+        try:
+            if globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_FIELD):
+                return InternalAuth().checkPassBlocking(ormSession, userName,
+                                                        password, InternalAuth.FOR_FIELD)
+
+        except Exception as e:
+            lastException = e
+
+        # TRY INTERNAL IF ITS ENABLED
+        try:
+            if globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_OFFICE):
+                return InternalAuth().checkPassBlocking(ormSession, userName,
+                                                        password, InternalAuth.FOR_OFFICE)
+
+        except Exception as e:
+            lastException = e
+
+        # TRY LDAP IF ITS ENABLED
+        try:
+            if globalSetting(ormSession, LDAP_AUTH_ENABLED):
+                return LdapAuth().checkPassBlocking(ormSession, userName,
+                                                    password, LdapAuth.FOR_OFFICE)
+
+        except Exception as e:
+            lastException = e
+
+        if lastException:
+            raise lastException
+
+        raise Exception("No authentication handlers are enabled, enable one in settings")
+
+    def _checkGroupBlocking(self, ormSession, groups: List[str]):
         pass
 
     @deferToThreadWrapWithLogger(logger)
