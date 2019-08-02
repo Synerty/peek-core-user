@@ -12,7 +12,7 @@ import {
 } from "@synerty/vortexjs";
 import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
 import {UserListItemTuple} from "../tuples/UserListItemTuple";
-import {DeviceEnrolmentService} from "@peek/peek_core_device";
+import {DeviceEnrolmentService, DeviceInfoTuple} from "@peek/peek_core_device";
 import {userTuplePrefix} from "../_private/PluginNames";
 import {UserLoggedInTuple} from "../_private";
 import {UserLogoutAction} from "../tuples/login/UserLogoutAction";
@@ -70,6 +70,24 @@ export class UserService extends ComponentLifecycleEventEmitter {
                 for (let user of tuples) {
                     this._userDisplayNameById[user.userId] = user.displayName;
                 }
+            });
+
+
+        this.deviceEnrolmentService
+            .deviceInfoObservable()
+            .first()
+            .takeUntil(this.onDestroyEvent)
+            .subscribe((deviceInfo: DeviceInfoTuple) => {
+
+                // Setup the user logged in subscriptions
+                const deviceUserLoggedInTs = new TupleSelector(
+                    UserLoggedInTuple.tupleName, {deviceToken: deviceInfo.deviceToken}
+                );
+
+                this.tupleService.observer
+                    .subscribeToTupleSelector(deviceUserLoggedInTs, true)
+                    .takeUntil(this.onDestroyEvent)
+                    .subscribe((tuples: UserLoggedInTuple[]) => this.userLoggedInReceived(tuples));
             });
 
 
@@ -187,24 +205,10 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     private setLogin(userDetails: UserListItemTuple): void {
-
-        // Setup the user logged in subscriptions
-        let tupleSelector = new TupleSelector(UserLoggedInTuple.tupleName, {
-            userName: userDetails.userId
-        });
-
-        this._lastUserSubscriptions.push(
-            this.tupleService.observer
-                .subscribeToTupleSelector(tupleSelector, true)
-                .subscribe((tuples: UserLoggedInTuple[]) => this.userLoggedInReceived(tuples))
-        );
-
         this.state.authToken = "TODO, but not null";
         this.state.userDetails = userDetails;
         this._loggedInStatus.next(true);
-
         this.storeState();
-
     }
 
     private setLogout(): void {
@@ -220,13 +224,22 @@ export class UserService extends ComponentLifecycleEventEmitter {
     }
 
     private userLoggedInReceived(tuples: UserLoggedInTuple[]): void {
-        let deviceToken = this.deviceEnrolmentService.enrolmentToken();
+        if (tuples.length != 1)
+            return;
 
-        // Do nothing, this is normal
-        for (let data of tuples) {
-            if (data.deviceToken == deviceToken)
-                return;
+        const userLoggedIn = tuples[0];
+        const serverSaidWereLoggedIn = userLoggedIn.userDetails != null;
+
+        if (serverSaidWereLoggedIn) {
+            if (!this.loggedIn) {
+                this.setLogin(userLoggedIn.userDetails);
+                this.router.navigate(['']);
+            }
+            return;
         }
+
+        if (!this.loggedIn)
+            return;
 
         this.setLogout();
 

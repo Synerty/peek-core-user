@@ -1,5 +1,6 @@
 import {addTupleType, Tuple} from "@synerty/vortexjs";
 import {userTuplePrefix} from "../PluginNames";
+import {UserListItemTuple} from "../../tuples/UserListItemTuple";
 
 
 /** User Logged In Tuple
@@ -18,7 +19,7 @@ export class UserLoggedInTuple extends Tuple {
         super(UserLoggedInTuple.tupleName); // Matches server side
     }
 
-    userName: string;
+    userDetails: UserListItemTuple;
     deviceToken: string;
 
 }

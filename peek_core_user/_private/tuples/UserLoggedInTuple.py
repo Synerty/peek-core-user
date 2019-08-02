@@ -1,7 +1,7 @@
 import logging
-from typing import List
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
+from peek_core_user.tuples.UserListItemTuple import UserListItemTuple
 from vortex.Tuple import addTupleType, Tuple, TupleField
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,5 @@ class UserLoggedInTuple(Tuple):
     """
     __tupleType__ = userPluginTuplePrefix + "UserLoggedInTuple"
 
-    userName: str = TupleField()
+    userDetails: UserListItemTuple = TupleField()
     deviceToken: str = TupleField()
-

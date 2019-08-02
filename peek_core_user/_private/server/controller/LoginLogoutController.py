@@ -156,7 +156,7 @@ class LoginLogoutController:
 
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(UserLoggedInTuple.tupleType(),
-                          selector=dict(userName=logoutTuple.userName))
+                          selector=dict(deviceToken=logoutTuple.deviceToken))
         )
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
@@ -341,7 +341,7 @@ class LoginLogoutController:
 
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(UserLoggedInTuple.tupleType(),
-                          selector=dict(userName=loginTuple.userName))
+                          selector=dict(deviceToken=loginTuple.deviceToken))
         )
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
@@ -351,9 +351,13 @@ class LoginLogoutController:
         return loginResponse
 
     def _forceLogout(self, ormSession, userName, deviceToken):
-        (
-            ormSession.query(UserLoggedIn)
-                .filter(UserLoggedIn.userName == userName)
-                .filter(UserLoggedIn.deviceToken == deviceToken)
-                .delete(synchronize_session=False)
+
+        ormSession.query(UserLoggedIn) \
+            .filter(UserLoggedIn.userName == userName) \
+            .filter(UserLoggedIn.deviceToken == deviceToken) \
+            .delete(synchronize_session=False)
+
+        self._clientTupleObservable.notifyOfTupleUpdate(
+            TupleSelector(UserLoggedInTuple.tupleType(),
+                          selector=dict(deviceToken=deviceToken))
         )
