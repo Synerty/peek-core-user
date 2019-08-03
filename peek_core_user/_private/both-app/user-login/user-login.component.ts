@@ -11,6 +11,7 @@ import {ComponentLifecycleEventEmitter, TupleSelector} from "@synerty/vortexjs";
 import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
 import {TitleService} from "@synerty/peek-util";
 import {UserLoginUiSettingTuple} from "../tuples/UserLoginUiSettingTuple";
+import {DeviceEnrolmentService} from "@peek/peek_core_device";
 
 @Component({
     selector: './peek-core-user-login',
@@ -33,6 +34,7 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
     setting: UserLoginUiSettingTuple = new UserLoginUiSettingTuple();
 
     constructor(private balloonMsg: Ng2BalloonMsgService,
+                private deviceEnrolmentService: DeviceEnrolmentService,
                 private tupleService: UserTupleService,
                 private userService: UserService,
                 private router: Router,
@@ -97,7 +99,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
             && this.selectedUser.password.length != 0;
 
         const isVehicleSet = !this.setting.showVehicleInput
-            || this.selectedUser.vehicleId && this.selectedUser.vehicleId.length != 0;
+            || this.selectedUser.vehicleId && this.selectedUser.vehicleId.length != 0
+            || !this.deviceEnrolmentService.isFieldService();
 
         return !this.isSelectedUserNull()
             && !this.isAuthenticating
@@ -114,18 +117,8 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
         // Add any warnings
         tupleAction.acceptedWarningKeys = this.warningKeys;
 
-        let userDetails: UserListItemTuple;
-        if (this.setting.showUsersAsList) {
-            userDetails = this.users
-                .filter(item => item.userId === this.selectedUser.userName)[0];
-        } else {
-            userDetails = new UserListItemTuple();
-            userDetails.userId = this.selectedUser.userName;
-            userDetails.displayName = this.selectedUser.userName;
-        }
-
         this.isAuthenticating = true;
-        this.userService.login(tupleAction, userDetails)
+        this.userService.login(tupleAction)
             .then((response: UserLoginResponseTuple) => {
 
                 if (response.succeeded) {

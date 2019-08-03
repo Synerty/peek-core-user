@@ -5,14 +5,14 @@ from twisted.internet.defer import inlineCallbacks
 
 from peek_core_user.server.UserApiABC import UserPostLoginHookCallable, \
     UserPostLogoutHookCallable
-from peek_core_user.server.UserHookApiABC import UserHookApiABC
+from peek_core_user.server.UserFieldHookApiABC import UserFieldHookApiABC
 from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
 
 logger = logging.getLogger(__name__)
 
 
-class UserHookApi(UserHookApiABC):
+class UserFieldHookApi(UserFieldHookApiABC):
     def __init__(self):
 
         self._postLoginHooks = []

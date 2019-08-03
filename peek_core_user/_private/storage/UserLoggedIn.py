@@ -10,7 +10,7 @@
 """
 import logging
 
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, Boolean
 from sqlalchemy import Integer, String
 from vortex.Tuple import Tuple, addTupleType
 
@@ -35,3 +35,4 @@ class UserLoggedIn(Tuple, DeclarativeBase):
     userName = Column(String(50))
     deviceToken = Column(String(100), unique=True, nullable=False)
     vehicle = Column(String)
+    isFieldLogin = Column(Boolean)

@@ -3,13 +3,20 @@ from datetime import datetime
 from typing import List
 
 import pytz
+from twisted.cred.error import LoginFailed
+from twisted.internet import reactor
+from twisted.internet.defer import Deferred, inlineCallbacks
+from vortex.DeferUtil import deferToThreadWrapWithLogger
+from vortex.TupleSelector import TupleSelector
+from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
+
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_core_user._private.server.api.UserHookApi import UserHookApi
+from peek_core_user._private.server.api.UserFieldHookApi import UserFieldHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
 from peek_core_user._private.storage.Setting import \
-    globalSetting, ALLOW_MULTI_DEVICE_LOGIN, INTERNAL_AUTH_ENABLED_FOR_FIELD, \
+    globalSetting, INTERNAL_AUTH_ENABLED_FOR_FIELD, \
     LDAP_AUTH_ENABLED, INTERNAL_AUTH_ENABLED_FOR_OFFICE
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
@@ -21,11 +28,6 @@ from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponse
 from peek_core_user.tuples.login.UserLogoutAction import UserLogoutAction
 from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
-from twisted.cred.error import LoginFailed
-from twisted.internet.defer import Deferred, inlineCallbacks
-from vortex.DeferUtil import deferToThreadWrapWithLogger
-from vortex.TupleSelector import TupleSelector
-from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class LoginLogoutController:
     def __init__(self, deviceApi: DeviceApiABC,
                  dbSessionCreator: DbSessionCreator):
         self._deviceApi: DeviceApiABC = deviceApi
-        self._hookApi: UserHookApi = None
+        self._fieldServiceHookApi: UserFieldHookApi = None
         self._infoApi: UserInfoApi = None
         self._dbSessionCreator: DbSessionCreator = dbSessionCreator
         self._clientTupleObservable: TupleDataObservableHandler = None
@@ -46,19 +48,20 @@ class LoginLogoutController:
 
     def setup(self, clientTupleObservable,
               adminTupleObservable,
-              hookApi: UserHookApi,
+              hookApi: UserFieldHookApi,
               infoApi: UserInfoApi):
         self._clientTupleObservable = clientTupleObservable
         self._adminTupleObservable = adminTupleObservable
-        self._hookApi = hookApi
+        self._fieldServiceHookApi = hookApi
         self._infoApi = infoApi
 
     def shutdown(self):
         self._clientTupleObservable = None
-        self._hookApi = None
+        self._fieldServiceHookApi = None
         self._infoApi = None
 
-    def _checkPassBlocking(self, ormSession, userName, password) -> List[str]:
+    def _checkPassBlocking(self, ormSession, userName, password,
+                           isFieldService: bool) -> List[str]:
         if not password:
             raise LoginFailed("Password is empty")
 
@@ -66,20 +69,21 @@ class LoginLogoutController:
 
         lastException = None
 
-        # TRY INTERNAL IF ITS ENABLED
-        try:
-            if globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_FIELD):
-                return InternalAuth().checkPassBlocking(ormSession, userName,
-                                                        password, InternalAuth.FOR_FIELD)
-
-        except Exception as e:
-            lastException = e
+        forService = InternalAuth.FOR_OFFICE
+        if isFieldService:
+            forService = InternalAuth.FOR_FIELD
 
         # TRY INTERNAL IF ITS ENABLED
         try:
-            if globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_OFFICE):
+            if forService == InternalAuth.FOR_FIELD \
+                    and globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_FIELD):
                 return InternalAuth().checkPassBlocking(ormSession, userName,
-                                                        password, InternalAuth.FOR_OFFICE)
+                                                        password, forService)
+
+            if forService == InternalAuth.FOR_OFFICE \
+                    and globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_OFFICE):
+                return InternalAuth().checkPassBlocking(ormSession, userName,
+                                                        password, forService)
 
         except Exception as e:
             lastException = e
@@ -88,7 +92,7 @@ class LoginLogoutController:
         try:
             if globalSetting(ormSession, LDAP_AUTH_ENABLED):
                 return LdapAuth().checkPassBlocking(ormSession, userName,
-                                                    password, LdapAuth.FOR_OFFICE)
+                                                    password, forService)
 
         except Exception as e:
             lastException = e
@@ -147,23 +151,31 @@ class LoginLogoutController:
             acceptedWarningKeys=logoutTuple.acceptedWarningKeys,
             succeeded=True)
 
-        # Give the hooks a chance to fail the logout
-        yield self._hookApi.callLogoutHooks(response)
+        if logoutTuple.isFieldService:
+            # Give the hooks a chance to fail the logout
+            yield self._fieldServiceHookApi.callLogoutHooks(response)
 
         # If there are no problems, proceed with the logout.
-        if response.succeeded:
-            yield self._logoutInDb(logoutTuple)
+        try:
+            if response.succeeded:
+                yield self._logoutInDb(logoutTuple)
 
-        self._clientTupleObservable.notifyOfTupleUpdate(
-            TupleSelector(UserLoggedInTuple.tupleType(),
-                          selector=dict(deviceToken=logoutTuple.deviceToken))
-        )
+        finally:
+            # Delay this, otherwise the user gets kicked off before getting
+            # the nice success message
+            reactor.callLater(0.05, self._sendLogoutUpdate, logoutTuple.deviceToken)
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
             LoggedInUserStatusTuple.tupleType()
         )
 
         return response
+
+    def _sendLogoutUpdate(self, deviceToken:str):
+        self._clientTupleObservable.notifyOfTupleUpdate(
+            TupleSelector(UserLoggedInTuple.tupleType(),
+                          selector=dict(deviceToken=deviceToken))
+        )
 
     @deferToThreadWrapWithLogger(logger)
     def _loginInDb(self, loginTuple: UserLoginAction):
@@ -177,6 +189,8 @@ class LoginLogoutController:
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
         deviceToken = loginTuple.deviceToken
         vehicle = loginTuple.vehicleId
+        isFieldService = loginTuple.isFieldService
+        allowMultipleLogins = isFieldService
 
         responseTuple = UserLoginResponseTuple(
             userName=userName,
@@ -193,8 +207,8 @@ class LoginLogoutController:
 
         ormSession = self._dbSessionCreator()
         try:
-            singleDevice = not globalSetting(ormSession, ALLOW_MULTI_DEVICE_LOGIN)
-            groups = self._checkPassBlocking(ormSession, userName, password)
+            groups = self._checkPassBlocking(ormSession, userName, password,
+                                             allowMultipleLogins)
             self._checkGroupBlocking(ormSession, groups)
 
             responseTuple.userDetail = self._infoApi.userBlocking(userName, ormSession)
@@ -202,6 +216,7 @@ class LoginLogoutController:
             # Find any current login sessions
             userLoggedIn = (ormSession.query(UserLoggedIn)
                             .filter(UserLoggedIn.userName == userName)
+                            .filter(UserLoggedIn.isFieldLogin == isFieldService)
                             .all())
             userLoggedIn = userLoggedIn[0] if userLoggedIn else None
 
@@ -209,9 +224,10 @@ class LoginLogoutController:
                 ormSession.query(UserLoggedIn)
                     .filter(UserLoggedIn.deviceToken != deviceToken)
                     .filter(UserLoggedIn.userName == userName)
+                    .filter(UserLoggedIn.isFieldLogin == isFieldService)
                     .all())
 
-            if singleDevice and len(loggedInElsewhere) not in (0, 1):
+            if allowMultipleLogins and len(loggedInElsewhere) not in (0, 1):
                 raise Exception("Found more than 1 ClientDevice for"
                                 + (" token %s" % deviceToken))
 
@@ -220,7 +236,7 @@ class LoginLogoutController:
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
             # If the user is logged in, but not to this client device, raise exception
-            if singleDevice and userLoggedIn and not sameDevice:
+            if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(ormSession,
                                       userName,
@@ -291,7 +307,8 @@ class LoginLogoutController:
             newUser = UserLoggedIn(userName=userName,
                                    loggedInDateTime=datetime.now(pytz.utc),
                                    deviceToken=deviceToken,
-                                   vehicle=vehicle)
+                                   vehicle=vehicle,
+                                   isFieldLogin=isFieldService)
             ormSession.add(newUser)
             ormSession.commit()
 
@@ -313,7 +330,9 @@ class LoginLogoutController:
         loginResponse = None
         try:
             loginResponse = yield self._loginInDb(loginTuple)
-            yield self._hookApi.callLoginHooks(loginResponse)
+
+            if loginTuple.isFieldService:
+                yield self._fieldServiceHookApi.callLoginHooks(loginResponse)
 
         # except UserAlreadyLoggedInError as e:
         #     pass

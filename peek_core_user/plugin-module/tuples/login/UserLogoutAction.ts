@@ -12,6 +12,9 @@ export class UserLogoutAction extends TupleActionABC {
     userName: string;
     deviceToken: string;
 
+    isFieldService: boolean = null;
+    isOfficeService: boolean = null;
+
     // A list of accepted warning keys
     // If any server side warnings occur and they are in this list then the logoff
     // continues.

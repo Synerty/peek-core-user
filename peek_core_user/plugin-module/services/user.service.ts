@@ -138,10 +138,11 @@ export class UserService extends ComponentLifecycleEventEmitter {
             .catch(e => console.log(`UserService: Error storing state ${e}`));
     }
 
-    login(userLoginAction: UserLoginAction,
-          userDetails: UserListItemTuple): Promise<UserLoginResponseTuple> {
+    login(userLoginAction: UserLoginAction): Promise<UserLoginResponseTuple> {
 
         userLoginAction.deviceToken = this.deviceEnrolmentService.enrolmentToken();
+        userLoginAction.isOfficeService = this.deviceEnrolmentService.isOfficeService();
+        userLoginAction.isFieldService = this.deviceEnrolmentService.isFieldService();
 
 
         return this.tupleService.action.pushAction(userLoginAction)
@@ -160,8 +161,9 @@ export class UserService extends ComponentLifecycleEventEmitter {
                     );
                 }
 
-                if (response.succeeded)
-                    this.setLogin(userDetails);
+                // Login has succeeded, The server will send us an update with the
+                // users details. From that we'll login in the service here and
+                // then notify all the observers.
 
                 return response;
             });
@@ -174,6 +176,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
         }
 
         tupleAction.deviceToken = this.deviceEnrolmentService.enrolmentToken();
+        tupleAction.isOfficeService = this.deviceEnrolmentService.isOfficeService();
+        tupleAction.isFieldService = this.deviceEnrolmentService.isFieldService();
 
         return this.tupleService.action.pushAction(tupleAction)
             .catch(err => {
@@ -246,8 +250,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
         // Else, log out
         this.balloonMsg
             .showMessage(
-                "This user has been logged out due to a login on another device," +
-                " or an administrative logout",
+                "This user has been logged out due to a login/logout on another device,"
+                + " or an administrative logout",
                 UsrMsgLevel.Error,
                 UsrMsgType.Confirm
             )

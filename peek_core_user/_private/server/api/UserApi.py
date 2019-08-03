@@ -2,7 +2,7 @@ import logging
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.server.api.UserAdminAuthApi import UserAdminAuthApi
-from peek_core_user._private.server.api.UserHookApi import UserHookApi
+from peek_core_user._private.server.api.UserFieldHookApi import UserFieldHookApi
 from peek_core_user._private.server.api.UserImportApi import UserImportApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.api.UserLoginApi import UserLoginApi
@@ -24,7 +24,7 @@ class UserApi(UserApiABC):
                  importController: ImportController,
                  loginLogoutController: LoginLogoutController,
                  adminAuthController: AdminAuthController):
-        self._hookApi = UserHookApi()
+        self._hookApi = UserFieldHookApi()
 
         self._importApi = UserImportApi(importController=importController)
 
@@ -57,7 +57,7 @@ class UserApi(UserApiABC):
         return self._importApi
 
     @property
-    def hookApi(self) -> UserHookApi:
+    def fieldHookApi(self) -> UserFieldHookApi:
         return self._hookApi
 
     @property

@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.LdapSetting import LdapSetting
 from twisted.cred.error import LoginFailed
@@ -43,9 +44,9 @@ class LdapNotEnabledError(Exception):
 
 
 class LdapAuth:
-    FOR_ADMIN = 1
-    FOR_OFFICE = 2
-    FOR_FIELD = 3
+    FOR_ADMIN = InternalAuth.FOR_ADMIN
+    FOR_OFFICE = InternalAuth.FOR_OFFICE
+    FOR_FIELD = InternalAuth.FOR_FIELD
 
     def checkPassBlocking(self, dbSession, userName, password,
                           forService: int) -> List[str]:

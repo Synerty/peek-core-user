@@ -265,13 +265,10 @@ ADMIN_LOGIN_GROUP = PropertyKey('Admin Login Group', 'peek-admin-login',
 OFFICE_LOGIN_GROUP = PropertyKey('Office Login Group', 'peek-office-login',
                                  propertyDict=globalProperties)
 
-SHOW_LOGIN_AS_LIST = PropertyKey('Show Login as List', True,
-                                 propertyDict=globalProperties)
+FIELD_SHOW_LOGIN_AS_LIST = PropertyKey('Field Show Login as List', True,
+                                       propertyDict=globalProperties)
 
-SHOW_VEHICLE_INPUT = PropertyKey('Show Vehicle Input', True,
-                                 propertyDict=globalProperties)
-
-ALLOW_MULTI_DEVICE_LOGIN = PropertyKey('Allow Multi Device Logins', False,
+FIELD_SHOW_VEHICLE_INPUT = PropertyKey('Field Show Vehicle Input', True,
                                        propertyDict=globalProperties)
 
 INTERNAL_AUTH_ENABLED_FOR_ADMIN = PropertyKey('Internal Auth Enabled For Admin',

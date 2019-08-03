@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from twisted.internet.defer import Deferred
 
 from peek_core_user.server.UserAdminAuthApiABC import UserAdminAuthApiABC
-from peek_core_user.server.UserHookApiABC import UserHookApiABC
+from peek_core_user.server.UserFieldHookApiABC import UserFieldHookApiABC
 from peek_core_user.server.UserImportApiABC import UserImportApiABC
 from peek_core_user.server.UserInfoApiABC import UserInfoApiABC
 from peek_core_user.server.UserLoginApiABC import UserLoginApiABC
@@ -40,13 +40,13 @@ class UserApiABC(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def hookApi(self) -> UserHookApiABC:
+    def fieldHookApi(self) -> UserFieldHookApiABC:
         """ Hook API
 
         Returns the API class that can be used to attach callbacks and observers to the
         login/logout process
 
-        :return A reference to the UserHookApiABC class
+        :return A reference to the UserFieldHookApiABC class
         """
 
     @property

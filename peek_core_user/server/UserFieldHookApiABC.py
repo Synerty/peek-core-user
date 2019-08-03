@@ -12,7 +12,7 @@ UserPostLoginHookCallable = Callable[[UserLoginResponseTuple], Deferred]
 UserPostLogoutHookCallable = Callable[[UserLogoutResponseTuple], Deferred]
 
 
-class UserHookApiABC(metaclass=ABCMeta):
+class UserFieldHookApiABC(metaclass=ABCMeta):
     @abstractmethod
     def postLoginObservable(self) -> Subject:
         """ Get the post login observable

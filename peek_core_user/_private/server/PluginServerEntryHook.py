@@ -158,7 +158,7 @@ class PluginServerEntryHook(PluginServerEntryHookABC,
         # Setup controllers.
         loginLogoutController.setup(clientTupleObservable,
                                     adminTupleObservable,
-                                    self._userApi.hookApi,
+                                    self._userApi.fieldHookApi,
                                     self._userApi.infoApi)
         importController.setTupleObserver(clientTupleObservable)
 

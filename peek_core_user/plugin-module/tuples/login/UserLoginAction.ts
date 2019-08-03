@@ -15,6 +15,9 @@ export class UserLoginAction extends TupleActionABC {
     deviceToken: string;
     vehicleId: string = '';
 
+    isFieldService: boolean = null;
+    isOfficeService: boolean = null;
+
     // A list of accepted warning keys
     // If any server side warnings occur and they are in this list then the logon
     // continues.

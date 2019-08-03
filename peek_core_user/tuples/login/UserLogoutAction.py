@@ -12,6 +12,9 @@ class UserLogoutAction(TupleActionABC):
     userName: str = TupleField()
     deviceToken: str = TupleField()
 
+    isFieldService: bool = TupleField()
+    isOfficeService: bool = TupleField()
+
     #: A list of accepted warning keys
     # If any server side warnings occur and they are in this list then the logoff
     # continues.

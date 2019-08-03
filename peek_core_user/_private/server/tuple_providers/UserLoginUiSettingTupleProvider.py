@@ -6,8 +6,8 @@ from vortex.Payload import Payload
 from vortex.TupleSelector import TupleSelector
 from vortex.handler.TupleDataObservableHandler import TuplesProviderABC
 
-from peek_core_user._private.storage.Setting import globalSetting, SHOW_LOGIN_AS_LIST, \
-    SHOW_VEHICLE_INPUT
+from peek_core_user._private.storage.Setting import globalSetting, FIELD_SHOW_LOGIN_AS_LIST, \
+    FIELD_SHOW_VEHICLE_INPUT
 from peek_core_user._private.tuples.UserLoginUiSettingTuple import UserLoginUiSettingTuple
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
 
@@ -24,8 +24,8 @@ class UserLoginUiSettingTupleProvider(TuplesProviderABC):
 
         dbSession = self._dbSessionCreator()
         try:
-            tuple_.showUsersAsList = globalSetting(dbSession, SHOW_LOGIN_AS_LIST)
-            tuple_.showVehicleInput = globalSetting(dbSession, SHOW_VEHICLE_INPUT)
+            tuple_.showUsersAsList = globalSetting(dbSession, FIELD_SHOW_LOGIN_AS_LIST)
+            tuple_.showVehicleInput = globalSetting(dbSession, FIELD_SHOW_VEHICLE_INPUT)
 
         finally:
             dbSession.close()
