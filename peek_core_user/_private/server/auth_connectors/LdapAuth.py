@@ -114,8 +114,14 @@ class LdapAuth:
             dcParts = ','.join(['DC=%s' % part
                                 for part in ldapSetting.ldapDomain.split('.')])
 
-            ldapBases = self._makeLdapBase(ldapSetting.ldapOUFolders, userName, "OU")
-            ldapBases += self._makeLdapBase(ldapSetting.ldapCNFolders, userName, "CN")
+            ldapBases = []
+            if ldapSetting.ldapOUFolders:
+                ldapBases += self._makeLdapBase(ldapSetting.ldapOUFolders, userName, "OU")
+            if ldapSetting.ldapOUFolders:
+                ldapBases += self._makeLdapBase(ldapSetting.ldapCNFolders, userName, "CN")
+
+            if not ldapBases:
+                raise LoginFailed("LDAP OU and/or CN search paths must be set.")
 
             for ldapBase in ldapBases:
                 ldapBase = "%s,%s" % (ldapBase, dcParts)
@@ -214,7 +220,7 @@ class LdapAuth:
 
         except Exception as e:
             logger.error(
-                "Login failed for %s, failed to parse LDAP %s Folders setting" % propertyName,
+                "Login failed for %s, failed to parse LDAP %s Folders setting",  propertyName,
                 userName)
 
             logger.exception(e)
