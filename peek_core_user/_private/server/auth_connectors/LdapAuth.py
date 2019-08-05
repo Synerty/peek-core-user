@@ -123,7 +123,7 @@ class LdapAuth:
             if not ldapBases:
                 raise LoginFailed("LDAP OU and/or CN search paths must be set.")
 
-
+            userDetails = None
             for ldapBase in ldapBases:
                 ldapBase = "%s,%s" % (ldapBase, dcParts)
 
