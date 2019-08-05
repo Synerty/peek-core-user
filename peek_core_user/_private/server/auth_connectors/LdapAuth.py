@@ -117,11 +117,12 @@ class LdapAuth:
             ldapBases = []
             if ldapSetting.ldapOUFolders:
                 ldapBases += self._makeLdapBase(ldapSetting.ldapOUFolders, userName, "OU")
-            if ldapSetting.ldapOUFolders:
+            if ldapSetting.ldapCNFolders:
                 ldapBases += self._makeLdapBase(ldapSetting.ldapCNFolders, userName, "CN")
 
             if not ldapBases:
                 raise LoginFailed("LDAP OU and/or CN search paths must be set.")
+
 
             for ldapBase in ldapBases:
                 ldapBase = "%s,%s" % (ldapBase, dcParts)
@@ -135,7 +136,7 @@ class LdapAuth:
                         break
 
                 except ldap.NO_SUCH_OBJECT:
-                    raise
+                    logger.warning("CN or OU doesn't exist : %s", ldapBase)
 
         except ldap.NO_SUCH_OBJECT:
             raise LoginFailed(
