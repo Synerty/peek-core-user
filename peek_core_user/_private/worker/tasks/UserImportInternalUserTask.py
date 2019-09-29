@@ -94,7 +94,7 @@ def importInternalUsers(self, importHash: str,
 
         session.commit()
 
-        logger.debug("Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
+        logger.info("Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
                     len(inserts), len(updates), len(deleteIds), len(same),
                     (datetime.now(pytz.utc) - startTime))
 
@@ -108,7 +108,7 @@ def importInternalUsers(self, importHash: str,
 
     except Exception as e:
         session.rollback()
-        logger.warning("Task failed, but it will retry. %s", e)
+        logger.debug("Task failed, but it will retry. %s", e)
         raise self.retry(exc=e, countdown=2)
 
     finally:

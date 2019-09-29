@@ -99,7 +99,7 @@ def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> Intern
 
     except Exception as e:
         session.rollback()
-        logger.warning("Task failed, but it will retry. %s", e)
+        logger.debug("Task failed, but it will retry. %s", e)
         raise self.retry(exc=e, countdown=2)
 
     finally:
