@@ -176,12 +176,14 @@ class LdapAuth:
                 raise LoginFailed("User is not apart of an authorised group")
 
         self._makeOrCreateInternalUserBlocking(dbSession,
-                                               userName, userTitle, userUuid, email)
+                                               userName, userTitle, userUuid, email,
+                                               ldapSetting.ldapTitle)
 
         return groups
 
     def _makeOrCreateInternalUserBlocking(self, dbSession,
-                                          userName, userTitle, userUuid, email):
+                                          userName, userTitle, userUuid, email,
+                                          ldapName):
 
         internalUser = dbSession.query(InternalUserTuple) \
             .filter(InternalUserTuple.userName == userName) \
@@ -192,7 +194,7 @@ class LdapAuth:
 
         newInternalUser = InternalUserTuple(
             userName=userName,
-            userTitle=userTitle,
+            userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
             email=email
         )
