@@ -3,6 +3,7 @@ import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 
 import {Observable} from "rxjs/Observable";
+import {first} from "rxjs/operators";
 import {Subject} from "rxjs/Subject";
 import {
     addTupleType,
@@ -75,7 +76,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
 
         this.deviceEnrolmentService
             .deviceInfoObservable()
-            .first()
+            .pipe(first())
             .takeUntil(this.onDestroyEvent)
             .subscribe((deviceInfo: DeviceInfoTuple) => {
 
