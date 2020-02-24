@@ -15,7 +15,7 @@ from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTupl
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.tuples.InternalUserImportResultTuple import \
     InternalUserImportResultTuple
-from peek_core_user._private.worker.CeleryApp import celeryApp
+from peek_plugin_base.worker.CeleryApp import celeryApp
 from peek_core_user.tuples.import_.ImportInternalUserTuple import \
     ImportInternalUserTuple
 from vortex.Payload import Payload

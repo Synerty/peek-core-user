@@ -204,7 +204,3 @@ class PluginServerEntryHook(PluginServerEntryHookABC,
 
     ###### Implement PluginServerWorkerEntryHookABC
 
-    @property
-    def celeryApp(self) -> Celery:
-        from peek_core_user._private.worker.CeleryApp import celeryApp
-        return celeryApp

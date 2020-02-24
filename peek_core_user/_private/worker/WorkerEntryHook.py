@@ -33,7 +33,3 @@ class WorkerEntryHook(PluginWorkerEntryHookABC):
         return [UserImportInternalGroupTask.__name__,
                 UserImportInternalUserTask.__name__]
 
-    @property
-    def celeryApp(self):
-        from .CeleryApp import celeryApp
-        return celeryApp

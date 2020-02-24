@@ -9,7 +9,7 @@ from peek_plugin_base.worker import CeleryDbConn
 from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_core_user._private.tuples.InternalGroupImportResultTuple import \
     InternalGroupImportResultTuple
-from peek_core_user._private.worker.CeleryApp import celeryApp
+from peek_plugin_base.worker.CeleryApp import celeryApp
 from peek_core_user.tuples.import_.ImportInternalGroupTuple import \
     ImportInternalGroupTuple
 from vortex.Payload import Payload
