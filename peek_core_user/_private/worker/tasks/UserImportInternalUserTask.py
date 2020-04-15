@@ -143,9 +143,14 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
     updated = False
     for fieldName in copyFields:
         newVal = getattr(importUser, fieldName)
-        if getattr(existingUser, fieldName) != newVal:
-            setattr(existingUser, fieldName, newVal)
-            updated = True
+        existingVal = getattr(existingUser, fieldName)
+        if existingVal != newVal:
+            if existingVal and not newVal:
+                """ Don't wipe out values if they already exist """
+
+            else:
+                setattr(existingUser, fieldName, newVal)
+                updated = True
 
     # The password is an optional field
     if importUser.password is not None:
