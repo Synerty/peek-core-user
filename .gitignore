@@ -98,4 +98,4 @@ ENV/
 .idea/
 
 # Ignore sonarscanner
-.scannerwork/
+.scannerwork/.scannerwork/
