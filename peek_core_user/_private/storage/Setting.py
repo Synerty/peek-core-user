@@ -286,3 +286,7 @@ INTERNAL_AUTH_ENABLED_FOR_OFFICE = PropertyKey('Internal Auth Enabled For Office
 LDAP_AUTH_ENABLED = PropertyKey('LDAP Auth Enabled',
                                 False,
                                 propertyDict=globalProperties)
+
+LDAP_VERIFY_SSL = PropertyKey('LDAP Verify SSL Certificates',
+                              True,
+                              propertyDict=globalProperties)

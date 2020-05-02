@@ -4,6 +4,7 @@ from typing import List
 from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.LdapSetting import LdapSetting
+from peek_core_user._private.storage.Setting import globalSetting, LDAP_VERIFY_SSL
 from twisted.cred.error import LoginFailed
 
 __author__ = 'synerty'
@@ -63,6 +64,9 @@ class LdapAuth:
 
         ldapSettings: List[LdapSetting] = dbSession.query(LdapSetting) \
             .all()
+
+        if not globalSetting(dbSession, LDAP_VERIFY_SSL):
+            ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
 
         if not ldapSettings:
             raise Exception("No LDAP servers configured.")
@@ -223,7 +227,8 @@ class LdapAuth:
 
         except Exception as e:
             logger.error(
-                "Login failed for %s, failed to parse LDAP %s Folders setting",  propertyName,
+                "Login failed for %s, failed to parse LDAP %s Folders setting",
+                propertyName,
                 userName)
 
             logger.exception(e)
