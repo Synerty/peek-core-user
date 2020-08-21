@@ -1,12 +1,7 @@
-import {Component, OnInit} from "@angular/core";
+import { Component } from "@angular/core";
 
 @Component({
-    selector: 'user-admin',
-    templateUrl: 'user.component.html'
+    selector: "user-admin",
+    templateUrl: "user.component.html",
 })
-export class UserComponent  implements OnInit {
-
-    ngOnInit() {
-
-    }
-}
+export class UserComponent {}

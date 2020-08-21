@@ -1,10 +1,9 @@
 <div class="plugin-user">
-
     <h4>Logout of Peek</h4>
 
     <form>
         <p class="user-message">
-            <fa name="user"></fa>
+            <i nz-icon nzType="user" nzTheme="outline"></i>
             Logged in as {{loggedInUserText()}}
         </p>
     </form>
@@ -21,10 +20,12 @@
         Click 'Logout' a second time to ignore these warnings.
     </p>
 
-    <button class="form-control btn-success"
-            [disabled]="isAuthenticating"
-            (click)="doLogout()">
-        <fa name="sign-out"></fa>
+    <button
+        class="form-control btn-success"
+        [disabled]="isAuthenticating"
+        (click)="doLogout()"
+    >
+        <i nz-icon nzType="logout" nzTheme="outline"></i>
         Logout
     </button>
 </div>

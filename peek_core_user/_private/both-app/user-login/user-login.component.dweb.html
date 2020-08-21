@@ -1,22 +1,29 @@
 <div class="plugin-user">
-
     <h4>Login to Peek</h4>
 
     <form autocomplete="off" novalidate (keyup.enter)="doLogin()">
         <fieldset [disabled]="isAuthenticating">
             <div class="form-group">
-                <input class="form-control" type="text" id="username"
-                       name="password"
-                       placeholder="Username"
-                       [(ngModel)]="selectedUser.userName">
+                <input
+                    class="form-control"
+                    type="text"
+                    id="username"
+                    name="password"
+                    placeholder="Username"
+                    [(ngModel)]="selectedUser.userName"
+                />
             </div>
 
             <!-- Login with user input box -->
             <div class="form-group">
-                <input class="form-control" type="password" id="password"
-                       name="password"
-                       placeholder="password"
-                       [(ngModel)]="selectedUser.password">
+                <input
+                    class="form-control"
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="password"
+                    [(ngModel)]="selectedUser.password"
+                />
             </div>
         </fieldset>
     </form>
@@ -29,16 +36,20 @@
         {{warning}}
     </p>
 
-    <p class="form-control bg-info" *ngIf="warnings != null && warnings.length != 0">
+    <p
+        class="form-control bg-info"
+        *ngIf="warnings != null && warnings.length != 0"
+    >
         Click 'Login' a second time to ignore these warnings.
     </p>
 
-    <button class="form-control"
-            [class.btn-success]="isLoginEnabled()"
-            [disabled]="!isLoginEnabled()"
-            (click)="doLogin()">
-        <fa name="sign-in"></fa>
+    <button
+        class="form-control"
+        [class.btn-success]="isLoginEnabled()"
+        [disabled]="!isLoginEnabled()"
+        (click)="doLogin()"
+    >
+        <i nz-icon nzType="login" nzTheme="outline"></i>
         {{loginText()}}
     </button>
 </div>
-

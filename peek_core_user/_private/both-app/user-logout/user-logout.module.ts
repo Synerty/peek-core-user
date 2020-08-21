@@ -1,16 +1,13 @@
-import {CommonModule} from "@angular/common";
-import {NgModule} from "@angular/core";
-import {UserLogoutComponent} from "./user-logout.component";
-import {PeekModuleFactory} from "@synerty/peek-util-web";
-
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { UserLogoutComponent } from "./user-logout.component";
+import { FormsModule } from "@angular/forms";
+import { NzIconModule } from "ng-zorro-antd/icon";
+import { HttpClientModule } from "@angular/common/http";
 
 @NgModule({
-    imports: [
-        CommonModule,
-        ...PeekModuleFactory.FormsModules
-    ],
+    imports: [CommonModule, FormsModule, NzIconModule, HttpClientModule],
     exports: [UserLogoutComponent],
-    declarations: [UserLogoutComponent]
+    declarations: [UserLogoutComponent],
 })
-export class UserLogoutModule {
-}
+export class UserLogoutModule {}

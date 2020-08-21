@@ -1,14 +1,14 @@
-import {CommonModule} from "@angular/common";
-import {FormsModule} from "@angular/forms";
-import {NgModule} from "@angular/core";
-import {RouterModule, Routes} from "@angular/router";
-import {EditInternalUserComponent} from "./edit-internal-user-table/edit.component";
-import {EditInternalGroupComponent} from "./edit-internal-group-table/edit.component";
-import {EditSettingComponent} from "./edit-setting-table/edit.component";
-import {NzTabsModule} from 'ng-zorro-antd/tabs';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+import { EditInternalUserComponent } from "./edit-internal-user-table/edit.component";
+import { EditInternalGroupComponent } from "./edit-internal-group-table/edit.component";
+import { EditSettingComponent } from "./edit-setting-table/edit.component";
+import { NzTabsModule } from "ng-zorro-antd/tabs";
+import { NzButtonModule } from "ng-zorro-antd/button";
+import { NzIconModule } from "ng-zorro-antd/icon";
+import { HttpClientModule } from "@angular/common/http";
 import {
     TupleActionPushNameService,
     TupleActionPushService,
@@ -16,20 +16,19 @@ import {
     TupleDataObserverService,
     TupleDataOfflineObserverService,
     TupleOfflineStorageNameService,
-    TupleOfflineStorageService
+    TupleOfflineStorageService,
 } from "@synerty/vortexjs";
-// Import our components
-import {UserComponent} from "./user.component";
+import { UserComponent } from "./user.component";
 import {
     userActionProcessorName,
     userFilt,
     userObservableName,
-    userTupleOfflineServiceName
+    userTupleOfflineServiceName,
 } from "@peek/peek_core_user/_private";
-import {AngularFontAwesomeModule} from "angular-font-awesome";
-import {ManageLoggedInUserComponent} from "./logged-in-user/logged-in-user.component";
-import {NzSwitchModule} from 'ng-zorro-antd/switch';
-import {EditLdapSettingComponent} from "./edit-ldap-setting-table/edit.component";
+
+import { ManageLoggedInUserComponent } from "./logged-in-user/logged-in-user.component";
+import { NzSwitchModule } from "ng-zorro-antd/switch";
+import { EditLdapSettingComponent } from "./edit-ldap-setting-table/edit.component";
 
 export function tupleDataObservableNameServiceFactory() {
     return new TupleDataObservableNameService(userObservableName, userFilt);
@@ -43,40 +42,42 @@ export function tupleOfflineStorageNameServiceFactory() {
     return new TupleOfflineStorageNameService(userTupleOfflineServiceName);
 }
 
-// Define the routes for this Angular module
+// Define the routes for this Angular module.
 export const pluginRoutes: Routes = [
     {
-        path: '',
-        component: UserComponent
-    }
-
+        path: "",
+        component: UserComponent,
+    },
 ];
 
-// Define the module
 @NgModule({
     imports: [
         CommonModule,
         RouterModule.forChild(pluginRoutes),
         FormsModule,
-        AngularFontAwesomeModule,
         NzTabsModule,
         NzSwitchModule,
         NzButtonModule,
-        NzIconModule
+        NzIconModule,
+        HttpClientModule,
     ],
     exports: [],
     providers: [
-        TupleActionPushService, {
+        TupleActionPushService,
+        {
             provide: TupleActionPushNameService,
-            useFactory: tupleActionPushNameServiceFactory
+            useFactory: tupleActionPushNameServiceFactory,
         },
-        TupleOfflineStorageService, {
+        TupleOfflineStorageService,
+        {
             provide: TupleOfflineStorageNameService,
-            useFactory: tupleOfflineStorageNameServiceFactory
+            useFactory: tupleOfflineStorageNameServiceFactory,
         },
-        TupleDataObserverService, TupleDataOfflineObserverService, {
+        TupleDataObserverService,
+        TupleDataOfflineObserverService,
+        {
             provide: TupleDataObservableNameService,
-            useFactory: tupleDataObservableNameServiceFactory
+            useFactory: tupleDataObservableNameServiceFactory,
         },
     ],
     declarations: [
@@ -85,8 +86,7 @@ export const pluginRoutes: Routes = [
         EditInternalUserComponent,
         EditInternalGroupComponent,
         EditSettingComponent,
-        EditLdapSettingComponent]
+        EditLdapSettingComponent,
+    ],
 })
-export class UserModule {
-
-}
+export class UserModule {}

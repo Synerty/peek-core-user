@@ -3,20 +3,20 @@
         The following 'div' groups button to the left of the Nav Bar.
         Can contain one to many buttons
     -->
-    <div class="btn-group pull-left" role="group">
-
-    </div>
+    <div class="btn-group pull-left" role="group"></div>
 
     <!--
         The following 'div' groups button to the right of the Nav Bar.
         Can contain one to many buttons
     -->
     <div class="btn-group pull-right" role="group">
-        <button class="nav-section-btn"
-                role="group"
-                [disabled]="isAuthenticating"
-                (click)="doLogout()">
-            <fa name="sign-out"></fa>
+        <button
+            class="nav-section-btn"
+            role="group"
+            [disabled]="isAuthenticating"
+            (click)="doLogout()"
+        >
+            <i nz-icon nzType="logout" nzTheme="outline"></i>
             Logout
         </button>
     </div>
@@ -24,7 +24,6 @@
 
 <div class="peek-nav-bar-padding">
     <!-- This div provides padding for the screen under the Navigation Section -->
-
 </div>
 
 <div class="plugin-user">
@@ -41,7 +40,7 @@
     </div>
 
     <div class="user-message">
-        <fa name="sign-in"></fa>
+        <i nz-icon nzType="login" nzTheme="outline"></i>
         Logged in as {{loggedInUserText()}}
     </div>
 </div>
