@@ -8,8 +8,8 @@ import {
 import {UserTupleService} from "@peek/peek_core_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
 import {ComponentLifecycleEventEmitter, TupleSelector} from "@synerty/vortexjs";
-import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
-import {TitleService} from "@synerty/peek-util";
+import { BalloonMsgService } from "@synerty/peek-plugin-base-js"
+import { TitleService } from "@synerty/peek-plugin-base-js"
 import {UserLoginUiSettingTuple} from "../tuples/UserLoginUiSettingTuple";
 import {DeviceEnrolmentService} from "@peek/peek_core_device";
 
@@ -33,7 +33,7 @@ export class UserLoginComponent extends ComponentLifecycleEventEmitter {
 
     setting: UserLoginUiSettingTuple = new UserLoginUiSettingTuple();
 
-    constructor(private balloonMsg: Ng2BalloonMsgService,
+    constructor(private balloonMsg: BalloonMsgService,
                 private deviceEnrolmentService: DeviceEnrolmentService,
                 private tupleService: UserTupleService,
                 private userService: UserService,

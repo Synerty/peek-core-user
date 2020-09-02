@@ -11,7 +11,7 @@ import {
 import {userFilt} from "@peek/peek_core_user/_private";
 import {InternalUserTuple} from "../tuples/InternalUserTuple";
 import {InternalUserUpdatePasswordAction} from "../tuples/InternalUserUpdatePasswordAction";
-import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
+import { BalloonMsgService } from "@synerty/peek-plugin-base-js"
 import {GroupDetailTuple} from "@peek/peek_core_user/tuples/GroupDetailTuple";
 
 
@@ -35,7 +35,7 @@ export class EditInternalUserComponent extends ComponentLifecycleEventEmitter {
 
     likeTitle: string = '';
 
-    constructor(private balloonMsg: Ng2BalloonMsgService,
+    constructor(private balloonMsg: BalloonMsgService,
                 private actionProcessor: TupleActionPushService,
                 private tupleObserver: TupleDataObserverService,
                 private zone:NgZone,

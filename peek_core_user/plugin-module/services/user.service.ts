@@ -11,7 +11,7 @@ import {
     Tuple,
     TupleSelector
 } from "@synerty/vortexjs";
-import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
+import {BalloonMsgService, BalloonMsgLevel, BalloonMsgType} from "@synerty/peek-plugin-base-js";
 import {UserListItemTuple} from "../tuples/UserListItemTuple";
 import {DeviceEnrolmentService, DeviceInfoTuple} from "@peek/peek_core_device";
 import {userTuplePrefix} from "../_private/PluginNames";
@@ -54,7 +54,7 @@ export class UserService extends ComponentLifecycleEventEmitter {
     private _lastUserSubscriptions = [];
 
     constructor(private router: Router,
-                private balloonMsg: Ng2BalloonMsgService,
+                private balloonMsg: BalloonMsgService,
                 private deviceEnrolmentService: DeviceEnrolmentService,
                 private tupleService: UserTupleService) {
         super();
@@ -253,8 +253,8 @@ export class UserService extends ComponentLifecycleEventEmitter {
             .showMessage(
                 "This user has been logged out due to a login/logout on another device,"
                 + " or an administrative logout",
-                UsrMsgLevel.Error,
-                UsrMsgType.Confirm
+                BalloonMsgLevel.Error,
+                BalloonMsgType.Confirm
             )
             .then(() => this.router.navigate(['peek_core_user', 'login']));
 

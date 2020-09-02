@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {Ng2BalloonMsgService, UsrMsgLevel, UsrMsgType} from "@synerty/ng2-balloon-msg";
+import {BalloonMsgService, BalloonMsgLevel, BalloonMsgType} from "@synerty/peek-plugin-base-js";
 import {
     ComponentLifecycleEventEmitter,
     TupleActionPushService,
@@ -17,7 +17,7 @@ export class ManageLoggedInUserComponent extends ComponentLifecycleEventEmitter 
 
     items: LoggedInUserStatusTuple[] = [];
 
-    constructor(private balloonMsg: Ng2BalloonMsgService,
+    constructor(private balloonMsg: BalloonMsgService,
                 private actionService: TupleActionPushService,
                 private tupleDataObserver: TupleDataObserverService) {
         super();
@@ -43,8 +43,8 @@ export class ManageLoggedInUserComponent extends ComponentLifecycleEventEmitter 
 
         this.balloonMsg.showMessage(
             "Are you sure you'd like to logout this user?",
-            UsrMsgLevel.Warning,
-            UsrMsgType.ConfirmCancel,
+            BalloonMsgLevel.Warning,
+            BalloonMsgType.ConfirmCancel,
             {confirmText: "Yes", cancelText: 'No'}
         )
             .then(() => {

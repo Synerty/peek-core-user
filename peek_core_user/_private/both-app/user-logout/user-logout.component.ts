@@ -9,8 +9,8 @@ import {
 } from "@peek/peek_core_user/_private/user-tuple.service";
 import {Component} from "@angular/core";
 import {ComponentLifecycleEventEmitter, TupleActionPushService} from "@synerty/vortexjs";
-import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
-import {TitleService} from "@synerty/peek-util";
+import { BalloonMsgService } from "@synerty/peek-plugin-base-js"
+import { TitleService } from "@synerty/peek-plugin-base-js"
 
 
 @Component({
@@ -28,7 +28,7 @@ export class UserLogoutComponent extends ComponentLifecycleEventEmitter {
     warnings: string[] = [];
     warningKeys: string[] = [];
 
-    constructor(private balloonMsg: Ng2BalloonMsgService,
+    constructor(private balloonMsg: BalloonMsgService,
                 private tupleService: UserTupleService,
                 private userService: UserService,
                 private router: Router,

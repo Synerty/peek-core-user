@@ -7,7 +7,7 @@ import {
 } from "@synerty/vortexjs";
 import {userFilt} from "@peek/peek_core_user/_private";
 import {InternalGroupTuple} from "../tuples/InternalGroupTuple";
-import {Ng2BalloonMsgService} from "@synerty/ng2-balloon-msg";
+import { BalloonMsgService } from "@synerty/peek-plugin-base-js"
 
 
 @Component({
@@ -25,7 +25,7 @@ export class EditInternalGroupComponent extends ComponentLifecycleEventEmitter {
 
     loader: TupleLoader;
 
-    constructor( private balloonMsg:Ng2BalloonMsgService,
+    constructor( private balloonMsg:BalloonMsgService,
         vortexService: VortexService) {
         super();
 
