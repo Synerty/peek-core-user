@@ -1,5 +1,5 @@
 import {addTupleType, TupleActionABC} from "@synerty/vortexjs";
-import {userTuplePrefix} from "@peek/peek_core_user/_private/PluginNames";
+import {userTuplePrefix} from "@_peek/peek_core_user/_private/PluginNames";
 
 @addTupleType
 export class InternalUserUpdatePasswordAction extends TupleActionABC {

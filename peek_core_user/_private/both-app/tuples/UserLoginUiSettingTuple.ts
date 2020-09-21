@@ -1,5 +1,5 @@
 import {Tuple} from "@synerty/vortexjs";
-import {userTuplePrefix} from "@peek/peek_core_user/_private/PluginNames";
+import {userTuplePrefix} from "@_peek/peek_core_user/_private/PluginNames";
 
 export class UserLoginUiSettingTuple extends Tuple {
     public static readonly tupleName = userTuplePrefix + "UserLoginUiSettingTuple";

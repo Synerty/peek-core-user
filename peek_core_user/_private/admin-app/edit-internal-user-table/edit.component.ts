@@ -7,11 +7,11 @@ import {
     TupleSelector,
     VortexService
 } from "@synerty/vortexjs"
-import { userFilt } from "@peek/peek_core_user/_private"
+import { userFilt } from "@_peek/peek_core_user/_private"
 import { InternalUserTuple } from "../tuples/InternalUserTuple"
 import { InternalUserUpdatePasswordAction } from "../tuples/InternalUserUpdatePasswordAction"
 import { BalloonMsgService, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
-import { GroupDetailTuple } from "@peek/peek_core_user/tuples/GroupDetailTuple"
+import { GroupDetailTuple } from "@_peek/peek_core_user/tuples/GroupDetailTuple"
 
 @Component({
     selector: "pl-user-edit-internal-user",

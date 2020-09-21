@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {CanActivate, Router} from "@angular/router";
 import {UserService} from "./user.service";
-import {DeviceEnrolmentService, DeviceInfoTuple} from "@peek/peek_core_device";
+import {DeviceEnrolmentService, DeviceInfoTuple} from "@_peek/peek_core_device";
 
 @Injectable()
 export class LoggedInGuard implements CanActivate {

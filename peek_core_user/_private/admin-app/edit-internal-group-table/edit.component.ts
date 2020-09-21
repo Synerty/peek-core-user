@@ -1,6 +1,6 @@
 import { Component } from "@angular/core"
 import { extend, TupleLoader, VortexService } from "@synerty/vortexjs"
-import { userFilt } from "@peek/peek_core_user/_private"
+import { userFilt } from "@_peek/peek_core_user/_private"
 import { InternalGroupTuple } from "../tuples/InternalGroupTuple"
 import { BalloonMsgService, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
 

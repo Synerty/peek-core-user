@@ -1,11 +1,11 @@
 import { Router } from "@angular/router"
-import { UserListItemTuple, UserLoginAction, UserLoginResponseTuple, UserService } from "@peek/peek_core_user"
-import { UserTupleService } from "@peek/peek_core_user/_private/user-tuple.service"
+import { UserListItemTuple, UserLoginAction, UserLoginResponseTuple, UserService } from "@_peek/peek_core_user"
+import { UserTupleService } from "@_peek/peek_core_user/_private/user-tuple.service"
 import { Component } from "@angular/core"
 import { TupleSelector } from "@synerty/vortexjs"
 import { BalloonMsgService, NgLifeCycleEvents, TitleService } from "@synerty/peek-plugin-base-js"
 import { UserLoginUiSettingTuple } from "../tuples/UserLoginUiSettingTuple"
-import { DeviceEnrolmentService } from "@peek/peek_core_device"
+import { DeviceEnrolmentService } from "@_peek/peek_core_device"
 
 @Component({
     selector: "./peek-core-user-login",
