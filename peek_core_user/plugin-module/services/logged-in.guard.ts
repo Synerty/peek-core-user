@@ -1,34 +1,31 @@
-import {Injectable} from "@angular/core";
-import {CanActivate, Router} from "@angular/router";
-import {UserService} from "./user.service";
-import {DeviceEnrolmentService, DeviceInfoTuple} from "@_peek/peek_core_device";
+import { Injectable } from "@angular/core"
+import { CanActivate, Router } from "@angular/router"
+import { UserService } from "./user.service"
+import { first } from "rxjs/operators"
 
 @Injectable()
 export class LoggedInGuard implements CanActivate {
-    constructor(private user: UserService,
-                private router:Router,
-                private deviceEnrolmentService: DeviceEnrolmentService) {
-    }
-
+    constructor(
+        private user: UserService,
+        private router: Router
+    ) { }
+    
     canActivate() {
         if (!this.user.hasLoaded()) {
             return new Promise<boolean>((resolve, reject) => {
                 this.user.loadingFinishedObservable()
-                    .first()
+                    .pipe(first())
                     .subscribe(() => {
-                        resolve(this.canActivate());
-                    });
-            });
+                        resolve(this.canActivate())
+                    })
+            })
         }
-
+        
         if (this.user.isLoggedIn())
-            return true;
-
-        if (this.deviceEnrolmentService.isSetup()) {
-            console.log("logged-in.guard");
-            this.router.navigate(['peek_core_user', 'login']);
-        }
-        return false;
+            return true
+        
+        this.router.navigate(["peek_core_user", "login"])
+        return false
     }
 }
 
