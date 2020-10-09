@@ -1,8 +1,8 @@
 import { Component } from "@angular/core"
 import { BalloonMsgLevel, BalloonMsgService, BalloonMsgType, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
 import { TupleActionPushService, TupleDataObserverService, TupleSelector } from "@synerty/vortexjs"
-import { UserLogoutAction, UserLogoutResponseTuple } from "@_peek/peek_core_user/tuples"
-import { LoggedInUserStatusTuple } from "@_peek/peek_core_user/_private"
+import { UserLogoutAction, UserLogoutResponseTuple } from "@peek/peek_core_user/tuples"
+import { LoggedInUserStatusTuple } from "@peek/peek_core_user/_private"
 
 @Component({
     selector: "pl-user-manage-logged-in-user",

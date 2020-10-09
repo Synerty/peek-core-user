@@ -1,5 +1,5 @@
 import {addTupleType, Tuple} from "@synerty/vortexjs";
-import {userTuplePrefix} from "@_peek/peek_core_user/_private/PluginNames";
+import {userTuplePrefix} from "@peek/peek_core_user/_private/PluginNames";
 
 @addTupleType
 export class InternalUserTuple extends Tuple {

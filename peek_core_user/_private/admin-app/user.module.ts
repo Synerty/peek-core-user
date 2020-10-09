@@ -24,7 +24,7 @@ import {
     userFilt,
     userObservableName,
     userTupleOfflineServiceName,
-} from "@_peek/peek_core_user/_private";
+} from "@peek/peek_core_user/_private";
 
 import { ManageLoggedInUserComponent } from "./logged-in-user/logged-in-user.component";
 import { NzSwitchModule } from "ng-zorro-antd/switch";

@@ -1,6 +1,6 @@
 import {UserLoginComponent} from "./user-login/user-login.component";
-import {LoggedInGuard} from "@_peek/peek_core_user";
-import {LoggedOutGuard} from "@_peek/peek_core_user";
+import {LoggedInGuard} from "@peek/peek_core_user";
+import {LoggedOutGuard} from "@peek/peek_core_user";
 import {UserLogoutComponent} from "./user-logout/user-logout.component";
 
 export const pluginRoutes = [
