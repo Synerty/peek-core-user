@@ -3,7 +3,7 @@ import { UserListItemTuple, UserLoginAction, UserLoginResponseTuple, UserService
 import { UserTupleService } from "@peek/peek_core_user/_private/user-tuple.service"
 import { Component } from "@angular/core"
 import { TupleSelector } from "@synerty/vortexjs"
-import { BalloonMsgService, NgLifeCycleEvents, TitleService } from "@synerty/peek-plugin-base-js"
+import { BalloonMsgService, NgLifeCycleEvents, HeaderService } from "@synerty/peek-plugin-base-js"
 import { UserLoginUiSettingTuple } from "../tuples/UserLoginUiSettingTuple"
 import { DeviceEnrolmentService } from "@peek/peek_core_device"
 
@@ -29,11 +29,11 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         private tupleService: UserTupleService,
         private userService: UserService,
         private router: Router,
-        titleService: TitleService
+        headerService: HeaderService
     ) {
         super()
         
-        titleService.setTitle("User Login")
+        headerService.setTitle("User Login")
         
         let selectAUser = new UserListItemTuple()
         selectAUser.displayName = "Select a User"
