@@ -10,8 +10,7 @@ import { DeviceEnrolmentService } from "@peek/peek_core_device"
 @Component({
     selector: "./peek-core-user-login",
     templateUrl: "./user-login.component.dweb.html",
-    styleUrls: ["../scss/plugin-user.dweb.scss"],
-    moduleId: module.id
+    styleUrls: ["../scss/plugin-user.dweb.scss"]
 })
 export class UserLoginComponent extends NgLifeCycleEvents {
     users: Array<UserListItemTuple> = []

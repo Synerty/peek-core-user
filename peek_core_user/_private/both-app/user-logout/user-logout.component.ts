@@ -7,8 +7,7 @@ import { BalloonMsgService, NgLifeCycleEvents, HeaderService } from "@synerty/pe
 @Component({
     selector: "./peek-core-user-logout",
     templateUrl: "./user-logout.component.dweb.html",
-    styleUrls: ["../scss/plugin-user.dweb.scss"],
-    moduleId: module.id
+    styleUrls: ["../scss/plugin-user.dweb.scss"]
 })
 export class UserLogoutComponent extends NgLifeCycleEvents {
     

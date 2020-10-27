@@ -2,7 +2,7 @@
 import { Injectable } from "@angular/core"
 import { Router } from "@angular/router"
 import { BalloonMsgLevel, BalloonMsgService, BalloonMsgType, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
-import { Observable } from "rxjs/Observable"
+import { Observable } from "rxjs"
 import { first } from "rxjs/operators"
 import { Subject } from "rxjs"
 import { addTupleType, Tuple, TupleSelector } from "@synerty/vortexjs"
