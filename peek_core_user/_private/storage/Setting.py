@@ -256,10 +256,10 @@ def globalSetting(ormSession, key=None, value=None):
     return _getSetting(ormSession, "Global", globalProperties, key=key, value=value)
 
 
-MOBILE_LOGIN_GROUP = PropertyKey('Mobile Login Group', 'peek-mobile-login',
+MOBILE_LOGIN_GROUP = PropertyKey('Mobile Login Group', 'peek-field-app-login',
                                  propertyDict=globalProperties)
 
-ADMIN_LOGIN_GROUP = PropertyKey('Admin Login Group', 'peek-admin-login',
+ADMIN_LOGIN_GROUP = PropertyKey('Admin Login Group', 'peek-admin-app-login',
                                 propertyDict=globalProperties)
 
 OFFICE_LOGIN_GROUP = PropertyKey('Office Login Group', 'peek-office-login',

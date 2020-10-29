@@ -64,7 +64,7 @@ class UserApiABC(metaclass=ABCMeta):
     def adminAuth(self) -> UserAdminAuthApiABC:
         """ Admin Auth API
 
-        Returns the API class admin authentication for the peek-server
+        Returns the API class admin authentication for the peek-logic-service
 
         :return A reference to the UserAdminAuthApiABC class
         """
