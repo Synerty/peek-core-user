@@ -9,11 +9,10 @@
         "website": "www.synerty.com"
     },
     "requiresServices": [
-        "client",
         "server",
         "storage",
-        "mobile",
-        "desktop",
+        "field",
+        "office",
         "admin",
         "agent",
         "worker",
@@ -29,7 +28,7 @@
         "docDir": "doc-admin",
         "docRst": "index.rst"
     },
-    "mobile": {
+    "field": {
         "showHomeLink": false,
         "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
@@ -56,7 +55,7 @@
             }
         ]
     },
-    "desktop": {
+    "office": {
         "showHomeLink": false,
         "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
@@ -89,8 +88,7 @@
         "appDir": "_private/admin-app",
         "appModule": "user.module#UserModule"
     },
-    "client": {
-    },
+
     "server": {
     },
     "agent": {
