@@ -2,7 +2,7 @@
     "plugin": {
         "title": "Users",
         "packageName": "peek_core_user",
-    "version":"0.0.0",
+        "version":"0.0.0",
         "buildNumber": "#PLUGIN_BUILD#",
         "buildDate": "#BUILD_DATE#",
         "creator": "Synerty Pty Ltd",
@@ -29,7 +29,7 @@
         "docRst": "index.rst"
     },
     "field": {
-        "showHomeLink": false,
+        "showHomeLink": true,
         "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
         "assetDir": "_private/both-assets",
@@ -88,7 +88,6 @@
         "appDir": "_private/admin-app",
         "appModule": "user.module#UserModule"
     },
-
     "server": {
     },
     "agent": {
