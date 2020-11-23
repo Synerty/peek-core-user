@@ -8,11 +8,15 @@ from peek_plugin_base.worker.PluginWorkerEntryHookABC import PluginWorkerEntryHo
 __version__ = '0.0.0'
 
 
-def peekClientEntryHook() -> Type[PluginClientEntryHookABC]:
+def peekFieldEntryHook() -> Type[PluginClientEntryHookABC]:
     from peek_core_user._private.client.PluginClientEntryHook import \
         PluginClientEntryHook
     return PluginClientEntryHook
 
+def peekOfficeEntryHook() -> Type[PluginClientEntryHookABC]:
+    from peek_core_user._private.client.PluginClientEntryHook import \
+        PluginClientEntryHook
+    return PluginClientEntryHook
 
 def peekAgentEntryHook() -> Type[PluginAgentEntryHookABC]:
     from ._private.agent.AgentEntryHook import AgentEntryHook
