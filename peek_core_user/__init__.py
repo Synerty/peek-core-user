@@ -2,7 +2,7 @@ from typing import Type
 
 from peek_plugin_base.agent.PluginAgentEntryHookABC import PluginAgentEntryHookABC
 from peek_plugin_base.client.PluginClientEntryHookABC import PluginClientEntryHookABC
-from peek_plugin_base.server.PluginServerEntryHookABC import PluginServerEntryHookABC
+from peek_plugin_base.server.PluginLogicEntryHookABC import PluginLogicEntryHookABC
 from peek_plugin_base.worker.PluginWorkerEntryHookABC import PluginWorkerEntryHookABC
 
 __version__ = '0.0.0'
@@ -19,10 +19,10 @@ def peekAgentEntryHook() -> Type[PluginAgentEntryHookABC]:
     return AgentEntryHook
 
 
-def peekServerEntryHook() -> Type[PluginServerEntryHookABC]:
-    from peek_core_user._private.server.PluginServerEntryHook import \
-        PluginServerEntryHook
-    return PluginServerEntryHook
+def peekLogicEntryHook() -> Type[PluginLogicEntryHookABC]:
+    from peek_core_user._private.server.PluginLogicEntryHook import \
+        PluginLogicEntryHook
+    return PluginLogicEntryHook
 
 
 def peekWorkerEntryHook() -> Type[PluginWorkerEntryHookABC]:

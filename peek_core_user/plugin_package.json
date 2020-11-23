@@ -9,7 +9,7 @@
         "website": "www.synerty.com"
     },
     "requiresServices": [
-        "server",
+        "logic",
         "storage",
         "field",
         "office",
@@ -88,7 +88,7 @@
         "appDir": "_private/admin-app",
         "appModule": "user.module#UserModule"
     },
-    "server": {
+    "logic": {
     },
     "agent": {
     },

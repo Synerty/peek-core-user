@@ -8,7 +8,7 @@ from peek_core_user._private.server.controller.AdminAuthController import \
 from sqlalchemy import MetaData
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_plugin_base.server.PluginServerEntryHookABC import PluginServerEntryHookABC
+from peek_plugin_base.server.PluginLogicEntryHookABC import PluginLogicEntryHookABC
 from peek_plugin_base.server.PluginServerStorageEntryHookABC import \
     PluginServerStorageEntryHookABC
 from peek_plugin_base.server.PluginServerWorkerEntryHookABC import \
@@ -34,11 +34,11 @@ from peek_plugin_base.storage.DbConnection import DbConnection
 logger = logging.getLogger(__name__)
 
 
-class PluginServerEntryHook(PluginServerEntryHookABC,
+class PluginLogicEntryHook(PluginLogicEntryHookABC,
                             PluginServerStorageEntryHookABC,
                             PluginServerWorkerEntryHookABC):
     def __init__(self, *args, **kwargs):
-        PluginServerEntryHookABC.__init__(self, *args, **kwargs)
+        PluginLogicEntryHookABC.__init__(self, *args, **kwargs)
         self._userApi = None
 
         self._handlers = []
