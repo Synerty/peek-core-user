@@ -8,7 +8,7 @@ from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 from peek_core_user._private.server.tuple_providers.UserLoginUiSettingTupleProvider import \
     UserLoginUiSettingTupleProvider
 from peek_core_user._private.tuples.UserLoginUiSettingTuple import UserLoginUiSettingTuple
-from peek_plugin_base.PeekVortexUtil import peekClientName
+from peek_plugin_base.PeekVortexUtil import peekBackendNames
 from peek_core_user._private.PluginNames import userPluginFilt, \
     userPluginObservableName
 from peek_core_user._private.server.tuple_providers.GroupDetailTupleProvider import \
@@ -33,7 +33,7 @@ class Dummy(TuplesProviderABC):
 def makeTupleDataObservableHandler(dbSessionCreator, ourApi):
     observable = TupleDataObservableHandler(observableName=userPluginObservableName,
                                             additionalFilt=userPluginFilt,
-                                            acceptOnlyFromVortex=peekClientName)
+                                            acceptOnlyFromVortex=peekBackendNames)
 
     observable.addTupleProvider(GroupDetailTuple.tupleName(),
                                 GroupDetailTupleProvider(ourApi))
