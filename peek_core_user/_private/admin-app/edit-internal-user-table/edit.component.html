@@ -2,13 +2,13 @@
     <div class="panel-heading">Edit Internal Users
         <div class="btn-toolbar pull-right">
             <div class="btn-group">
-                <div class="btn btn-default btn-sm" (click)='save()'>
+                <div (click)="save()" class="btn btn-default btn-sm">
                     Save
                 </div>
-                <div class="btn btn-default btn-sm" (click)='load()'>
+                <div (click)="load()" class="btn btn-default btn-sm">
                     Reset
                 </div>
-                <div class="btn btn-default btn-sm" (click)='addRow()'>
+                <div (click)="addRow()" class="btn btn-default btn-sm">
                     Add
                 </div>
             </div>
@@ -19,22 +19,25 @@
             <form class="form-inline">
                 <div class="form-group">
                     <label for="likeTitle">Title Search : </label>
-                    <input type="text" class="form-control" [(ngModel)]="likeTitle"
-                           [ngModelOptions]="{standalone: true}"
-                           id="likeTitle" (change)="load()">
+                    <input
+                        (change)="load()" [(ngModel)]="likeTitle"
+                        [ngModelOptions]="{standalone: true}"
+                        class="form-control"
+                        id="likeTitle" type="text"
+                    >
                 </div>
             </form>
         </div>
-
+        
         <p *ngIf="needFilter()">
             Enter a filter with a length of 3 or more.
         </p>
-
+        
         <p *ngIf="!needFilter() && !haveItems()">
             No users found!
         </p>
-
-        <table class="table" *ngIf="haveItems()">
+        
+        <table *ngIf="haveItems()" class="table">
             <thead>
             <tr>
                 <th>Name</th>
@@ -47,75 +50,109 @@
                 <th></th>
             </tr>
             </thead>
-
+            
             <tbody *ngFor="let item of items">
             <tr>
                 <td>
-                    <input [(ngModel)]="item.userName"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.userName"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
-                    <input [(ngModel)]="item.userTitle"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.userTitle"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
-                    <input [(ngModel)]="item.userUuid"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.userUuid"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
-                    <input [(ngModel)]="item.mobile"
-                           class="form-control input-sm"
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.mobile"
+                        class="form-control input-sm"
+                        type="text"
+                    />
                 </td>
                 <td>
-                    <input [(ngModel)]="item.email"
-                           class="form-control input-sm"
-                           type="email"/>
+                    <input
+                        [(ngModel)]="item.email"
+                        class="form-control input-sm"
+                        type="email"
+                    />
                 </td>
                 <td>
-                    <div class="btn btn-default btn-sm" (click)='setPassword(item)'>
-                        <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                    <div
+                        (click)="setPassword(item)"
+                        class="btn btn-default btn-sm"
+                    >
+                        <span
+                            aria-hidden="true" class="glyphicon glyphicon-lock"
+                        ></span>
                     </div>
                 </td>
                 <td>
-                    <div class="btn btn-default btn-sm" (click)='removeRow(item)'>
-                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    <div
+                        (click)="removeRow(item)" class="btn btn-default btn-sm"
+                    >
+                        <span
+                            aria-hidden="true" class="glyphicon glyphicon-minus"
+                        ></span>
                     </div>
                 </td>
                 <td>
-                    <div class="btn btn-default btn-sm" (click)='addGroupRow(item)'>
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    <div
+                        (click)="addGroupRow(item)"
+                        class="btn btn-default btn-sm"
+                    >
+                        <span
+                            aria-hidden="true" class="glyphicon glyphicon-plus"
+                        ></span>
                     </div>
                 </td>
             </tr>
-            <tr  *ngFor="let groupId of item.groupIds; let i=index">
-
+            <tr *ngFor="let groupId of item.groupIds; let i=index">
+                
                 <td></td>
                 <td></td>
                 <td></td>
                 <th>Group</th>
                 <td *ngIf="groupId == null">
-
-                    <select (change)="updateGroup(item, i, $event.target.value)"
-                           class="form-control input-sm">
-                        <option value=""> -- Select -- </option>
-                        <option *ngFor="let group of groups"
-                                [value]="group.id">{{group.groupTitle}}</option>
+                    
+                    <select
+                        (change)="updateGroup(item, i, $event.target.value)"
+                        class="form-control input-sm"
+                    >
+                        <option value=""> -- Select --</option>
+                        <option
+                            *ngFor="let group of groups"
+                            [value]="group.id"
+                        >{{group.groupTitle}}
+                        </option>
                     </select>
                 </td>
-
+                
                 <td *ngIf="groupId != null">
                     {{groupTitleForId(groupId)}}
                 </td>
                 <td>
-                    <div class="btn btn-default btn-sm" (click)='removeGroupRow(item, i)'>
-                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    <div
+                        (click)="removeGroupRow(item, i)"
+                        class="btn btn-default btn-sm"
+                    >
+                        <span
+                            aria-hidden="true" class="glyphicon glyphicon-minus"
+                        ></span>
                     </div>
                 </td>
                 <td></td>

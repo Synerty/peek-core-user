@@ -16,14 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class UserLoggedInTupleProvider(TuplesProviderABC):
-    def __init__(self, dbSessionCreator,
-                 ourApi: UserApi):
+    def __init__(self, dbSessionCreator, ourApi: UserApi):
         self._dbSessionCreator = dbSessionCreator
         self._ourApi = ourApi
 
         from peek_core_user.server.UserApiABC import UserApiABC
-        assert isinstance(self._ourApi, UserApiABC), (
-            "We didn't get a UserApiABC")
+
+        assert isinstance(self._ourApi, UserApiABC), "We didn't get a UserApiABC"
 
     @deferToThreadWrapWithLogger(logger)
     def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
@@ -31,16 +30,22 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
 
         session = self._dbSessionCreator()
         try:
-            userLoggedIn = session.query(UserLoggedIn) \
-                .filter(UserLoggedIn.deviceToken == deviceToken) \
+            userLoggedIn = (
+                session.query(UserLoggedIn)
+                .filter(UserLoggedIn.deviceToken == deviceToken)
                 .one()
+            )
 
-            internalUserTuple = session.query(InternalUserTuple) \
-                .filter(InternalUserTuple.userName == userLoggedIn.userName) \
+            internalUserTuple = (
+                session.query(InternalUserTuple)
+                .filter(InternalUserTuple.userName == userLoggedIn.userName)
                 .one()
+            )
 
-            userDetails = UserListItemTuple(userId=internalUserTuple.userName,
-                                            displayName=internalUserTuple.userTitle)
+            userDetails = UserListItemTuple(
+                userId=internalUserTuple.userName,
+                displayName=internalUserTuple.userTitle,
+            )
 
         except NoResultFound:
             userDetails = None
@@ -48,8 +53,7 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
         finally:
             session.close()
 
-        tuples = [UserLoggedInTuple(deviceToken=deviceToken,
-                                    userDetails=userDetails)]
+        tuples = [UserLoggedInTuple(deviceToken=deviceToken, userDetails=userDetails)]
 
         payloadEnvelope = Payload(filt=filt, tuples=tuples).makePayloadEnvelope()
         vortexMsg = payloadEnvelope.toVortexMsg()

@@ -9,15 +9,18 @@ from sqlalchemy.orm import subqueryload
 from txcelery.defer import DeferrableTask
 
 from peek_plugin_base.worker import CeleryDbConn
-from peek_core_user._private.server.controller.PasswordUpdateController import \
-    PasswordUpdateController
+from peek_core_user._private.server.controller.PasswordUpdateController import (
+    PasswordUpdateController,
+)
 from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
-from peek_core_user._private.tuples.InternalUserImportResultTuple import \
-    InternalUserImportResultTuple
+from peek_core_user._private.tuples.InternalUserImportResultTuple import (
+    InternalUserImportResultTuple,
+)
 from peek_plugin_base.worker.CeleryApp import celeryApp
-from peek_core_user.tuples.import_.ImportInternalUserTuple import \
-    ImportInternalUserTuple
+from peek_core_user.tuples.import_.ImportInternalUserTuple import (
+    ImportInternalUserTuple,
+)
 from vortex.Payload import Payload
 
 logger = logging.getLogger(__name__)
@@ -25,9 +28,10 @@ logger = logging.getLogger(__name__)
 
 @DeferrableTask
 @celeryApp.task(bind=True)
-def importInternalUsers(self, importHash: str,
-                        usersVortexMsg: bytes) -> InternalUserImportResultTuple:
-    """ Import Internal Users
+def importInternalUsers(
+    self, importHash: str, usersVortexMsg: bytes
+) -> InternalUserImportResultTuple:
+    """Import Internal Users
 
     :param self: A celery reference to this task
     :param importHash: An unique string of this group of items being imported.
@@ -36,9 +40,7 @@ def importInternalUsers(self, importHash: str,
     """
 
     importUsers: List[ImportInternalUserTuple] = (
-        Payload()
-            .fromEncodedPayload(usersVortexMsg)
-            .tuples
+        Payload().fromEncodedPayload(usersVortexMsg).tuples
     )
 
     startTime = datetime.now(pytz.utc)
@@ -59,19 +61,15 @@ def importInternalUsers(self, importHash: str,
 
         else:
             existingUsersByName = {
-                g.userName: g for g in
-                session
-                    .query(InternalUserTuple)
-                    .filter(InternalUserTuple.userName.in_(allNames))
-                    .filter(InternalUserTuple.importHash == importHash)
-                    .options(subqueryload(InternalUserTuple.groups))
-                    .all()
+                g.userName: g
+                for g in session.query(InternalUserTuple)
+                .filter(InternalUserTuple.userName.in_(allNames))
+                .filter(InternalUserTuple.importHash == importHash)
+                .options(subqueryload(InternalUserTuple.groups))
+                .all()
             }
 
-        groupsByName = {
-            g.groupName: g for g in
-            session.query(InternalGroupTuple).all()
-        }
+        groupsByName = {g.groupName: g for g in session.query(InternalGroupTuple).all()}
 
         for importUser in importUsers:
             try:
@@ -94,16 +92,21 @@ def importInternalUsers(self, importHash: str,
 
         session.commit()
 
-        logger.info("Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
-                    len(inserts), len(updates), len(deleteIds), len(same),
-                    (datetime.now(pytz.utc) - startTime))
+        logger.info(
+            "Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
+            len(inserts),
+            len(updates),
+            len(deleteIds),
+            len(same),
+            (datetime.now(pytz.utc) - startTime),
+        )
 
         return InternalUserImportResultTuple(
             addedIds=[o.id for o in inserts],
             updatedIds=[o.id for o in updates],
             deletedIds=deleteIds,
             sameCount=len(same),
-            errors=errors
+            errors=errors,
         )
 
     except Exception as e:
@@ -116,7 +119,6 @@ def importInternalUsers(self, importHash: str,
 
 
 def _insertUser(session, groupsByName, importUser, importHash, inserts):
-
     newUser = InternalUserTuple()
     newUser.importHash = importHash
 
@@ -134,11 +136,11 @@ def _insertUser(session, groupsByName, importUser, importHash, inserts):
 
 
 def _updateUser(existingUser, groupsByName, importUser, same, updates):
-
     excludeFieldNames = ("groupKeys", "password")
 
-    copyFields = filter(lambda f: f not in excludeFieldNames,
-                        ImportInternalUserTuple.tupleFieldNames())
+    copyFields = filter(
+        lambda f: f not in excludeFieldNames, ImportInternalUserTuple.tupleFieldNames()
+    )
 
     updated = False
     for fieldName in copyFields:
@@ -170,7 +172,6 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
             existingUser.groups.remove(groupsByName[removeGroup])
 
         updated = updated or bool(addGroups) or bool(removeGroups)
-
 
     if updated:
         updates.append(existingUser)

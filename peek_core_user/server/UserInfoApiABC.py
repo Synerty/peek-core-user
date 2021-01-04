@@ -9,7 +9,7 @@ from peek_core_user.tuples.UserDetailTuple import UserDetailTuple
 class UserInfoApiABC(metaclass=ABCMeta):
     @abstractmethod
     def user(self, userName: str) -> Deferred:
-        """ Users
+        """Users
 
         :param userName: The userName of the user to retrieve
 
@@ -17,8 +17,8 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def userBlocking(self, userName:str, ormSession=None) -> Optional[UserDetailTuple]:
-        """ User Details for User ID
+    def userBlocking(self, userName: str, ormSession=None) -> Optional[UserDetailTuple]:
+        """User Details for User ID
 
         Return an instance of c{UserDetailTuple} for the userName provided.
         :param userName: The username to retrive the details for
@@ -29,9 +29,10 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def users(self, likeTitle: Optional[str] = None,
-              groupNames: Optional[List[str]] = None) -> Deferred:
-        """ Users
+    def users(
+        self, likeTitle: Optional[str] = None, groupNames: Optional[List[str]] = None
+    ) -> Deferred:
+        """Users
 
         :param likeTitle: An optional string to look for in the title of the users
         :param groupNames: An optional list of group names to include users for.
@@ -41,7 +42,7 @@ class UserInfoApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def groups(self, likeTitle: Optional[str] = None) -> Deferred:
-        """ Groups
+        """Groups
 
         :param likeTitle: An optional string to look for in the title of the groups
 
@@ -49,7 +50,7 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def peekDeviceTokensForUser(self, userName:str) -> Deferred:  # List[str]:
+    def peekDeviceTokensForUser(self, userName: str) -> Deferred:  # List[str]:
         """Peek Device Tokens for Logged in User
 
         Return all the peek device tokens for devices this user is logged in to.
@@ -57,9 +58,10 @@ class UserInfoApiABC(metaclass=ABCMeta):
         :return A list of Peek Device Tokens
         """
 
-
     @abstractmethod
-    def peekUserForDeviceToken(self, deviceToken) -> Deferred:  #Optional[UserDetailTuple]:
+    def peekUserForDeviceToken(
+        self, deviceToken
+    ) -> Deferred:  # Optional[UserDetailTuple]:
         """Peek User for Device Token
 
         Return a user detail tuple for a user logged into a device with deviceToken

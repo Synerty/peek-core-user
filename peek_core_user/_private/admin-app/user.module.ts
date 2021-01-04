@@ -1,14 +1,14 @@
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
-import { EditInternalUserComponent } from "./edit-internal-user-table/edit.component";
-import { EditInternalGroupComponent } from "./edit-internal-group-table/edit.component";
-import { EditSettingComponent } from "./edit-setting-table/edit.component";
-import { NzTabsModule } from "ng-zorro-antd/tabs";
-import { NzButtonModule } from "ng-zorro-antd/button";
-import { NzIconModule } from "ng-zorro-antd/icon";
-import { HttpClientModule } from "@angular/common/http";
+import { CommonModule } from "@angular/common"
+import { FormsModule } from "@angular/forms"
+import { NgModule } from "@angular/core"
+import { RouterModule, Routes } from "@angular/router"
+import { EditInternalUserComponent } from "./edit-internal-user-table/edit.component"
+import { EditInternalGroupComponent } from "./edit-internal-group-table/edit.component"
+import { EditSettingComponent } from "./edit-setting-table/edit.component"
+import { NzTabsModule } from "ng-zorro-antd/tabs"
+import { NzButtonModule } from "ng-zorro-antd/button"
+import { NzIconModule } from "ng-zorro-antd/icon"
+import { HttpClientModule } from "@angular/common/http"
 import {
     TupleActionPushNameService,
     TupleActionPushService,
@@ -17,29 +17,29 @@ import {
     TupleDataOfflineObserverService,
     TupleOfflineStorageNameService,
     TupleOfflineStorageService,
-} from "@synerty/vortexjs";
-import { UserComponent } from "./user.component";
+} from "@synerty/vortexjs"
+import { UserComponent } from "./user.component"
 import {
     userActionProcessorName,
     userFilt,
     userObservableName,
     userTupleOfflineServiceName,
-} from "@peek/peek_core_user/_private";
+} from "@peek/peek_core_user/_private"
 
-import { ManageLoggedInUserComponent } from "./logged-in-user/logged-in-user.component";
-import { NzSwitchModule } from "ng-zorro-antd/switch";
-import { EditLdapSettingComponent } from "./edit-ldap-setting-table/edit.component";
+import { ManageLoggedInUserComponent } from "./logged-in-user/logged-in-user.component"
+import { NzSwitchModule } from "ng-zorro-antd/switch"
+import { EditLdapSettingComponent } from "./edit-ldap-setting-table/edit.component"
 
 export function tupleDataObservableNameServiceFactory() {
-    return new TupleDataObservableNameService(userObservableName, userFilt);
+    return new TupleDataObservableNameService(userObservableName, userFilt)
 }
 
 export function tupleActionPushNameServiceFactory() {
-    return new TupleActionPushNameService(userActionProcessorName, userFilt);
+    return new TupleActionPushNameService(userActionProcessorName, userFilt)
 }
 
 export function tupleOfflineStorageNameServiceFactory() {
-    return new TupleOfflineStorageNameService(userTupleOfflineServiceName);
+    return new TupleOfflineStorageNameService(userTupleOfflineServiceName)
 }
 
 // Define the routes for this Angular module.
@@ -48,7 +48,7 @@ export const pluginRoutes: Routes = [
         path: "",
         component: UserComponent,
     },
-];
+]
 
 @NgModule({
     imports: [
@@ -89,4 +89,5 @@ export const pluginRoutes: Routes = [
         EditLdapSettingComponent,
     ],
 })
-export class UserModule {}
+export class UserModule {
+}

@@ -3,40 +3,49 @@ import os
 
 from celery import Celery
 from jsoncfg.value_mappers import require_string
-from peek_core_user._private.server.controller.AdminAuthController import \
-    AdminAuthController
+from peek_core_user._private.server.controller.AdminAuthController import (
+    AdminAuthController,
+)
 from sqlalchemy import MetaData
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_plugin_base.server.PluginLogicEntryHookABC import PluginLogicEntryHookABC
-from peek_plugin_base.server.PluginServerStorageEntryHookABC import \
-    PluginServerStorageEntryHookABC
-from peek_plugin_base.server.PluginServerWorkerEntryHookABC import \
-    PluginServerWorkerEntryHookABC
-from peek_core_user._private.server.AdminTupleDataObservable import \
-    makeAdminTupleDataObservableHandler
-from peek_core_user._private.server.ClientTupleActionProcessor import \
-    makeTupleActionProcessorHandler
-from peek_core_user._private.server.ClientTupleDataObservable import \
-    makeTupleDataObservableHandler
+from peek_plugin_base.server.PluginServerStorageEntryHookABC import (
+    PluginServerStorageEntryHookABC,
+)
+from peek_plugin_base.server.PluginServerWorkerEntryHookABC import (
+    PluginServerWorkerEntryHookABC,
+)
+from peek_core_user._private.server.AdminTupleDataObservable import (
+    makeAdminTupleDataObservableHandler,
+)
+from peek_core_user._private.server.ClientTupleActionProcessor import (
+    makeTupleActionProcessorHandler,
+)
+from peek_core_user._private.server.ClientTupleDataObservable import (
+    makeTupleDataObservableHandler,
+)
 from peek_core_user._private.server.admin_backend import makeAdminBackendHandlers
 from peek_core_user._private.server.api.UserApi import UserApi
-from peek_core_user._private.server.controller.ImportController import \
-    ImportController
-from peek_core_user._private.server.controller.LoginLogoutController import \
-    LoginLogoutController
+from peek_core_user._private.server.controller.ImportController import ImportController
+from peek_core_user._private.server.controller.LoginLogoutController import (
+    LoginLogoutController,
+)
 from peek_core_user._private.server.controller.MainController import MainController
-from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
-    LoggedInUserStatusTuple
+from peek_core_user._private.tuples.LoggedInUserStatusTuple import (
+    LoggedInUserStatusTuple,
+)
 from peek_core_user.server.UserApiABC import UserApiABC
 from peek_plugin_base.storage.DbConnection import DbConnection
 
 logger = logging.getLogger(__name__)
 
 
-class PluginLogicEntryHook(PluginLogicEntryHookABC,
-                            PluginServerStorageEntryHookABC,
-                            PluginServerWorkerEntryHookABC):
+class PluginLogicEntryHook(
+    PluginLogicEntryHookABC,
+    PluginServerStorageEntryHookABC,
+    PluginServerWorkerEntryHookABC,
+):
     def __init__(self, *args, **kwargs):
         PluginLogicEntryHookABC.__init__(self, *args, **kwargs)
         self._userApi = None
@@ -44,7 +53,7 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
         self._handlers = []
 
     def _migrateStorageSchema(self, metadata: MetaData) -> None:
-        """ Migrate Storage Schema
+        """Migrate Storage Schema
 
         Rename the schema
 
@@ -52,17 +61,18 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
 
         relDir = self._packageCfg.config.storage.alembicDir(require_string)
         alembicDir = os.path.join(self.rootDir, relDir)
-        if not os.path.isdir(alembicDir): raise NotADirectoryError(alembicDir)
+        if not os.path.isdir(alembicDir):
+            raise NotADirectoryError(alembicDir)
 
         dbConn = DbConnection(
             dbConnectString=self.platform.dbConnectString,
             metadata=metadata,
             alembicDir=alembicDir,
-            enableCreateAll=False
+            enableCreateAll=False,
         )
 
         # Rename the plugin schema to core.
-        renameToCoreSql = '''
+        renameToCoreSql = """
             DO $$
             BEGIN
                 IF EXISTS(
@@ -76,7 +86,7 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
                 END IF;
             END
             $$;
-        '''
+        """
 
         dbSession = dbConn.ormSessionCreator()
         try:
@@ -91,18 +101,21 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
 
     def load(self) -> None:
         from peek_core_user._private.tuples import loadPrivateTuples
+
         loadPrivateTuples()
 
         from peek_core_user._private.storage.DeclarativeBase import loadStorageTuples
+
         loadStorageTuples()
 
         from peek_core_user.tuples import loadPublicTuples
+
         loadPublicTuples()
 
         logger.debug("loaded")
 
     def start(self):
-        """ Start
+        """Start
 
         This will be called when the plugin is loaded, just after the db is migrated.
         Place any custom initialiastion steps here.
@@ -129,11 +142,13 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
 
         # ----------------
         # Setup our API
-        self._userApi = UserApi(deviceApi,
-                                self.dbSessionCreator,
-                                importController,
-                                loginLogoutController,
-                                adminAuthController)
+        self._userApi = UserApi(
+            deviceApi,
+            self.dbSessionCreator,
+            importController,
+            loginLogoutController,
+            adminAuthController,
+        )
 
         # ----------------
         # Main Controller
@@ -156,10 +171,12 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
 
         # ----------------
         # Setup controllers.
-        loginLogoutController.setup(clientTupleObservable,
-                                    adminTupleObservable,
-                                    self._userApi.fieldHookApi,
-                                    self._userApi.infoApi)
+        loginLogoutController.setup(
+            clientTupleObservable,
+            adminTupleObservable,
+            self._userApi.fieldHookApi,
+            self._userApi.infoApi,
+        )
         importController.setTupleObserver(clientTupleObservable)
 
         # Make the admin observable send an update when device online / offline
@@ -200,7 +217,7 @@ class PluginLogicEntryHook(PluginLogicEntryHookABC,
     @property
     def dbMetadata(self):
         from peek_core_user._private.storage import DeclarativeBase
+
         return DeclarativeBase.metadata
 
     ###### Implement PluginServerWorkerEntryHookABC
-

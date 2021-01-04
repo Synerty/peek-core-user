@@ -15,16 +15,19 @@ UserPostLogoutHookCallable = Callable[[UserLogoutResponseTuple], Deferred]
 
 class UserLoginApiABC(metaclass=ABCMeta):
     @abstractmethod
-    def logout(self,
-               logoutTuple: UserLogoutAction) -> Deferred:  # [UserLogoutResponseTuple]:
-        """ Logout
+    def logout(
+        self, logoutTuple: UserLogoutAction
+    ) -> Deferred:  # [UserLogoutResponseTuple]:
+        """Logout
 
         :param logoutTuple
         """
 
     @abstractmethod
-    def login(self, loginTuple: UserLoginAction) -> Deferred:  # [UserLoginResponseTuple]:
-        """ Login
+    def login(
+        self, loginTuple: UserLoginAction
+    ) -> Deferred:  # [UserLoginResponseTuple]:
+        """Login
 
         :param loginTuple
         """

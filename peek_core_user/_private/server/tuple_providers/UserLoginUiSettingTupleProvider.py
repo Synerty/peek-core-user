@@ -6,9 +6,14 @@ from vortex.Payload import Payload
 from vortex.TupleSelector import TupleSelector
 from vortex.handler.TupleDataObservableHandler import TuplesProviderABC
 
-from peek_core_user._private.storage.Setting import globalSetting, FIELD_SHOW_LOGIN_AS_LIST, \
-    FIELD_SHOW_VEHICLE_INPUT
-from peek_core_user._private.tuples.UserLoginUiSettingTuple import UserLoginUiSettingTuple
+from peek_core_user._private.storage.Setting import (
+    globalSetting,
+    FIELD_SHOW_LOGIN_AS_LIST,
+    FIELD_SHOW_VEHICLE_INPUT,
+)
+from peek_core_user._private.tuples.UserLoginUiSettingTuple import (
+    UserLoginUiSettingTuple,
+)
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
 
 logger = logging.getLogger(__name__)

@@ -15,13 +15,15 @@ class GroupDetailTupleProvider(TuplesProviderABC):
         self._ourApi = ourApi
 
         from peek_core_user.server.UserApiABC import UserApiABC
-        assert isinstance(self._ourApi, UserApiABC), (
-            "We didn't get a UserApiABC")
+
+        assert isinstance(self._ourApi, UserApiABC), "We didn't get a UserApiABC"
 
     @inlineCallbacks
     def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
         tuples = yield self._ourApi.infoApi.groups()
 
-        payloadEnvelope = yield Payload(filt=filt, tuples=tuples).makePayloadEnvelopeDefer()
+        payloadEnvelope = yield Payload(
+            filt=filt, tuples=tuples
+        ).makePayloadEnvelopeDefer()
         vortexMsg = yield payloadEnvelope.toVortexMsgDefer()
         return vortexMsg

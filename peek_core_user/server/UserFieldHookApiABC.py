@@ -15,7 +15,7 @@ UserPostLogoutHookCallable = Callable[[UserLogoutResponseTuple], Deferred]
 class UserFieldHookApiABC(metaclass=ABCMeta):
     @abstractmethod
     def postLoginObservable(self) -> Subject:
-        """ Get the post login observable
+        """Get the post login observable
 
         Subscribers will be called just after the user has authenticated
 
@@ -23,7 +23,7 @@ class UserFieldHookApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def postLogoffObservable(self) -> Subject:
-        """ Get the post logoff observable
+        """Get the post logoff observable
 
         Subscribers will be called just after the user has logged off
 
@@ -31,7 +31,7 @@ class UserFieldHookApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def addPostLoginHook(self, callable: UserPostLoginHookCallable) -> None:
-        """ Add Post Login Hook
+        """Add Post Login Hook
 
         :param callable: This callable will be called just after the user has
         authenticated
@@ -39,14 +39,14 @@ class UserFieldHookApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def removePostLoginHook(self, callable: UserPostLoginHookCallable) -> None:
-        """ Remove Post Login Hook
+        """Remove Post Login Hook
 
         :param callable: This callable to remove from the hooks
         """
 
     @abstractmethod
     def addPostLogoutHook(self, callable: UserPostLogoutHookCallable) -> None:
-        """ Add Post Logout Hook
+        """Add Post Logout Hook
 
         :param callable: This callable will be called just after the user has
         logged out
@@ -54,7 +54,7 @@ class UserFieldHookApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def removePostLogoutHook(self, callable: UserPostLogoutHookCallable) -> None:
-        """ Remove Post Logout Hook
+        """Remove Post Logout Hook
 
         :param callable: This callable to remove from the hooks
         """

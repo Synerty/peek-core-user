@@ -17,11 +17,10 @@ UserPostLogoutHookCallable = Callable[[UserLogoutResponseTuple], Deferred]
 
 
 class UserApiABC(metaclass=ABCMeta):
-
     @property
     @abstractmethod
     def loginApi(self) -> UserLoginApiABC:
-        """ Login API
+        """Login API
 
         Returns the API class that handles the user logins
 
@@ -31,7 +30,7 @@ class UserApiABC(metaclass=ABCMeta):
     @property
     @abstractmethod
     def importApi(self) -> UserImportApiABC:
-        """ Import API
+        """Import API
 
         Returns the API class that can be used to import the internal user/group objects
 
@@ -41,7 +40,7 @@ class UserApiABC(metaclass=ABCMeta):
     @property
     @abstractmethod
     def fieldHookApi(self) -> UserFieldHookApiABC:
-        """ Hook API
+        """Hook API
 
         Returns the API class that can be used to attach callbacks and observers to the
         login/logout process
@@ -52,7 +51,7 @@ class UserApiABC(metaclass=ABCMeta):
     @property
     @abstractmethod
     def infoApi(self) -> UserInfoApiABC:
-        """ Info API
+        """Info API
 
         Returns the API class that provides information about users
 
@@ -62,7 +61,7 @@ class UserApiABC(metaclass=ABCMeta):
     @property
     @abstractmethod
     def adminAuth(self) -> UserAdminAuthApiABC:
-        """ Admin Auth API
+        """Admin Auth API
 
         Returns the API class admin authentication for the peek-logic-service
 

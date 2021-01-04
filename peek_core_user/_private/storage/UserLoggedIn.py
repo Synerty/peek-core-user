@@ -22,13 +22,14 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class UserLoggedIn(Tuple, DeclarativeBase):
-    """ UserLoggedIn
+    """UserLoggedIn
 
     This table stores which users are logged into which devices
 
     """
-    __tupleType__ = userPluginTuplePrefix + 'UserLoggedIn'
-    __tablename__ = 'UserLoggedIn'
+
+    __tupleType__ = userPluginTuplePrefix + "UserLoggedIn"
+    __tablename__ = "UserLoggedIn"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     loggedInDateTime = Column(DateTime(True), nullable=False)

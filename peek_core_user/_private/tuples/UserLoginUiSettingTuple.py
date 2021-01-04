@@ -9,11 +9,12 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class UserLoginUiSettingTuple(Tuple):
-    """ User Login UI Setting
+    """User Login UI Setting
 
-      This tuple is sent to the devices to control the appearance of the UI
+    This tuple is sent to the devices to control the appearance of the UI
 
     """
+
     __tupleType__ = userPluginTuplePrefix + "UserLoginUiSettingTuple"
 
     showUsersAsList: bool = TupleField()

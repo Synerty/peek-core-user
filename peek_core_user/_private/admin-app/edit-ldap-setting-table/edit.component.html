@@ -2,13 +2,13 @@
     <div class="panel-heading">Edit Internal Groups
         <div class="btn-toolbar pull-right">
             <div class="btn-group">
-                <div class="btn btn-default btn-sm" (click)='save()'>
+                <div (click)="save()" class="btn btn-default btn-sm">
                     Save
                 </div>
-                <div class="btn btn-default btn-sm" (click)='loader.load()'>
+                <div (click)="loader.load()" class="btn btn-default btn-sm">
                     Reset
                 </div>
-                <div class="btn btn-default btn-sm" (click)='addRow()'>
+                <div (click)="addRow()" class="btn btn-default btn-sm">
                     Add
                 </div>
             </div>
@@ -16,33 +16,42 @@
     </div>
     <div class="panel-body">
         <table class="table">
-
+            
             <tbody *ngFor="let item of items">
             <tr>
                 <td>Title
-                    <input [(ngModel)]="item.ldapTitle"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapTitle"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>URI
-                    <input [(ngModel)]="item.ldapUri"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapUri"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>Domain
-                    <input [(ngModel)]="item.ldapDomain"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapDomain"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
-                    <button (click)="removeRow(item)"
-                            nzJustify="right"
-                            nz-button nzType="default" [nzSize]="size" nzShape="circle">
+                    <button
+                        (click)="removeRow(item)"
+                        [nzSize]="size"
+                        nz-button nzJustify="right" nzShape="circle"
+                        nzType="default"
+                    >
                         <i nz-icon nzType="close">
-
+                        
                         </i>
                     </button>
                 </td>
@@ -50,10 +59,12 @@
             <tr>
                 <td colspan="3">
                     CN Folders
-                    <input [(ngModel)]="item.ldapCNFolders"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapCNFolders"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
                     For Admin
@@ -63,10 +74,12 @@
             <tr>
                 <td colspan="3">
                     OU Folders
-                    <input [(ngModel)]="item.ldapOUFolders"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapOUFolders"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
                     For Office
@@ -76,10 +89,12 @@
             <tr>
                 <td colspan="3">
                     Groups
-                    <input [(ngModel)]="item.ldapGroups"
-                           class="form-control input-sm"
-                           required
-                           type="text"/>
+                    <input
+                        [(ngModel)]="item.ldapGroups"
+                        class="form-control input-sm"
+                        required
+                        type="text"
+                    />
                 </td>
                 <td>
                     For Field

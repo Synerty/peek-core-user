@@ -1,31 +1,31 @@
-import {addTupleType, Tuple} from "@synerty/vortexjs";
-import {userTuplePrefix} from "@peek/peek_core_user/_private/PluginNames";
+import { addTupleType, Tuple } from "@synerty/vortexjs"
+import { userTuplePrefix } from "@peek/peek_core_user/_private/PluginNames"
 
 @addTupleType
 export class InternalUserTuple extends Tuple {
-    public static readonly tupleName = userTuplePrefix + "InternalUserTuple";
-
+    public static readonly tupleName = userTuplePrefix + "InternalUserTuple"
+    
     //  Description of date1
-    id : number;
-
+    id: number
+    
     //  The unique user/login name of the user
-    userName : string;
-
+    userName: string
+    
     //  The display name of the user
-    userTitle : string;
-
+    userTitle: string
+    
     //  A unique id reference to an external system
-    userUuid : string;
-
+    userUuid: string
+    
     //  The mobile number of the user
-    mobile : string | null;
-
+    mobile: string | null
+    
     //  The email address of the user
-    email : string | null;
-
+    email: string | null
+    
     //  The display name of the user
-    groupIds: number[];
-
+    groupIds: number[]
+    
     constructor() {
         super(InternalUserTuple.tupleName)
     }

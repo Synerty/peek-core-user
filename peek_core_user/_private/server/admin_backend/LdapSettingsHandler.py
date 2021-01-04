@@ -19,7 +19,6 @@ class __CrudHandler(OrmCrudHandler):
 
 # This method creates an instance of the handler class.
 def makeLdapSettingeHandler(tupleObservable, dbSessionCreator):
-    handler = __CrudHandler(dbSessionCreator, LdapSetting,
-                            filtKey, retreiveAll=True)
+    handler = __CrudHandler(dbSessionCreator, LdapSetting, filtKey, retreiveAll=True)
 
     return handler

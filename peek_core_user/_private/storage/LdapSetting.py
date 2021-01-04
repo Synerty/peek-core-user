@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class LdapSetting(Tuple, DeclarativeBase):
-    """ LdapSetting
+    """LdapSetting
 
     This table stores connetions and settings to LDAP servers
 
     """
-    __tupleType__ = userPluginTuplePrefix + 'LdapSettingTuple'
-    __tablename__ = 'LdapSetting'
+
+    __tupleType__ = userPluginTuplePrefix + "LdapSettingTuple"
+    __tablename__ = "LdapSetting"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     ldapTitle = Column(String, nullable=False, unique=True)
@@ -28,6 +29,6 @@ class LdapSetting(Tuple, DeclarativeBase):
     ldapOUFolders = Column(String, nullable=True)
     ldapGroups = Column(String, nullable=True)
 
-    adminEnabled = Column(Boolean, nullable=False, server_default='0')
-    desktopEnabled = Column(Boolean, nullable=False, server_default='0')
-    mobileEnabled = Column(Boolean, nullable=False, server_default='0')
+    adminEnabled = Column(Boolean, nullable=False, server_default="0")
+    desktopEnabled = Column(Boolean, nullable=False, server_default="0")
+    mobileEnabled = Column(Boolean, nullable=False, server_default="0")

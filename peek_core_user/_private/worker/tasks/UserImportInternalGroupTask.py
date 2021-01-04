@@ -7,11 +7,13 @@ from txcelery.defer import DeferrableTask
 
 from peek_plugin_base.worker import CeleryDbConn
 from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
-from peek_core_user._private.tuples.InternalGroupImportResultTuple import \
-    InternalGroupImportResultTuple
+from peek_core_user._private.tuples.InternalGroupImportResultTuple import (
+    InternalGroupImportResultTuple,
+)
 from peek_plugin_base.worker.CeleryApp import celeryApp
-from peek_core_user.tuples.import_.ImportInternalGroupTuple import \
-    ImportInternalGroupTuple
+from peek_core_user.tuples.import_.ImportInternalGroupTuple import (
+    ImportInternalGroupTuple,
+)
 from vortex.Payload import Payload
 
 logger = logging.getLogger(__name__)
@@ -19,8 +21,10 @@ logger = logging.getLogger(__name__)
 
 @DeferrableTask
 @celeryApp.task(bind=True)
-def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> InternalGroupImportResultTuple:
-    """ Import Internal Groups
+def importInternalGroups(
+    self, importHash: str, groupsVortexMsg: bytes
+) -> InternalGroupImportResultTuple:
+    """Import Internal Groups
 
     :param self: A celery reference to this task
     :param importHash: An unique string of this group of items being imported.
@@ -29,9 +33,7 @@ def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> Intern
     """
 
     importGroups: List[ImportInternalGroupTuple] = (
-        Payload()
-            .fromEncodedPayload(groupsVortexMsg)
-            .tuples
+        Payload().fromEncodedPayload(groupsVortexMsg).tuples
     )
 
     startTime = datetime.now(pytz.utc)
@@ -48,12 +50,11 @@ def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> Intern
         allNames = [i.groupName for i in importGroups]
 
         existingGroupsByName = {
-            g.groupName: g for g in
-            session
-                .query(InternalGroupTuple)
-                .filter(InternalGroupTuple.userName.in_(allNames))
-                .filter(InternalGroupTuple.importHash == importHash)
-                .all()
+            g.groupName: g
+            for g in session.query(InternalGroupTuple)
+            .filter(InternalGroupTuple.userName.in_(allNames))
+            .filter(InternalGroupTuple.importHash == importHash)
+            .all()
         }
 
         for importGroup in importGroups:
@@ -85,16 +86,21 @@ def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes) -> Intern
             session.delete(oldGroup)
 
         session.commit()
-        logger.info("Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
-                    len(inserts), len(updates), len(deleteIds), sameCount,
-                    (datetime.now(pytz.utc) - startTime))
+        logger.info(
+            "Inserted %s, Updated %s, Deleted %s, Same %s, in %s",
+            len(inserts),
+            len(updates),
+            len(deleteIds),
+            sameCount,
+            (datetime.now(pytz.utc) - startTime),
+        )
 
         return InternalGroupImportResultTuple(
             addedIds=[o.id for o in inserts],
             updatedIds=[o.id for o in updates],
             deletedIds=deleteIds,
             sameCount=sameCount,
-            errors=errors
+            errors=errors,
         )
 
     except Exception as e:

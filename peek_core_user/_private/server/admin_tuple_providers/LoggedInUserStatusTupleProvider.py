@@ -9,20 +9,19 @@ from vortex.handler.TupleDataObservableHandler import TuplesProviderABC
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
-from peek_core_user._private.tuples.LoggedInUserStatusTuple import \
-    LoggedInUserStatusTuple
+from peek_core_user._private.tuples.LoggedInUserStatusTuple import (
+    LoggedInUserStatusTuple,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class LoggedInUserStatusTupleProvider(TuplesProviderABC):
-    def __init__(self, dbSessionCreator,
-                 deviceApi: DeviceApiABC):
+    def __init__(self, dbSessionCreator, deviceApi: DeviceApiABC):
         self._dbSessionCreator = dbSessionCreator
         self._deviceApi = deviceApi
 
-        assert isinstance(self._deviceApi, DeviceApiABC), (
-            "We didn't get a DeviceApiABC")
+        assert isinstance(self._deviceApi, DeviceApiABC), "We didn't get a DeviceApiABC"
 
     @inlineCallbacks
     def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
@@ -41,8 +40,9 @@ class LoggedInUserStatusTupleProvider(TuplesProviderABC):
             tuple_.deviceType = deviceDetail.deviceType
             tuple_.deviceDescription = deviceDetail.description
 
-        payloadEnvelope = yield Payload(filt=filt, tuples=tuples) \
-            .makePayloadEnvelopeDefer()
+        payloadEnvelope = yield Payload(
+            filt=filt, tuples=tuples
+        ).makePayloadEnvelopeDefer()
         vortexMsg = yield payloadEnvelope.toVortexMsgDefer()
         return vortexMsg
 
@@ -56,15 +56,18 @@ class LoggedInUserStatusTupleProvider(TuplesProviderABC):
                     userTitle=u.userTitle,
                     loginDate=u.loggedInDateTime,
                     vehicle=u.vehicle,
-                    deviceToken=u.deviceToken
+                    deviceToken=u.deviceToken,
                 )
-                for u in dbSession.query(UserLoggedIn.userName,
-                                         UserLoggedIn.loggedInDateTime,
-                                         UserLoggedIn.deviceToken,
-                                         UserLoggedIn.vehicle,
-                                         InternalUserTuple.userTitle)
-                    .join(InternalUserTuple,
-                          UserLoggedIn.userName == InternalUserTuple.userName)
+                for u in dbSession.query(
+                    UserLoggedIn.userName,
+                    UserLoggedIn.loggedInDateTime,
+                    UserLoggedIn.deviceToken,
+                    UserLoggedIn.vehicle,
+                    InternalUserTuple.userTitle,
+                ).join(
+                    InternalUserTuple,
+                    UserLoggedIn.userName == InternalUserTuple.userName,
+                )
             ]
 
             return tuples

@@ -1,5 +1,3 @@
-
-
 # class UserIsNotLoggedInError(Exception):
 #     def __init__(self, userName):
 #         self.userName = userName
@@ -25,7 +23,6 @@ class UserNotFoundException(Exception):
             return "User name not selected"
         else:
             return "User %s is not found in database" % self.userName
-
 
 
 class UserPasswordNotSetException(Exception):

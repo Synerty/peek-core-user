@@ -1,5 +1,8 @@
 import { Component } from "@angular/core"
-import { BalloonMsgService, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
+import {
+    BalloonMsgService,
+    NgLifeCycleEvents
+} from "@synerty/peek-plugin-base-js"
 import { extend, TupleLoader, VortexService } from "@synerty/vortexjs"
 import { userFilt } from "@peek/peek_core_user/_private"
 import { SettingPropertyTuple } from "../tuples/SettingPropertyTuple"

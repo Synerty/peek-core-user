@@ -10,7 +10,10 @@ import {
 import { userFilt } from "@peek/peek_core_user/_private"
 import { InternalUserTuple } from "../tuples/InternalUserTuple"
 import { InternalUserUpdatePasswordAction } from "../tuples/InternalUserUpdatePasswordAction"
-import { BalloonMsgService, NgLifeCycleEvents } from "@synerty/peek-plugin-base-js"
+import {
+    BalloonMsgService,
+    NgLifeCycleEvents
+} from "@synerty/peek-plugin-base-js"
 import { GroupDetailTuple } from "@peek/peek_core_user/tuples/GroupDetailTuple"
 
 @Component({

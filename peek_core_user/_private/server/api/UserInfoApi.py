@@ -7,8 +7,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
-from peek_core_user._private.storage.InternalUserGroupTuple import \
-    InternalUserGroupTuple
+from peek_core_user._private.storage.InternalUserGroupTuple import (
+    InternalUserGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user.server.UserInfoApiABC import UserInfoApiABC
@@ -23,14 +24,12 @@ class UserInfoApi(UserInfoApiABC):
     #: A reference to the core device plugins API
     _deviceApi: DeviceApiABC
 
-    _userCopyFields = (
-            set(UserDetailTuple.tupleFieldNames())
-            & set(InternalUserTuple.tupleFieldNames())
+    _userCopyFields = set(UserDetailTuple.tupleFieldNames()) & set(
+        InternalUserTuple.tupleFieldNames()
     )
 
-    _groupCopyFields = (
-            set(GroupDetailTuple.tupleFieldNames())
-            & set(InternalGroupTuple.tupleFieldNames())
+    _groupCopyFields = set(GroupDetailTuple.tupleFieldNames()) & set(
+        InternalGroupTuple.tupleFieldNames()
     )
 
     def __init__(self, deviceApi: DeviceApiABC, dbSessionCreator):
@@ -57,9 +56,11 @@ class UserInfoApi(UserInfoApiABC):
             close = True
 
         try:
-            user = (ormSession.query(InternalUserTuple)
-                    .filter(InternalUserTuple.userName == userName)
-                    .one())
+            user = (
+                ormSession.query(InternalUserTuple)
+                .filter(InternalUserTuple.userName == userName)
+                .one()
+            )
 
             return self._makeUserDetails(user)
 
@@ -71,8 +72,9 @@ class UserInfoApi(UserInfoApiABC):
                 ormSession.close()
 
     @deferToThreadWrapWithLogger(logger)
-    def users(self, likeTitle: Optional[str] = None,
-              groupNames: Optional[List[str]] = None):
+    def users(
+        self, likeTitle: Optional[str] = None, groupNames: Optional[List[str]] = None
+    ):
         """
         Returns Deferred[List[UserDetailTuple]]
         """
@@ -82,28 +84,32 @@ class UserInfoApi(UserInfoApiABC):
         finally:
             ormSession.close()
 
-    def usersBlocking(self, session, likeTitle: Optional[str] = None,
-                      groupNames: Optional[List[str]] = None) -> List[
-        UserDetailTuple]:
+    def usersBlocking(
+        self,
+        session,
+        likeTitle: Optional[str] = None,
+        groupNames: Optional[List[str]] = None,
+    ) -> List[UserDetailTuple]:
         qry = (
-            session
-                .query(InternalUserTuple)
-                .options(subqueryload(InternalUserTuple.groups))
-                .order_by(InternalUserTuple.userName)
+            session.query(InternalUserTuple)
+            .options(subqueryload(InternalUserTuple.groups))
+            .order_by(InternalUserTuple.userName)
         )
 
         if groupNames:
             qry = (
                 qry.join(InternalUserGroupTuple)
-                    .join(InternalGroupTuple)
-                    .filter(InternalGroupTuple.groupName.in_(groupNames))
+                .join(InternalGroupTuple)
+                .filter(InternalGroupTuple.groupName.in_(groupNames))
             )
 
         if likeTitle:
-            qry = qry.filter(or_(
-                InternalUserTuple.userTitle.ilike('%' + likeTitle + '%'),
-                InternalUserTuple.userName.ilike('%' + likeTitle + '%')
-            ))
+            qry = qry.filter(
+                or_(
+                    InternalUserTuple.userTitle.ilike("%" + likeTitle + "%"),
+                    InternalUserTuple.userName.ilike("%" + likeTitle + "%"),
+                )
+            )
 
         ormUsers = qry.all()
 
@@ -128,16 +134,13 @@ class UserInfoApi(UserInfoApiABC):
         finally:
             ormSession.close()
 
-    def groupsBlocking(self, session, likeTitle: Optional[str] = None) -> List[
-        GroupDetailTuple]:
-        qry = (
-            session
-                .query(InternalGroupTuple)
-                .order_by(InternalGroupTuple.groupName)
-        )
+    def groupsBlocking(
+        self, session, likeTitle: Optional[str] = None
+    ) -> List[GroupDetailTuple]:
+        qry = session.query(InternalGroupTuple).order_by(InternalGroupTuple.groupName)
 
         if likeTitle:
-            qry = qry.filter(InternalGroupTuple.userTitle.ilike('%' + likeTitle + '%'))
+            qry = qry.filter(InternalGroupTuple.userTitle.ilike("%" + likeTitle + "%"))
 
         return [self._makeGroupDetails(u) for u in qry.all()]
 
@@ -152,11 +155,13 @@ class UserInfoApi(UserInfoApiABC):
     def peekDeviceTokensForUser(self, userName: str) -> List[str]:
         session = self._dbSessionCreator()
         try:
-            result = (session.query(UserLoggedIn)
-                      .filter(UserLoggedIn.userName == userName)
-                      .all())
+            result = (
+                session.query(UserLoggedIn)
+                .filter(UserLoggedIn.userName == userName)
+                .all()
+            )
 
-            return [ r.deviceToken for r in result]
+            return [r.deviceToken for r in result]
 
         finally:
             session.close()
@@ -166,12 +171,10 @@ class UserInfoApi(UserInfoApiABC):
         session = self._dbSessionCreator()
         try:
             result = (
-                session
-                    .query(InternalUserTuple)
-                    .join(UserLoggedIn,
-                          UserLoggedIn.userName == InternalUserTuple.userName)
-                    .filter(UserLoggedIn.deviceToken == deviceToken)
-                    .one()
+                session.query(InternalUserTuple)
+                .join(UserLoggedIn, UserLoggedIn.userName == InternalUserTuple.userName)
+                .filter(UserLoggedIn.deviceToken == deviceToken)
+                .one()
             )
 
             return self._makeUserDetails(result)

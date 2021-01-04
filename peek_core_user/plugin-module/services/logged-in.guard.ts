@@ -8,11 +8,15 @@ export class LoggedInGuard implements CanActivate {
     constructor(
         private user: UserService,
         private router: Router
-    ) { }
+    ) {
+    }
     
     canActivate() {
         if (!this.user.hasLoaded()) {
-            return new Promise<boolean>((resolve, reject) => {
+            return new Promise<boolean>((
+                resolve,
+                reject
+            ) => {
                 this.user.loadingFinishedObservable()
                     .pipe(first())
                     .subscribe(() => {

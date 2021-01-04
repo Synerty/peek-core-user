@@ -13,11 +13,13 @@ from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
 logger = logging.getLogger(__name__)
 
-from peek_core_user._private.worker.tasks.UserImportInternalUserTask import \
-    importInternalUsers
+from peek_core_user._private.worker.tasks.UserImportInternalUserTask import (
+    importInternalUsers,
+)
 
-from peek_core_user._private.worker.tasks.UserImportInternalGroupTask import \
-    importInternalGroups
+from peek_core_user._private.worker.tasks.UserImportInternalGroupTask import (
+    importInternalGroups,
+)
 
 
 class ImportController:
@@ -31,7 +33,7 @@ class ImportController:
         self._tupleDataObserver = tupleDataObserver
 
     @inlineCallbacks
-    def importInternalUsers(self, importHash:str, usersVortexMsg: bytes):
+    def importInternalUsers(self, importHash: str, usersVortexMsg: bytes):
         #: result: InternalUserImportResultTuple
         result = yield importInternalUsers.delay(importHash, usersVortexMsg)
 
@@ -50,7 +52,7 @@ class ImportController:
         return result
 
     @inlineCallbacks
-    def importInternalGroups(self, importHash:str, groupsVortexMsg: bytes):
+    def importInternalGroups(self, importHash: str, groupsVortexMsg: bytes):
         #: result: InternalGroupImportResultTuple
         result = yield importInternalGroups.delay(importHash, groupsVortexMsg)
 

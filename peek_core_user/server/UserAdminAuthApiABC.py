@@ -6,7 +6,7 @@ from twisted.internet.defer import Deferred
 class UserAdminAuthApiABC(metaclass=ABCMeta):
     @abstractmethod
     def check(self, username: str, password: str) -> Deferred:
-        """ check
+        """check
 
         :param username
         :param password

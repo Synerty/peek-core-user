@@ -23,20 +23,27 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class InternalUserGroupTuple(Tuple, DeclarativeBase):
-    """ Internal User Group Tuple
+    """Internal User Group Tuple
 
     This table stores the relationships between the users and the groups.
 
     """
-    __tupleType__ = userPluginTuplePrefix + 'InternalUserGroupTuple'
-    __tablename__ = 'InternalUserGroup'
 
-    userId = Column(Integer, ForeignKey('InternalUser.id', ondelete='CASCADE')
-                    , primary_key=True, nullable=False)
+    __tupleType__ = userPluginTuplePrefix + "InternalUserGroupTuple"
+    __tablename__ = "InternalUserGroup"
 
-    groupId = Column(Integer, ForeignKey('InternalGroup.id', ondelete='CASCADE')
-                     , primary_key=True, nullable=False)
-
-    __table_args__ = (
-        Index("idx_InternalUserGroup_map", userId, groupId, unique=True),
+    userId = Column(
+        Integer,
+        ForeignKey("InternalUser.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
     )
+
+    groupId = Column(
+        Integer,
+        ForeignKey("InternalGroup.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    __table_args__ = (Index("idx_InternalUserGroup_map", userId, groupId, unique=True),)

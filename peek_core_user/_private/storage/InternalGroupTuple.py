@@ -22,13 +22,14 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class InternalGroupTuple(Tuple, DeclarativeBase):
-    """ Group Table
+    """Group Table
 
     This table contains the user plugin groups, for the internal directory.
 
     """
-    __tupleType__ = userPluginTuplePrefix + 'InternalGroupTuple'
-    __tablename__ = 'InternalGroup'
+
+    __tupleType__ = userPluginTuplePrefix + "InternalGroupTuple"
+    __tablename__ = "InternalGroup"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     groupName = Column(String, unique=True, nullable=False)
@@ -36,6 +37,4 @@ class InternalGroupTuple(Tuple, DeclarativeBase):
 
     importHash = Column(String)
 
-    __table_args__ = (
-        Index("idx_InternalGroupTable_importHash", importHash),
-    )
+    __table_args__ = (Index("idx_InternalGroupTable_importHash", importHash),)

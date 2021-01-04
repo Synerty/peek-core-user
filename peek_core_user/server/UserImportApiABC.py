@@ -4,8 +4,10 @@ from twisted.internet.defer import Deferred
 
 class UserImportApiABC(metaclass=ABCMeta):
     @abstractmethod
-    def importInternalUsers(self, importHash: str, usersEncodedPayload: bytes) -> Deferred:
-        """ Import Internal Users
+    def importInternalUsers(
+        self, importHash: str, usersEncodedPayload: bytes
+    ) -> Deferred:
+        """Import Internal Users
 
         Add, replace and remove users in the internal DB
 
@@ -25,8 +27,10 @@ class UserImportApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def importInternalGroups(self, importHash: str, groupsEncodedPayload: bytes) -> Deferred:
-        """ Import Internal Groups
+    def importInternalGroups(
+        self, importHash: str, groupsEncodedPayload: bytes
+    ) -> Deferred:
+        """Import Internal Groups
 
         Add, replace and remove users in the internal DB
 

@@ -10,14 +10,15 @@ logger = logging.getLogger(__name__)
 
 @addTupleType
 class LoggedInUserStatusTuple(Tuple):
-    """ Logged In User Status Tuple
+    """Logged In User Status Tuple
 
-      This tuple is used by the "Managed LoggedIn User"
+    This tuple is used by the "Managed LoggedIn User"
 
-      If the device receives this tuple and the deviceToken doesn't match the current
-      device, then the user is logged off.
+    If the device receives this tuple and the deviceToken doesn't match the current
+    device, then the user is logged off.
 
     """
+
     __tupleType__ = userPluginTuplePrefix + "LoggedInUserStatusTuple"
 
     userName: str = TupleField()

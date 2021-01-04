@@ -1,8 +1,16 @@
 import { Router } from "@angular/router"
-import { UserLogoutAction, UserLogoutResponseTuple, UserService } from "@peek/peek_core_user"
+import {
+    UserLogoutAction,
+    UserLogoutResponseTuple,
+    UserService
+} from "@peek/peek_core_user"
 import { UserTupleService } from "@peek/peek_core_user/_private/user-tuple.service"
 import { Component } from "@angular/core"
-import { BalloonMsgService, NgLifeCycleEvents, HeaderService } from "@synerty/peek-plugin-base-js"
+import {
+    BalloonMsgService,
+    NgLifeCycleEvents,
+    HeaderService
+} from "@synerty/peek-plugin-base-js"
 
 @Component({
     selector: "./peek-core-user-logout",

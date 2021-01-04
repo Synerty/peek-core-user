@@ -6,30 +6,34 @@ from peek_core_user._private.server.api.UserFieldHookApi import UserFieldHookApi
 from peek_core_user._private.server.api.UserImportApi import UserImportApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.api.UserLoginApi import UserLoginApi
-from peek_core_user._private.server.controller.AdminAuthController import \
-    AdminAuthController
-from peek_core_user._private.server.controller.ImportController import \
-    ImportController
-from peek_core_user._private.server.controller.LoginLogoutController import \
-    LoginLogoutController
+from peek_core_user._private.server.controller.AdminAuthController import (
+    AdminAuthController,
+)
+from peek_core_user._private.server.controller.ImportController import ImportController
+from peek_core_user._private.server.controller.LoginLogoutController import (
+    LoginLogoutController,
+)
 from peek_core_user.server.UserApiABC import UserApiABC
 
 logger = logging.getLogger(__name__)
 
 
 class UserApi(UserApiABC):
-
-    def __init__(self, deviceApi: DeviceApiABC,
-                 dbSessionCreator,
-                 importController: ImportController,
-                 loginLogoutController: LoginLogoutController,
-                 adminAuthController: AdminAuthController):
+    def __init__(
+        self,
+        deviceApi: DeviceApiABC,
+        dbSessionCreator,
+        importController: ImportController,
+        loginLogoutController: LoginLogoutController,
+        adminAuthController: AdminAuthController,
+    ):
         self._hookApi = UserFieldHookApi()
 
         self._importApi = UserImportApi(importController=importController)
 
-        self._infoApi = UserInfoApi(deviceApi=deviceApi,
-                                    dbSessionCreator=dbSessionCreator)
+        self._infoApi = UserInfoApi(
+            deviceApi=deviceApi, dbSessionCreator=dbSessionCreator
+        )
 
         self._loginApi = UserLoginApi(loginLogoutController=loginLogoutController)
 

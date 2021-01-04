@@ -1,31 +1,31 @@
 <div class="plugin-user">
     <h4>Logout of Peek</h4>
-
+    
     <form>
         <p class="user-message">
-            <i nz-icon nzType="user" nzTheme="outline"></i>
+            <i nz-icon nzTheme="outline" nzType="user"></i>
             Logged in as {{loggedInUserText()}}
         </p>
     </form>
-
-    <p class="bg-danger" *ngFor="let error of errors">
+    
+    <p *ngFor="let error of errors" class="bg-danger">
         {{error}}
     </p>
-
-    <p class="bg-warning" *ngFor="let warning of warnings">
+    
+    <p *ngFor="let warning of warnings" class="bg-warning">
         {{warning}}
     </p>
-
-    <p class="bg-info" *ngIf="warnings != null && warnings.length != 0">
+    
+    <p *ngIf="warnings != null && warnings.length != 0" class="bg-info">
         Click 'Logout' a second time to ignore these warnings.
     </p>
-
+    
     <button
-        class="form-control btn-success"
-        [disabled]="isAuthenticating"
         (click)="doLogout()"
+        [disabled]="isAuthenticating"
+        class="form-control btn-success"
     >
-        <i nz-icon nzType="logout" nzTheme="outline"></i>
+        <i nz-icon nzTheme="outline" nzType="logout"></i>
         Logout
     </button>
 </div>

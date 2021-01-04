@@ -3,8 +3,10 @@ import logging
 from rx.subjects import Subject
 from twisted.internet.defer import inlineCallbacks
 
-from peek_core_user.server.UserApiABC import UserPostLoginHookCallable, \
-    UserPostLogoutHookCallable
+from peek_core_user.server.UserApiABC import (
+    UserPostLoginHookCallable,
+    UserPostLogoutHookCallable,
+)
 from peek_core_user.server.UserFieldHookApiABC import UserFieldHookApiABC
 from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
 from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple

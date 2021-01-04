@@ -29,9 +29,9 @@ class __CrudHandler(OrmCrudHandler):
         if likeTitle and len(likeTitle) >= 3:
             tuples = (
                 session.query(InternalUserTuple)
-                    .options(subqueryload(InternalUserTuple.groups))
-                    .filter(InternalUserTuple.userTitle.ilike('%' + likeTitle + '%'))
-                    .all()
+                .options(subqueryload(InternalUserTuple.groups))
+                .filter(InternalUserTuple.userTitle.ilike("%" + likeTitle + "%"))
+                .all()
             )
 
         for tuple in tuples:
@@ -48,7 +48,7 @@ class __CrudHandler(OrmCrudHandler):
 
 
 class __ExtUpdateObservable(OrmCrudHandlerExtension):
-    """ Update Observable ORM Crud Extension
+    """Update Observable ORM Crud Extension
 
     This extension is called after events that will alter data,
     it then notifies the observer.
@@ -93,11 +93,11 @@ class __ExtUpdateObservable(OrmCrudHandlerExtension):
         return True
 
 
-
 # This method creates an instance of the handler class.
 def makeInternalUserTableHandler(tupleObservable, dbSessionCreator):
-    handler = __CrudHandler(dbSessionCreator, InternalUserTuple,
-                            filtKey, retreiveAll=True)
+    handler = __CrudHandler(
+        dbSessionCreator, InternalUserTuple, filtKey, retreiveAll=True
+    )
 
     logger.debug("Started")
     handler.addExtension(InternalUserTuple, __ExtUpdateObservable(tupleObservable))

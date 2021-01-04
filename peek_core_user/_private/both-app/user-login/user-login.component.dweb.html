@@ -1,55 +1,55 @@
 <div class="plugin-user">
     <h4>Login to Peek</h4>
-
-    <form autocomplete="off" novalidate (keyup.enter)="doLogin()">
+    
+    <form (keyup.enter)="doLogin()" autocomplete="off" novalidate>
         <fieldset [disabled]="isAuthenticating">
             <div class="form-group">
                 <input
+                    [(ngModel)]="selectedUser.userName"
                     class="form-control"
-                    type="text"
                     id="username"
                     name="password"
                     placeholder="Username"
-                    [(ngModel)]="selectedUser.userName"
+                    type="text"
                 />
             </div>
-
+            
             <!-- Login with user input box -->
             <div class="form-group">
                 <input
+                    [(ngModel)]="selectedUser.password"
                     class="form-control"
-                    type="password"
                     id="password"
                     name="password"
                     placeholder="password"
-                    [(ngModel)]="selectedUser.password"
+                    type="password"
                 />
             </div>
         </fieldset>
     </form>
-
-    <p class="form-control bg-danger" *ngFor="let error of errors">
+    
+    <p *ngFor="let error of errors" class="form-control bg-danger">
         {{error}}
     </p>
-
-    <p class="form-control bg-warning" *ngFor="let warning of warnings">
+    
+    <p *ngFor="let warning of warnings" class="form-control bg-warning">
         {{warning}}
     </p>
-
+    
     <p
-        class="form-control bg-info"
         *ngIf="warnings != null && warnings.length != 0"
+        class="form-control bg-info"
     >
         Click 'Login' a second time to ignore these warnings.
     </p>
-
+    
     <button
-        class="form-control"
+        (click)="doLogin()"
         [class.btn-success]="isLoginEnabled()"
         [disabled]="!isLoginEnabled()"
-        (click)="doLogin()"
+        class="form-control"
     >
-        <i nz-icon nzType="login" nzTheme="outline"></i>
+        <i nz-icon nzTheme="outline" nzType="login"></i>
         {{loginText()}}
     </button>
 </div>

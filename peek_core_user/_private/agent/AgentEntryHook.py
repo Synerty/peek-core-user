@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class AgentEntryHook(PluginAgentEntryHookABC):
-
     def load(self) -> None:
         loadStorageTuples()
         loadPrivateTuples()

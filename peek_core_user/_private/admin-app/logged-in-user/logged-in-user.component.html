@@ -34,13 +34,16 @@
                     <p *ngIf="item.deviceIsOnline">Online Now</p>
                     <p *ngIf="!item.deviceIsOnline && item.deviceLastOnline">
                         {{item.deviceLastOnline | date:'HH:mm dd-MMM-yyyy'}}</p>
-                    <p *ngIf="!item.deviceIsOnline && !item.deviceLastOnline">Never
+                    <p *ngIf="!item.deviceIsOnline && !item.deviceLastOnline">
+                        Never
                         Connected</p>
-
+                
                 </td>
                 <td>
-                    <button class="btn btn-warning"
-                            (click)='logoutUser(item)'>
+                    <button
+                        (click)="logoutUser(item)"
+                        class="btn btn-warning"
+                    >
                         Logout User
                     </button>
                 </td>

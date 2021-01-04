@@ -9,8 +9,8 @@ Create Date: 2018-01-28 16:39:17.645627
 """
 
 # revision identifiers, used by Alembic.
-revision = '2c6728ebc562'
-down_revision = '9b65be31926e'
+revision = "2c6728ebc562"
+down_revision = "9b65be31926e"
 branch_labels = None
 depends_on = None
 
@@ -20,25 +20,28 @@ import geoalchemy2
 
 
 def upgrade():
-
-    op.create_table('InternalUserPassword',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('userId', sa.Integer(), nullable=False),
-    sa.Column('password', sa.String(length=50), nullable=False),
-    sa.ForeignKeyConstraint(['userId'], ['core_user.InternalUser.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
-    schema='core_user'
+    op.create_table(
+        "InternalUserPassword",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("userId", sa.Integer(), nullable=False),
+        sa.Column("password", sa.String(length=50), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["userId"], ["core_user.InternalUser.id"], ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        schema="core_user",
     )
 
-    op.execute('''
+    op.execute(
+        """
     INSERT INTO core_user."InternalUserPassword" ("userId", "password")
     SELECT "id", "password"
     FROM core_user."InternalUser"
     WHERE "password" is not null
-    ''')
+    """
+    )
 
-    op.drop_column('InternalUser', 'password', schema='core_user')
-
+    op.drop_column("InternalUser", "password", schema="core_user")
 
 
 def downgrade():

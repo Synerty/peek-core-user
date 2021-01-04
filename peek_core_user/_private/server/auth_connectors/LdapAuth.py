@@ -7,13 +7,13 @@ from peek_core_user._private.storage.LdapSetting import LdapSetting
 from peek_core_user._private.storage.Setting import globalSetting, LDAP_VERIFY_SSL
 from twisted.cred.error import LoginFailed
 
-__author__ = 'synerty'
+__author__ = "synerty"
 
 logger = logging.getLogger(__name__)
 
 import ldap
 
-'''
+"""
 {'objectClass': [b'top', b'person', b'organizationalPerson', b'user'], 'cn': [b'attest'],
  'givenName': [b'attest'],
  'distinguishedName': [b'CN=attest,OU=testou,DC=synad,DC=synerty,DC=com'],
@@ -37,7 +37,7 @@ import ldap
  'dSCorePropagationData': [b'20190606130621.0Z', b'20190606130016.0Z',
                            b'20170506090346.0Z', b'16010101000000.0Z'],
  'lastLogonTimestamp': [b'132042996806397639']}
-'''
+"""
 
 
 class LdapNotEnabledError(Exception):
@@ -49,9 +49,10 @@ class LdapAuth:
     FOR_OFFICE = InternalAuth.FOR_OFFICE
     FOR_FIELD = InternalAuth.FOR_FIELD
 
-    def checkPassBlocking(self, dbSession, userName, password,
-                          forService: int) -> List[str]:
-        """ Login User
+    def checkPassBlocking(
+        self, dbSession, userName, password, forService: int
+    ) -> List[str]:
+        """Login User
 
         :param forService:
         :param dbSession:
@@ -62,8 +63,7 @@ class LdapAuth:
 
         assert forService in (1, 2, 3), "Unhandled for service type"
 
-        ldapSettings: List[LdapSetting] = dbSession.query(LdapSetting) \
-            .all()
+        ldapSettings: List[LdapSetting] = dbSession.query(LdapSetting).all()
 
         if not globalSetting(dbSession, LDAP_VERIFY_SSL):
             ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
@@ -87,7 +87,9 @@ class LdapAuth:
                     continue
 
             else:
-                raise Exception("InternalAuth:Unhandled forService type %s" % forService)
+                raise Exception(
+                    "InternalAuth:Unhandled forService type %s" % forService
+                )
 
             try:
                 return self._tryLdap(dbSession, userName, password, ldapSetting)
@@ -95,16 +97,16 @@ class LdapAuth:
                 if not firstException:
                     firstException = e
 
-        logger.error("Login failed for %s, %s",
-                     userName, str(firstException))
+        logger.error("Login failed for %s, %s", userName, str(firstException))
 
         if firstException:
             raise firstException
 
         raise LoginFailed("No LDAP providers found for this service")
 
-    def _tryLdap(self, dbSession, userName, password,
-                 ldapSetting: LdapSetting) -> List[str]:
+    def _tryLdap(
+        self, dbSession, userName, password, ldapSetting: LdapSetting
+    ) -> List[str]:
         try:
 
             conn = ldap.initialize(ldapSetting.ldapUri)
@@ -112,17 +114,25 @@ class LdapAuth:
             conn.set_option(ldap.OPT_REFERRALS, 0)
 
             # make the connection
-            conn.simple_bind_s('%s@%s' % (userName, ldapSetting.ldapDomain), password)
-            ldapFilter = "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))" % userName
+            conn.simple_bind_s("%s@%s" % (userName, ldapSetting.ldapDomain), password)
+            ldapFilter = (
+                "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
+                % userName
+            )
 
-            dcParts = ','.join(['DC=%s' % part
-                                for part in ldapSetting.ldapDomain.split('.')])
+            dcParts = ",".join(
+                ["DC=%s" % part for part in ldapSetting.ldapDomain.split(".")]
+            )
 
             ldapBases = []
             if ldapSetting.ldapOUFolders:
-                ldapBases += self._makeLdapBase(ldapSetting.ldapOUFolders, userName, "OU")
+                ldapBases += self._makeLdapBase(
+                    ldapSetting.ldapOUFolders, userName, "OU"
+                )
             if ldapSetting.ldapCNFolders:
-                ldapBases += self._makeLdapBase(ldapSetting.ldapCNFolders, userName, "CN")
+                ldapBases += self._makeLdapBase(
+                    ldapSetting.ldapCNFolders, userName, "CN"
+                )
 
             if not ldapBases:
                 raise LoginFailed("LDAP OU and/or CN search paths must be set.")
@@ -133,8 +143,9 @@ class LdapAuth:
 
                 try:
                     # Example Base : 'CN=atuser1,CN=Users,DC=synad,DC=synerty,DC=com'
-                    userDetails = conn.search_st(ldapBase, ldap.SCOPE_SUBTREE,
-                                                 ldapFilter, None, 0, 10)
+                    userDetails = conn.search_st(
+                        ldapBase, ldap.SCOPE_SUBTREE, ldapFilter, None, 0, 10
+                    )
 
                     if userDetails:
                         break
@@ -144,7 +155,8 @@ class LdapAuth:
 
         except ldap.NO_SUCH_OBJECT:
             raise LoginFailed(
-                "An internal error occurred, ask admin to check Attune logs")
+                "An internal error occurred, ask admin to check Attune logs"
+            )
 
         except ldap.INVALID_CREDENTIALS:
             raise LoginFailed("Username or password is incorrect")
@@ -155,43 +167,45 @@ class LdapAuth:
         userDetails = userDetails[0][1]
 
         groups = []
-        for memberOf in userDetails['memberOf']:
-            group = memberOf.decode().split(',')[0]
-            if '=' in group:
-                group = group.split('=')[1]
+        for memberOf in userDetails["memberOf"]:
+            group = memberOf.decode().split(",")[0]
+            if "=" in group:
+                group = group.split("=")[1]
             groups.append(group)
 
         userTitle = None
-        if userDetails['displayName']:
-            userTitle = userDetails['displayName'][0].decode()
+        if userDetails["displayName"]:
+            userTitle = userDetails["displayName"][0].decode()
 
         email = None
-        if userDetails['userPrincipalName']:
-            email = userDetails['userPrincipalName'][0].decode()
+        if userDetails["userPrincipalName"]:
+            email = userDetails["userPrincipalName"][0].decode()
 
         userUuid = None
-        if userDetails['distinguishedName']:
-            userUuid = userDetails['distinguishedName'][0].decode()
+        if userDetails["distinguishedName"]:
+            userUuid = userDetails["distinguishedName"][0].decode()
 
         if ldapSetting.ldapGroups:
-            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(',')])
+            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
 
             if not ldapGroups & set(groups):
                 raise LoginFailed("User is not apart of an authorised group")
 
-        self._makeOrCreateInternalUserBlocking(dbSession,
-                                               userName, userTitle, userUuid, email,
-                                               ldapSetting.ldapTitle)
+        self._makeOrCreateInternalUserBlocking(
+            dbSession, userName, userTitle, userUuid, email, ldapSetting.ldapTitle
+        )
 
         return groups
 
-    def _makeOrCreateInternalUserBlocking(self, dbSession,
-                                          userName, userTitle, userUuid, email,
-                                          ldapName):
+    def _makeOrCreateInternalUserBlocking(
+        self, dbSession, userName, userTitle, userUuid, email, ldapName
+    ):
 
-        internalUser = dbSession.query(InternalUserTuple) \
-            .filter(InternalUserTuple.userName == userName) \
+        internalUser = (
+            dbSession.query(InternalUserTuple)
+            .filter(InternalUserTuple.userName == userName)
             .all()
+        )
 
         if internalUser:
             return
@@ -200,7 +214,7 @@ class LdapAuth:
             userName=userName,
             userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
-            email=email
+            email=email,
         )
 
         dbSession.add(newInternalUser)
@@ -209,19 +223,19 @@ class LdapAuth:
     def _makeLdapBase(self, ldapFolders, userName, propertyName):
         try:
             ldapBases = []
-            for folder in ldapFolders.split(','):
+            for folder in ldapFolders.split(","):
                 folder = folder.strip()
                 if not folder:
                     continue
 
                 parts = []
-                for part in folder.split('/'):
+                for part in folder.split("/"):
                     part = part.strip()
                     if not part:
                         continue
-                    parts.append('%s=%s' % (propertyName, part))
+                    parts.append("%s=%s" % (propertyName, part))
 
-                ldapBases.append(','.join(reversed(parts)))
+                ldapBases.append(",".join(reversed(parts)))
 
             return ldapBases
 
@@ -229,9 +243,11 @@ class LdapAuth:
             logger.error(
                 "Login failed for %s, failed to parse LDAP %s Folders setting",
                 propertyName,
-                userName)
+                userName,
+            )
 
             logger.exception(e)
 
             raise LoginFailed(
-                "An internal error occurred, ask admin to check Attune logs")
+                "An internal error occurred, ask admin to check Attune logs"
+            )
