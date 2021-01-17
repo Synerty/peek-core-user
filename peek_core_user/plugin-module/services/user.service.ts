@@ -5,12 +5,15 @@ import {
     BalloonMsgLevel,
     BalloonMsgService,
     BalloonMsgType,
-    NgLifeCycleEvents
 } from "@synerty/peek-plugin-base-js"
-import { Observable } from "rxjs"
+import {
+    addTupleType,
+    NgLifeCycleEvents,
+    Tuple,
+    TupleSelector
+} from "@synerty/vortexjs"
+import { Observable, Subject } from "rxjs"
 import { first } from "rxjs/operators"
-import { Subject } from "rxjs"
-import { addTupleType, Tuple, TupleSelector } from "@synerty/vortexjs"
 import { UserListItemTuple } from "../tuples/UserListItemTuple"
 import { DeviceEnrolmentService, DeviceInfoTuple } from "@peek/peek_core_device"
 import { userTuplePrefix } from "../_private/PluginNames"

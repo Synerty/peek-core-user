@@ -1,11 +1,13 @@
 import { Component } from "@angular/core"
-import { extend, TupleLoader, VortexService } from "@synerty/vortexjs"
+import {
+    extend,
+    NgLifeCycleEvents,
+    TupleLoader,
+    VortexService
+} from "@synerty/vortexjs"
 import { userFilt } from "@peek/peek_core_user/_private"
 import { InternalGroupTuple } from "../tuples/InternalGroupTuple"
-import {
-    BalloonMsgService,
-    NgLifeCycleEvents
-} from "@synerty/peek-plugin-base-js"
+import { BalloonMsgService } from "@synerty/peek-plugin-base-js"
 
 @Component({
     selector: "pl-user-edit-internal-group",

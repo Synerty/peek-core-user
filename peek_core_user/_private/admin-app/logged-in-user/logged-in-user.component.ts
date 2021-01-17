@@ -3,9 +3,9 @@ import {
     BalloonMsgLevel,
     BalloonMsgService,
     BalloonMsgType,
-    NgLifeCycleEvents
 } from "@synerty/peek-plugin-base-js"
 import {
+    NgLifeCycleEvents,
     TupleActionPushService,
     TupleDataObserverService,
     TupleSelector
