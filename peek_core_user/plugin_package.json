@@ -25,6 +25,8 @@
     },
     "field": {
         "showHomeLink": true,
+        "homeLinkText": "User",
+        "appModule": "plugin-user.module#PluginUserModule",
         "appDir": "_private/both-app",
         "moduleDir": "plugin-module",
         "assetDir": "_private/both-assets",

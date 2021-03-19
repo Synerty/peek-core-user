@@ -143,11 +143,14 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         this.tupleService.observer.subscribeToTupleSelector(tupleSelector)
             .takeUntil(this.onDestroyEvent)
             .subscribe((tuples: UserListItemTuple[]) => {
-                let blank = new UserListItemTuple()
+                const blank = new UserListItemTuple()
                 blank.displayName = "--- select ---"
                 this.users = [blank]
                 this.users.add(tuples)
-                console.log("UserListItemTuple Tuples len = " + tuples.length.toString())
+                this.users.sort((
+                    a,
+                    b
+                ) => a.displayName < b.displayName ? -1 : 1)
             })
     }
 }
