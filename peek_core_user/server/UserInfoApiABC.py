@@ -1,9 +1,10 @@
-from typing import Optional, List
-
-from abc import ABCMeta, abstractmethod
-from twisted.internet.defer import Deferred
+from abc import ABCMeta
+from abc import abstractmethod
+from typing import List
+from typing import Optional
 
 from peek_core_user.tuples.UserDetailTuple import UserDetailTuple
+from twisted.internet.defer import Deferred
 
 
 class UserInfoApiABC(metaclass=ABCMeta):
@@ -17,7 +18,8 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def userBlocking(self, userName: str, ormSession=None) -> Optional[UserDetailTuple]:
+    def userBlocking(self, userName: str, ormSession=None) -> Optional[
+        UserDetailTuple]:
         """User Details for User ID
 
         Return an instance of c{UserDetailTuple} for the userName provided.
@@ -30,7 +32,10 @@ class UserInfoApiABC(metaclass=ABCMeta):
 
     @abstractmethod
     def users(
-        self, likeTitle: Optional[str] = None, groupNames: Optional[List[str]] = None
+        self,
+        likeTitle: Optional[str] = None,
+        groupNames: Optional[List[str]] = None,
+        isFieldLogin: Optional[bool] = None,
     ) -> Deferred:
         """Users
 
@@ -67,4 +72,24 @@ class UserInfoApiABC(metaclass=ABCMeta):
         Return a user detail tuple for a user logged into a device with deviceToken
 
         :return UserDetail or None
+        """
+
+    @abstractmethod
+    def peekTokensWithUserDetails(
+        self, isFieldDevice: bool
+    ) -> Deferred:  # List[FieldDeviceWithUserDetailsTuple]
+        """Peek logged-in field device tokens with or without logged-in user
+        details
+
+        :return: A list of Peek Device Tokens logged in or not logged in on
+        Field app with user details tuples
+        """
+
+    @abstractmethod
+    def peekLoggedInDeviceTokens(self, isFieldDevice: bool) -> Deferred:
+        # List[
+        # str]
+        """Peek field device tokens with logged-in status
+
+        :return: A list of string of device tokens
         """
