@@ -17,7 +17,7 @@ class DeviceWithUserDetailsTuple(Tuple):
     related searches
     """
 
-    __tupleType__ = userPluginTuplePrefix + "FieldDeviceWithUserDetailsTuple"
+    __tupleType__ = userPluginTuplePrefix + "DeviceWithUserDetailsTuple"
 
     userDetails: UserDetailTuple = TupleField()
     deviceToken: str = TupleField()
