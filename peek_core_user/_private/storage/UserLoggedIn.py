@@ -10,9 +10,13 @@
 """
 import logging
 
-from sqlalchemy import Column, DateTime, Boolean
-from sqlalchemy import Integer, String
-from vortex.Tuple import Tuple, addTupleType
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import Integer
+from sqlalchemy import String
+from vortex.Tuple import Tuple
+from vortex.Tuple import addTupleType
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.storage.DeclarativeBase import DeclarativeBase
@@ -33,7 +37,7 @@ class UserLoggedIn(Tuple, DeclarativeBase):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     loggedInDateTime = Column(DateTime(True), nullable=False)
-    userName = Column(String(50))
+    userName = Column(String(50), unique=True)
     deviceToken = Column(String(100), unique=True, nullable=False)
     vehicle = Column(String)
     isFieldLogin = Column(Boolean)
