@@ -7,8 +7,7 @@ from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.exc import NoResultFound
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_core_user._private.storage.InternalGroupTuple import \
-    InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
 from peek_core_user._private.storage.InternalUserGroupTuple import (
     InternalUserGroupTuple,
 )
@@ -51,8 +50,7 @@ class UserInfoApi(UserInfoApiABC):
         """
         return self.userBlocking(userName)
 
-    def userBlocking(self, userName, ormSession=None) -> Optional[
-        UserDetailTuple]:
+    def userBlocking(self, userName, ormSession=None) -> Optional[UserDetailTuple]:
 
         if ormSession:
             close = False
@@ -64,8 +62,8 @@ class UserInfoApi(UserInfoApiABC):
         try:
             user = (
                 ormSession.query(InternalUserTuple)
-                    .filter(InternalUserTuple.userName == userName)
-                    .one()
+                .filter(InternalUserTuple.userName == userName)
+                .one()
             )
 
             return self._makeUserDetails(user)
@@ -102,21 +100,20 @@ class UserInfoApi(UserInfoApiABC):
     ) -> List[UserDetailTuple]:
         qry = (
             session.query(InternalUserTuple)
-                .options(subqueryload(InternalUserTuple.groups))
-                .order_by(InternalUserTuple.userName)
+            .options(subqueryload(InternalUserTuple.groups))
+            .order_by(InternalUserTuple.userName)
         )
 
         if isFieldLogin:
             qry = qry.join(
-                UserLoggedIn,
-                UserLoggedIn.userName == InternalUserTuple.userName
+                UserLoggedIn, UserLoggedIn.userName == InternalUserTuple.userName
             ).filter(UserLoggedIn.isFieldLogin)
 
         if groupNames:
             qry = (
                 qry.join(InternalUserGroupTuple)
-                    .join(InternalGroupTuple)
-                    .filter(InternalGroupTuple.groupName.in_(groupNames))
+                .join(InternalGroupTuple)
+                .filter(InternalGroupTuple.groupName.in_(groupNames))
             )
 
         if likeTitle:
@@ -153,17 +150,14 @@ class UserInfoApi(UserInfoApiABC):
     def groupsBlocking(
         self, session, likeTitle: Optional[str] = None
     ) -> List[GroupDetailTuple]:
-        qry = session.query(InternalGroupTuple).order_by(
-            InternalGroupTuple.groupName)
+        qry = session.query(InternalGroupTuple).order_by(InternalGroupTuple.groupName)
 
         if likeTitle:
-            qry = qry.filter(
-                InternalGroupTuple.userTitle.ilike("%" + likeTitle + "%"))
+            qry = qry.filter(InternalGroupTuple.userTitle.ilike("%" + likeTitle + "%"))
 
         return [self._makeGroupDetails(u) for u in qry.all()]
 
-    def _makeGroupDetails(self,
-                          ormGroups: InternalGroupTuple) -> GroupDetailTuple:
+    def _makeGroupDetails(self, ormGroups: InternalGroupTuple) -> GroupDetailTuple:
         groupDetail = GroupDetailTuple()
         for fieldName in self._groupCopyFields:
             setattr(groupDetail, fieldName, getattr(ormGroups, fieldName))
@@ -176,8 +170,8 @@ class UserInfoApi(UserInfoApiABC):
         try:
             result = (
                 session.query(UserLoggedIn)
-                    .filter(UserLoggedIn.userName == userName)
-                    .all()
+                .filter(UserLoggedIn.userName == userName)
+                .all()
             )
 
             return [r.deviceToken for r in result]
@@ -191,10 +185,9 @@ class UserInfoApi(UserInfoApiABC):
         try:
             result = (
                 session.query(InternalUserTuple)
-                    .join(UserLoggedIn,
-                    UserLoggedIn.userName == InternalUserTuple.userName)
-                    .filter(UserLoggedIn.deviceToken == deviceToken)
-                    .one()
+                .join(UserLoggedIn, UserLoggedIn.userName == InternalUserTuple.userName)
+                .filter(UserLoggedIn.deviceToken == deviceToken)
+                .one()
             )
 
             return self._makeUserDetails(result)
@@ -213,17 +206,17 @@ class UserInfoApi(UserInfoApiABC):
         try:
             query = (
                 session.query(UserLoggedIn, InternalUserTuple)
-                    .join(
+                .join(
                     InternalUserTuple,
                     UserLoggedIn.userName == InternalUserTuple.userName,
                 )
-                    .filter(UserLoggedIn.isFieldLogin == isFieldDevice)
+                .filter(UserLoggedIn.isFieldLogin == isFieldDevice)
             )
             result = []
-            for fieldLoggedInUser, userDetails in query.all():
+            for fieldLoggedInUser, internalUser in query.all():
                 row = DeviceWithUserDetailsTuple(
                     deviceToken=fieldLoggedInUser.deviceToken,
-                    userDetails=userDetails
+                    userDetails=internalUser.toUserDetailTuple(),
                 )
                 result.append(row)
             return result
