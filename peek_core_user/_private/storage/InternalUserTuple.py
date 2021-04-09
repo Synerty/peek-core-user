@@ -13,6 +13,8 @@ import logging
 from sqlalchemy import Column
 from sqlalchemy import Integer, String, Index
 from sqlalchemy.orm import relationship
+
+from peek_core_user.tuples.UserDetailTuple import UserDetailTuple
 from vortex.Tuple import Tuple, addTupleType, TupleField
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
@@ -54,3 +56,14 @@ class InternalUserTuple(Tuple, DeclarativeBase):
     groupIds = TupleField()
 
     __table_args__ = (Index("idx_InternalUserTable_importHash", importHash),)
+
+    def toUserDetailTuple(self):
+        return UserDetailTuple(
+            userName=self.userName,
+            userTitle=self.userTitle,
+            userUuid=self.userUuid,
+            mobile=self.mobile,
+            email=self.email,
+            groupNames=None,
+            data=None,
+        )
