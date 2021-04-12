@@ -2,7 +2,7 @@
     <h4>Login to Peek</h4>
     
     <form (keyup.enter)="doLogin()" autocomplete="off" novalidate>
-        <fieldset [disabled]="isAuthenticating">
+        <fieldset [disabled]="isAuthenticating$ | async">
             <div class="form-group">
                 <input
                     [(ngModel)]="selectedUser.userName"
