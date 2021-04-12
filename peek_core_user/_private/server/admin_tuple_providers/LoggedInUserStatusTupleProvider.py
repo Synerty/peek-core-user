@@ -35,10 +35,12 @@ class LoggedInUserStatusTupleProvider(TuplesProviderABC):
 
         for deviceDetail in deviceDetails:
             tuple_ = tuplesByDeviceToken[deviceDetail.deviceToken]
-            tuple_.deviceIsOnline = deviceDetail.isOnline
             tuple_.deviceLastOnline = deviceDetail.lastOnline
             tuple_.deviceType = deviceDetail.deviceType
             tuple_.deviceDescription = deviceDetail.description
+            tuple_.deviceIsOnline = bool(
+                deviceDetail.deviceStatus & deviceDetail.DEVICE_ONLINE
+            )
 
         payloadEnvelope = yield Payload(
             filt=filt, tuples=tuples
