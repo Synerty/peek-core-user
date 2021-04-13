@@ -11,6 +11,7 @@ import { NgLifeCycleEvents, TupleSelector, } from "@synerty/vortexjs"
 import { BalloonMsgService, HeaderService } from "@synerty/peek-plugin-base-js"
 import { UserLoginUiSettingTuple } from "../tuples/UserLoginUiSettingTuple"
 import { DeviceEnrolmentService } from "@peek/peek_core_device"
+import { BehaviorSubject } from "rxjs"
 
 @Component({
     selector: "./peek-core-user-login",
@@ -20,12 +21,12 @@ import { DeviceEnrolmentService } from "@peek/peek_core_device"
 export class UserLoginComponent extends NgLifeCycleEvents {
     users: Array<UserListItemTuple> = []
     selectedUser: UserLoginAction = new UserLoginAction()
-    isAuthenticating: boolean = false
     test: any = ""
     errors: string[] = []
     warnings: string[] = []
     warningKeys: string[] = []
     setting: UserLoginUiSettingTuple = new UserLoginUiSettingTuple()
+    isAuthenticating$ = new BehaviorSubject<boolean>(false)
     
     constructor(
         private balloonMsg: BalloonMsgService,
@@ -51,6 +52,14 @@ export class UserLoginComponent extends NgLifeCycleEvents {
                 if (this.setting.showUsersAsList)
                     this.loadUsersList()
             })
+    }
+    
+    get isAuthenticating(): boolean {
+        return this.isAuthenticating$.getValue()
+    }
+    
+    set isAuthenticating(value) {
+        this.isAuthenticating$.next(value)
     }
     
     isSelectedUserNull(): boolean {
@@ -100,6 +109,7 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         this.isAuthenticating = true
         this.userService.login(tupleAction)
             .then((response: UserLoginResponseTuple) => {
+                this.isAuthenticating = false
                 
                 if (response.succeeded) {
                     this.balloonMsg.showSuccess("Login Successful")
@@ -119,21 +129,17 @@ export class UserLoginComponent extends NgLifeCycleEvents {
                     }
                     this.warningKeys.push(key)
                 }
-                this.isAuthenticating = false
-                
             })
             .catch((err) => {
-                if (err.toString()
-                    .startsWith("Timed out")) {
+                this.isAuthenticating = false
+                if (err.toString().startsWith("Timed out")) {
                     alert("Login Failed. The server didn't respond.")
-                    this.isAuthenticating = false
                     return
                 }
                 else if (err.toString().length == 0) {
                     alert("An error occurred when logging in.")
                 }
                 alert(err)
-                this.isAuthenticating = false
             })
     }
     
