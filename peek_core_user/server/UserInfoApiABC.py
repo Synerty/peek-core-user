@@ -18,8 +18,9 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def userBlocking(self, userName: str, ormSession=None) -> Optional[
-        UserDetailTuple]:
+    def userBlocking(
+        self, userName: str, ormSession=None
+    ) -> Optional[UserDetailTuple]:
         """User Details for User ID
 
         Return an instance of c{UserDetailTuple} for the userName provided.
@@ -92,4 +93,12 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """Peek field device tokens with logged-in status
 
         :return: A list of string of device tokens
+        """
+
+    @abstractmethod
+    def userLoggedInInfo(self, userName: str) -> Deferred:
+        """Peek logged-in field device info by userName
+
+        :param userName: The username / userid of the user, EG C917
+        :return: A list of user LoggedIn Info
         """

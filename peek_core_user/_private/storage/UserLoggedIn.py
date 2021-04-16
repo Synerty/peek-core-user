@@ -15,6 +15,8 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
+
+from peek_core_user.tuples.UserLoggedInInfoTuple import UserLoggedInInfoTuple
 from vortex.Tuple import Tuple
 from vortex.Tuple import addTupleType
 
@@ -41,3 +43,12 @@ class UserLoggedIn(Tuple, DeclarativeBase):
     deviceToken = Column(String(100), unique=True, nullable=False)
     vehicle = Column(String)
     isFieldLogin = Column(Boolean)
+
+    def toTuple(self):
+        return UserLoggedInInfoTuple(
+            loggedInDateTime=self.loggedInDateTime,
+            userName=self.userName,
+            deviceToken=self.deviceToken,
+            vehicle=self.vehicle,
+            isFieldLogin=self.isFieldLogin,
+        )

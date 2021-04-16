@@ -7,7 +7,9 @@ from sqlalchemy.orm import subqueryload
 from sqlalchemy.orm.exc import NoResultFound
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserGroupTuple import (
     InternalUserGroupTuple,
 )
@@ -50,7 +52,9 @@ class UserInfoApi(UserInfoApiABC):
         """
         return self.userBlocking(userName)
 
-    def userBlocking(self, userName, ormSession=None) -> Optional[UserDetailTuple]:
+    def userBlocking(
+        self, userName, ormSession=None
+    ) -> Optional[UserDetailTuple]:
 
         if ormSession:
             close = False
@@ -106,7 +110,8 @@ class UserInfoApi(UserInfoApiABC):
 
         if isFieldLogin:
             qry = qry.join(
-                UserLoggedIn, UserLoggedIn.userName == InternalUserTuple.userName
+                UserLoggedIn,
+                UserLoggedIn.userName == InternalUserTuple.userName,
             ).filter(UserLoggedIn.isFieldLogin)
 
         if groupNames:
@@ -150,14 +155,20 @@ class UserInfoApi(UserInfoApiABC):
     def groupsBlocking(
         self, session, likeTitle: Optional[str] = None
     ) -> List[GroupDetailTuple]:
-        qry = session.query(InternalGroupTuple).order_by(InternalGroupTuple.groupName)
+        qry = session.query(InternalGroupTuple).order_by(
+            InternalGroupTuple.groupName
+        )
 
         if likeTitle:
-            qry = qry.filter(InternalGroupTuple.userTitle.ilike("%" + likeTitle + "%"))
+            qry = qry.filter(
+                InternalGroupTuple.userTitle.ilike("%" + likeTitle + "%")
+            )
 
         return [self._makeGroupDetails(u) for u in qry.all()]
 
-    def _makeGroupDetails(self, ormGroups: InternalGroupTuple) -> GroupDetailTuple:
+    def _makeGroupDetails(
+        self, ormGroups: InternalGroupTuple
+    ) -> GroupDetailTuple:
         groupDetail = GroupDetailTuple()
         for fieldName in self._groupCopyFields:
             setattr(groupDetail, fieldName, getattr(ormGroups, fieldName))
@@ -185,7 +196,10 @@ class UserInfoApi(UserInfoApiABC):
         try:
             result = (
                 session.query(InternalUserTuple)
-                .join(UserLoggedIn, UserLoggedIn.userName == InternalUserTuple.userName)
+                .join(
+                    UserLoggedIn,
+                    UserLoggedIn.userName == InternalUserTuple.userName,
+                )
                 .filter(UserLoggedIn.deviceToken == deviceToken)
                 .one()
             )
@@ -235,5 +249,18 @@ class UserInfoApi(UserInfoApiABC):
             return [row.deviceToken for row in query.all()]
         except NoResultFound:
             return []
+        finally:
+            session.close()
+
+    @deferToThreadWrapWithLogger(logger)
+    def userLoggedInInfo(self, userName: str) -> List[UserLoggedIn]:
+        session = self._dbSessionCreator()
+        try:
+            query = session.query(UserLoggedIn).filter(
+                UserLoggedIn.userName == userName
+            )
+
+            row = query.one()
+            return row.toTuple()
         finally:
             session.close()
