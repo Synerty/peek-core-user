@@ -253,14 +253,15 @@ class UserInfoApi(UserInfoApiABC):
             session.close()
 
     @deferToThreadWrapWithLogger(logger)
-    def userLoggedInInfo(self, userName: str) -> List[UserLoggedIn]:
+    def userLoggedInInfo(
+        self, userName: str, isFieldDevice: bool
+    ) -> List[UserLoggedIn]:
         session = self._dbSessionCreator()
         try:
             query = session.query(UserLoggedIn).filter(
-                UserLoggedIn.userName == userName
+                UserLoggedIn.isFieldLogin == isFieldDevice,
+                UserLoggedIn.userName == userName,
             )
-
-            row = query.one()
-            return row.toTuple()
+            return [row.toTuple() for row in query.all()]
         finally:
             session.close()

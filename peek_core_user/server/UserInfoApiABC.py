@@ -96,7 +96,7 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def userLoggedInInfo(self, userName: str) -> Deferred:
+    def userLoggedInInfo(self, userName: str, isFieldDevice: bool) -> Deferred:
         """Peek logged-in field device info by userName
 
         :param userName: The username / userid of the user, EG C917
