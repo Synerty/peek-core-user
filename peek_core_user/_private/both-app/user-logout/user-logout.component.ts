@@ -8,6 +8,7 @@ import { UserTupleService } from "@peek/peek_core_user/_private/user-tuple.servi
 import { Component } from "@angular/core"
 import { BalloonMsgService, HeaderService } from "@synerty/peek-plugin-base-js"
 import { NgLifeCycleEvents } from "@synerty/vortexjs"
+import { DeviceOnlineService } from "@peek/peek_core_device/_private"
 
 @Component({
     selector: "./peek-core-user-logout",
@@ -15,7 +16,6 @@ import { NgLifeCycleEvents } from "@synerty/vortexjs"
     styleUrls: ["../scss/plugin-user.dweb.scss"]
 })
 export class UserLogoutComponent extends NgLifeCycleEvents {
-    
     isAuthenticating: boolean = false
     
     errors: string[] = []
@@ -28,11 +28,11 @@ export class UserLogoutComponent extends NgLifeCycleEvents {
         private tupleService: UserTupleService,
         private userService: UserService,
         private router: Router,
+        private deviceOnlineService: DeviceOnlineService,
         headerService: HeaderService
     ) {
         super()
         headerService.setTitle("User Logout")
-        
     }
     
     doLogout() {
@@ -45,8 +45,8 @@ export class UserLogoutComponent extends NgLifeCycleEvents {
         this.isAuthenticating = true
         this.userService.logout(tupleAction)
             .then((response: UserLogoutResponseTuple) => {
-                
                 if (response.succeeded) {
+                    this.deviceOnlineService.setDeviceOffline()
                     this.balloonMsg.showSuccess("Logout Successful")
                     this.router.navigate([""])
                     return
@@ -79,12 +79,8 @@ export class UserLogoutComponent extends NgLifeCycleEvents {
         
     }
     
-    // ------------------------------
-    // Display methods
-    
     loggedInUserText() {
         return this.userService.userDetails.displayName
             + ` (${this.userService.userDetails.userId})`
     }
-    
 }

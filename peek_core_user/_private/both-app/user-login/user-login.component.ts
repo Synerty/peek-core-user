@@ -11,6 +11,7 @@ import { NgLifeCycleEvents, TupleSelector, } from "@synerty/vortexjs"
 import { BalloonMsgService, HeaderService } from "@synerty/peek-plugin-base-js"
 import { UserLoginUiSettingTuple } from "../tuples/UserLoginUiSettingTuple"
 import { DeviceEnrolmentService } from "@peek/peek_core_device"
+import { DeviceOnlineService } from "@peek/peek_core_device/_private"
 import { BehaviorSubject } from "rxjs"
 
 @Component({
@@ -34,6 +35,7 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         private tupleService: UserTupleService,
         private userService: UserService,
         private router: Router,
+        private deviceOnlineService: DeviceOnlineService,
         headerService: HeaderService
     ) {
         super()
@@ -112,6 +114,7 @@ export class UserLoginComponent extends NgLifeCycleEvents {
                 this.isAuthenticating = false
                 
                 if (response.succeeded) {
+                    this.deviceOnlineService.setDeviceOnline()
                     this.balloonMsg.showSuccess("Login Successful")
                     this.router.navigate([""])
                     return

@@ -23,6 +23,7 @@ import { UserLogoutResponseTuple } from "../tuples/login/UserLogoutResponseTuple
 import { UserLoginAction } from "../tuples/login/UserLoginAction"
 import { UserLoginResponseTuple } from "../tuples/login/UserLoginResponseTuple"
 import { UserTupleService } from "../_private/user-tuple.service"
+import { DeviceOnlineService } from "@peek/peek_core_device/_private"
 
 @addTupleType
 export class UserServiceStateTuple extends Tuple {
@@ -50,6 +51,7 @@ export class UserService extends NgLifeCycleEvents {
         private router: Router,
         private balloonMsg: BalloonMsgService,
         private deviceEnrolmentService: DeviceEnrolmentService,
+        private deviceOnlineService: DeviceOnlineService,
         private tupleService: UserTupleService
     ) {
         super()
@@ -220,8 +222,13 @@ export class UserService extends NgLifeCycleEvents {
                 if (tuples.length != 0) {
                     this.state = tuples[0]
                     // Apply the login
-                    if (this.state.userDetails != null)
+                    if (this.state.userDetails != null) {
                         this.setLogin(this.state.userDetails)
+                        this.deviceOnlineService.setDeviceOnline()
+                    }
+                    else {
+                        this.deviceOnlineService.setDeviceOffline()
+                    }
                 }
                 
                 if (!wasLoaded) {
