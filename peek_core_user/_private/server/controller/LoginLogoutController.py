@@ -351,6 +351,9 @@ class LoginLogoutController:
         Returns Deferred[UserLoginResponseTuple]
 
         """
+        # make login username case insensitive
+        loginTuple.userName = loginTuple.userName.lower()
+
         loginResponse = None
         try:
             loginResponse = yield self._loginInDb(loginTuple)
