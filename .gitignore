@@ -92,10 +92,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
-.idea
 
 # Ignore pycharm project files
-.idea/
 
 # Ignore sonarscanner
 .scannerwork/.scannerwork/
