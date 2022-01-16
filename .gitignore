@@ -2,16 +2,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# auth generated js and jsmap files
-*.js
-*.js.map
+dist/git s
 
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
+docs/api_autodoc/
 env/
 build/
 develop-eggs/
@@ -27,13 +25,13 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+peek_dist*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-MANIFEST
 
 # Installer logs
 pip-log.txt
@@ -66,7 +64,10 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/peek*
+docs/modules.rst
+docs/_build
+
 
 # PyBuilder
 target/
@@ -92,8 +93,29 @@ ENV/
 
 # Rope project settings
 .ropeproject
+MANIFEST
 
-# Ignore pycharm project files
+#peek_agent_service
+#peek_office_service
+#peek_platform
+#peek_logic_service
+#peek_worker_service
+.DS_Store
+.scannerwork/
 
-# Ignore sonarscanner
-.scannerwork/.scannerwork/
+# gitlab token
+.gitlabtoken
+
+# sphinx builds
+doc_dist
+doc_dist_latex
+
+# for the Peek Doc projects
+**/doc_link
+
+# For the Peek App projects
+**/node_modules
+*_app/src/@*
+*_app/src/assets/peek*
+.lasthash
+
