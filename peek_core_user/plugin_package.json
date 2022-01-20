@@ -90,12 +90,9 @@
         "appDir": "_private/admin-app",
         "appModule": "user.module#UserModule"
     },
-    "logic": {
-    },
-    "agent": {
-    },
-    "worker": {
-    },
+    "logic": {},
+    "agent": {},
+    "worker": {},
     "storage": {
         "alembicDir": "_private/alembic"
     }

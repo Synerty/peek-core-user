@@ -1,7 +1,5 @@
 <div class="panel panel-default">
-    <div class="panel-heading">
-        General Settings
-    </div>
+    <div class="panel-heading">General Settings</div>
     <div class="panel-body">
         <table class="table">
             <tr>
@@ -10,10 +8,10 @@
             </tr>
             <tr *ngFor="let item of items">
                 <td>{{ item.key }}</td>
-                <td *ngIf="item.type == 'boolean' ">
+                <td *ngIf="item.type == 'boolean'">
                     <nz-switch [(ngModel)]="item.boolean_value"></nz-switch>
                 </td>
-                <td *ngIf="item.type == 'integer' ">
+                <td *ngIf="item.type == 'integer'">
                     <input
                         [(ngModel)]="item.int_value"
                         [name]="item.key"
@@ -22,7 +20,7 @@
                         type="number"
                     />
                 </td>
-                <td *ngIf="item.key.endsWith('pass') && item.type == 'string' ">
+                <td *ngIf="item.key.endsWith('pass') && item.type == 'string'">
                     <input
                         [(ngModel)]="item.char_value"
                         [name]="item.key"
@@ -30,7 +28,7 @@
                         type="password"
                     />
                 </td>
-                <td *ngIf="!item.key.endsWith('pass') && item.type == 'string' ">
+                <td *ngIf="!item.key.endsWith('pass') && item.type == 'string'">
                     <input
                         [(ngModel)]="item.char_value"
                         [name]="item.key"
@@ -39,17 +37,14 @@
                 </td>
             </tr>
         </table>
-        
+
         <div class="btn-toolbar">
             <div class="btn-group">
-                <div (click)="saveClicked()" class="btn btn-default">
-                    Save
-                </div>
+                <div (click)="saveClicked()" class="btn btn-default">Save</div>
                 <div (click)="resetClicked()" class="btn btn-default">
                     Reset
                 </div>
             </div>
         </div>
-    
     </div>
 </div>

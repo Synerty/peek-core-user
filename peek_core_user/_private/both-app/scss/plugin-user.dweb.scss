@@ -1,4 +1,4 @@
-@import '~@synerty/peek-plugin-base-js/src/styles/_variables';
+@import "~@synerty/peek-plugin-base-js/src/styles/_variables";
 
 $general_margin_1: 1 !default;
 $general_font_size_5: 1 !default;
@@ -19,10 +19,8 @@ $general_padding_3: 1 !default;
         */
         font-size: $general_font_size_3;
         margin-top: $general_margin_3;
-
     }
 }
-
 
 .peek-nav-section {
     position: relative;

@@ -1,16 +1,13 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Edit Internal Groups
+    <div class="panel-heading">
+        Edit Internal Groups
         <div class="btn-toolbar pull-right">
             <div class="btn-group">
-                <div (click)="save()" class="btn btn-default btn-sm">
-                    Save
-                </div>
+                <div (click)="save()" class="btn btn-default btn-sm">Save</div>
                 <div (click)="loader.load()" class="btn btn-default btn-sm">
                     Reset
                 </div>
-                <div (click)="addRow()" class="btn btn-default btn-sm">
-                    Add
-                </div>
+                <div (click)="addRow()" class="btn btn-default btn-sm">Add</div>
             </div>
         </div>
     </div>
@@ -41,7 +38,8 @@
                 <td>
                     <div (click)="removeRow(item)" class="btn btn-default">
                         <span
-                            aria-hidden="true" class="glyphicon glyphicon-minus"
+                            aria-hidden="true"
+                            class="glyphicon glyphicon-minus"
                         ></span>
                     </div>
                 </td>

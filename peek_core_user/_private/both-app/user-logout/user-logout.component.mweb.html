@@ -4,7 +4,7 @@
         Can contain one to many buttons
     -->
     <div class="btn-group pull-left" role="group"></div>
-    
+
     <!--
         The following 'div' groups button to the right of the Nav Bar.
         Can contain one to many buttons
@@ -27,18 +27,14 @@
 </div>
 
 <div class="plugin-user">
-    <div *ngFor="let error of errors" class="bg-danger">
-        {{error}}
-    </div>
-    
-    <div *ngFor="let warning of warnings" class="bg-warning">
-        {{warning}}
-    </div>
-    
+    <div *ngFor="let error of errors" class="bg-danger">{{error}}</div>
+
+    <div *ngFor="let warning of warnings" class="bg-warning">{{warning}}</div>
+
     <div *ngIf="warnings != null && warnings.length != 0" class="bg-info">
         Click 'Logout' a second time to ignore these warnings.
     </div>
-    
+
     <div class="user-message">
         <i nz-icon nzTheme="outline" nzType="login"></i>
         Logged in as {{loggedInUserText()}}

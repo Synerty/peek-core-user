@@ -1,6 +1,6 @@
-import { addTupleType, Tuple } from "@synerty/vortexjs"
-import { userTuplePrefix } from "../PluginNames"
-import { UserListItemTuple } from "../../tuples/UserListItemTuple"
+import { addTupleType, Tuple } from "@synerty/vortexjs";
+import { userTuplePrefix } from "../PluginNames";
+import { UserListItemTuple } from "../../tuples/UserListItemTuple";
 
 /** User Logged In Tuple
  *
@@ -12,12 +12,11 @@ import { UserListItemTuple } from "../../tuples/UserListItemTuple"
  */
 @addTupleType
 export class UserLoggedInTuple extends Tuple {
-    public static readonly tupleName = userTuplePrefix + "UserLoggedInTuple"
-    userDetails: UserListItemTuple
-    deviceToken: string
-    
+    public static readonly tupleName = userTuplePrefix + "UserLoggedInTuple";
+    userDetails: UserListItemTuple;
+    deviceToken: string;
+
     constructor() {
-        super(UserLoggedInTuple.tupleName) // Matches server side
+        super(UserLoggedInTuple.tupleName); // Matches server side
     }
-    
 }
