@@ -1,3 +1,5 @@
+import { Observable, Subject } from "rxjs";
+import { first, takeUntil } from "rxjs/operators";
 // user.service.ts
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
@@ -12,8 +14,6 @@ import {
     Tuple,
     TupleSelector,
 } from "@synerty/vortexjs";
-import { Observable, Subject } from "rxjs";
-import { first } from "rxjs/operators";
 import { UserListItemTuple } from "../tuples/UserListItemTuple";
 import {
     DeviceEnrolmentService,
@@ -68,7 +68,7 @@ export class UserService extends NgLifeCycleEvents {
         let tupleSelector = new TupleSelector(UserListItemTuple.tupleName, {});
         this.tupleService.observer
             .subscribeToTupleSelector(tupleSelector)
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((tuples: UserListItemTuple[]) => {
                 this._users = tuples;
                 this._userDisplayNameById = {};
@@ -80,7 +80,7 @@ export class UserService extends NgLifeCycleEvents {
         this.deviceEnrolmentService
             .deviceInfoObservable()
             .pipe(first())
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((deviceInfo: DeviceInfoTuple) => {
                 // Setup the user logged in subscriptions
                 const deviceUserLoggedInTs = new TupleSelector(
@@ -90,7 +90,7 @@ export class UserService extends NgLifeCycleEvents {
 
                 this.tupleService.observer
                     .subscribeToTupleSelector(deviceUserLoggedInTs, true)
-                    .takeUntil(this.onDestroyEvent)
+                    .pipe(takeUntil(this.onDestroyEvent))
                     .subscribe((tuples: UserLoggedInTuple[]) =>
                         this.userLoggedInReceived(tuples)
                     );

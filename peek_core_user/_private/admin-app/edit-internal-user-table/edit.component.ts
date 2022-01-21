@@ -1,3 +1,4 @@
+import { takeUntil } from "rxjs/operators";
 import { Component, NgZone } from "@angular/core";
 import {
     extend,
@@ -45,7 +46,7 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
         });
 
         this.loader.observable
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((tuples: InternalUserTuple[]) => {
                 this.items = tuples;
                 this.itemsToDelete = [];
@@ -55,7 +56,7 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
             .subscribeToTupleSelector(
                 new TupleSelector(GroupDetailTuple.tupleName, {})
             )
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((tuples: GroupDetailTuple[]) => {
                 this.groups = tuples;
                 this.groupsById = {};

@@ -1,3 +1,5 @@
+import { BehaviorSubject } from "rxjs";
+import { filter, takeUntil } from "rxjs/operators";
 import { Router } from "@angular/router";
 import {
     UserListItemTuple,
@@ -12,7 +14,6 @@ import { BalloonMsgService, HeaderService } from "@synerty/peek-plugin-base-js";
 import { UserLoginUiSettingTuple } from "../tuples/UserLoginUiSettingTuple";
 import { DeviceEnrolmentService } from "@peek/peek_core_device";
 import { DeviceOnlineService } from "@peek/peek_core_device/_private";
-import { BehaviorSubject } from "rxjs";
 
 @Component({
     selector: "./peek-core-user-login",
@@ -48,8 +49,8 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         let ts = new TupleSelector(UserLoginUiSettingTuple.tupleName, {});
         this.tupleService.observer
             .subscribeToTupleSelector(ts)
-            .takeUntil(this.onDestroyEvent)
-            .filter((items) => items.length != 0)
+            .pipe(takeUntil(this.onDestroyEvent))
+            .pipe(filter((items) => items.length != 0))
             .subscribe((tuples: UserLoginUiSettingTuple[]) => {
                 this.setting = tuples[0];
                 if (this.setting.showUsersAsList) this.loadUsersList();
@@ -156,7 +157,7 @@ export class UserLoginComponent extends NgLifeCycleEvents {
         let tupleSelector = new TupleSelector(UserListItemTuple.tupleName, {});
         this.tupleService.observer
             .subscribeToTupleSelector(tupleSelector)
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((tuples: UserListItemTuple[]) => {
                 const blank = new UserListItemTuple();
                 blank.displayName = "--- select ---";

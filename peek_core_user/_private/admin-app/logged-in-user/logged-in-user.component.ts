@@ -1,3 +1,4 @@
+import { takeUntil } from "rxjs/operators";
 import { Component } from "@angular/core";
 import {
     BalloonMsgLevel,
@@ -34,7 +35,7 @@ export class ManageLoggedInUserComponent extends NgLifeCycleEvents {
         const ts = new TupleSelector(LoggedInUserStatusTuple.tupleName, {});
         tupleDataObserver
             .subscribeToTupleSelector(ts)
-            .takeUntil(this.onDestroyEvent)
+            .pipe(takeUntil(this.onDestroyEvent))
             .subscribe((tuples: LoggedInUserStatusTuple[]) => {
                 this.items = tuples;
             });
