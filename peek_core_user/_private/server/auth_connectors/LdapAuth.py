@@ -1,10 +1,16 @@
+import hashlib
 import logging
 from typing import List
 
-from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
+from peek_core_user._private.server.auth_connectors.InternalAuth import (
+    InternalAuth,
+)
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.LdapSetting import LdapSetting
-from peek_core_user._private.storage.Setting import globalSetting, LDAP_VERIFY_SSL
+from peek_core_user._private.storage.Setting import (
+    globalSetting,
+    LDAP_VERIFY_SSL,
+)
 from twisted.cred.error import LoginFailed
 
 __author__ = "synerty"
@@ -114,7 +120,9 @@ class LdapAuth:
             conn.set_option(ldap.OPT_REFERRALS, 0)
 
             # make the connection
-            conn.simple_bind_s("%s@%s" % (userName, ldapSetting.ldapDomain), password)
+            conn.simple_bind_s(
+                "%s@%s" % (userName, ldapSetting.ldapDomain), password
+            )
             ldapFilter = (
                 "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
                 % userName
@@ -182,17 +190,25 @@ class LdapAuth:
             email = userDetails["userPrincipalName"][0].decode()
 
         userUuid = None
-        if userDetails["distinguishedName"]:
-            userUuid = userDetails["distinguishedName"][0].decode()
+        if userDetails["objectGUID"]:
+            md5Hash = hashlib.md5(userDetails["objectGUID"][0])
+            userUuid = str(md5Hash.hexdigest())
 
         if ldapSetting.ldapGroups:
-            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
+            ldapGroups = set(
+                [s.strip() for s in ldapSetting.ldapGroups.split(",")]
+            )
 
             if not ldapGroups & set(groups):
                 raise LoginFailed("User is not apart of an authorised group")
 
         self._makeOrCreateInternalUserBlocking(
-            dbSession, userName, userTitle, userUuid, email, ldapSetting.ldapTitle
+            dbSession,
+            userName,
+            userTitle,
+            userUuid,
+            email,
+            ldapSetting.ldapTitle,
         )
 
         return groups
@@ -203,7 +219,7 @@ class LdapAuth:
 
         internalUser = (
             dbSession.query(InternalUserTuple)
-            .filter(InternalUserTuple.userName == userName)
+            .filter(InternalUserTuple.userUuid == userUuid)
             .all()
         )
 

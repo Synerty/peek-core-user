@@ -32,6 +32,20 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def userByUserKeyBlocking(
+        self, userKey: str, ormSession=None
+    ) -> Optional[UserDetailTuple]:
+        """User Details for User key
+
+        Return an instance of c{UserDetailTuple} for the userName provided.
+        :param userKey: The userkey to retrive the details for
+        :param ormSession: Specify the ormSession to use, otherwise it may close the
+                            current session.
+
+        :return UserDetailTuple
+        """
+
+    @abstractmethod
     def users(
         self,
         likeTitle: Optional[str] = None,

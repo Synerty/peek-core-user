@@ -3,14 +3,19 @@ import logging
 from sqlalchemy.orm import subqueryload
 
 from peek_core_user._private.PluginNames import userPluginFilt
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user.tuples.UserListItemTuple import UserListItemTuple
 from peek_core_user.tuples.UserDetailTuple import UserDetailTuple
 from vortex.Payload import Payload
 from vortex.TupleSelector import TupleSelector
 from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
-from vortex.sqla_orm.OrmCrudHandler import OrmCrudHandler, OrmCrudHandlerExtension
+from vortex.sqla_orm.OrmCrudHandler import (
+    OrmCrudHandler,
+    OrmCrudHandlerExtension,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +35,9 @@ class __CrudHandler(OrmCrudHandler):
             tuples = (
                 session.query(InternalUserTuple)
                 .options(subqueryload(InternalUserTuple.groups))
-                .filter(InternalUserTuple.userTitle.ilike("%" + likeTitle + "%"))
+                .filter(
+                    InternalUserTuple.userTitle.ilike("%" + likeTitle + "%")
+                )
                 .all()
             )
 
@@ -83,6 +90,11 @@ class __ExtUpdateObservable(OrmCrudHandlerExtension):
     afterUpdateCommit = _afterCommit
     afterDeleteCommit = _afterCommit
 
+    def beforeUpdate(self, tuple_, tuples, session, payloadFilt):
+        for t in tuples:
+            t.userKey = t.userName.lower()
+        return True
+
     def middleUpdate(self, tuple_, tuples, session, payloadFilt):
         groupsById = {g.id: g for g in session.query(InternalGroupTuple)}
 
@@ -100,5 +112,7 @@ def makeInternalUserTableHandler(tupleObservable, dbSessionCreator):
     )
 
     logger.debug("Started")
-    handler.addExtension(InternalUserTuple, __ExtUpdateObservable(tupleObservable))
+    handler.addExtension(
+        InternalUserTuple, __ExtUpdateObservable(tupleObservable)
+    )
     return handler

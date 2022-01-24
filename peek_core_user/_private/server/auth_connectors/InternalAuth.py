@@ -4,11 +4,15 @@ from typing import List
 from peek_core_user._private.server.controller.PasswordUpdateController import (
     PasswordUpdateController,
 )
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserGroupTuple import (
     InternalUserGroupTuple,
 )
-from peek_core_user._private.storage.InternalUserPassword import InternalUserPassword
+from peek_core_user._private.storage.InternalUserPassword import (
+    InternalUserPassword,
+)
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.Setting import (
     globalSetting,
@@ -34,7 +38,7 @@ class InternalAuth:
         results = (
             dbSession.query(InternalUserPassword)
             .join(InternalUserTuple)
-            .filter(InternalUserTuple.userName == userName)
+            .filter(InternalUserTuple.userKey == userName.lower())
             .all()
         )
 
@@ -70,6 +74,8 @@ class InternalAuth:
                 raise LoginFailed("User is not apart of an authorised group")
 
         else:
-            raise Exception("InternalAuth:Unhandled forService type %s" % forService)
+            raise Exception(
+                "InternalAuth:Unhandled forService type %s" % forService
+            )
 
         return groupNames

@@ -15,7 +15,7 @@ class UserDetailTuple(Tuple):
     userTitle: str = TupleField()
 
     #:  An external system user uuid, EG 715903a7ebc14fb0afb00d432676c51c
-    userUuid: Optional[str] = TupleField()
+    userUuid: str = TupleField()
 
     #:  The mobile number, EG +61 419 123 456
     mobile: Optional[str] = TupleField()
@@ -28,3 +28,7 @@ class UserDetailTuple(Tuple):
 
     #: A field for additional data
     data: Optional[Dict] = TupleField()
+
+    @property
+    def userKey(self):
+        return self.userName.lower()
