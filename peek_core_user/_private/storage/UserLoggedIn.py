@@ -40,6 +40,8 @@ class UserLoggedIn(Tuple, DeclarativeBase):
     id = Column(Integer, primary_key=True, autoincrement=True)
     loggedInDateTime = Column(DateTime(True), nullable=False)
     userName = Column(String(50))
+    userKey = Column(String(50))
+    userUuid = Column(String, unique=True, nullable=False)
     deviceToken = Column(String(100), unique=True, nullable=False)
     vehicle = Column(String)
     isFieldLogin = Column(Boolean)

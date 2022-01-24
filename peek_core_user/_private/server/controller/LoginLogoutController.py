@@ -13,7 +13,9 @@ from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.server.api.UserFieldHookApi import UserFieldHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
-from peek_core_user._private.server.auth_connectors.InternalAuth import InternalAuth
+from peek_core_user._private.server.auth_connectors.InternalAuth import (
+    InternalAuth,
+)
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
 from peek_core_user._private.storage.Setting import (
     globalSetting,
@@ -26,11 +28,17 @@ from peek_core_user._private.tuples.LoggedInUserStatusTuple import (
     LoggedInUserStatusTuple,
 )
 from peek_core_user._private.tuples.UserLoggedInTuple import UserLoggedInTuple
-from peek_core_user.server.UserDbErrors import UserIsNotLoggedInToThisDeviceError
+from peek_core_user.server.UserDbErrors import (
+    UserIsNotLoggedInToThisDeviceError,
+)
 from peek_core_user.tuples.login.UserLoginAction import UserLoginAction
-from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
+from peek_core_user.tuples.login.UserLoginResponseTuple import (
+    UserLoginResponseTuple,
+)
 from peek_core_user.tuples.login.UserLogoutAction import UserLogoutAction
-from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
+from peek_core_user.tuples.login.UserLogoutResponseTuple import (
+    UserLogoutResponseTuple,
+)
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
 
 logger = logging.getLogger(__name__)
@@ -40,7 +48,9 @@ DEVICE_ALREADY_LOGGED_ON_KEY = "pl-user.DEVICE_ALREADY_LOGGED_ON_KEY"
 
 
 class LoginLogoutController:
-    def __init__(self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator):
+    def __init__(
+        self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator
+    ):
         self._deviceApi: DeviceApiABC = deviceApi
         self._fieldServiceHookApi: UserFieldHookApi = None
         self._infoApi: UserInfoApi = None
@@ -176,7 +186,9 @@ class LoginLogoutController:
         finally:
             # Delay this, otherwise the user gets kicked off before getting
             # the nice success message
-            reactor.callLater(0.05, self._sendLogoutUpdate, logoutTuple.deviceToken)
+            reactor.callLater(
+                0.05, self._sendLogoutUpdate, logoutTuple.deviceToken
+            )
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
             LoggedInUserStatusTuple.tupleType()
@@ -187,7 +199,8 @@ class LoginLogoutController:
     def _sendLogoutUpdate(self, deviceToken: str):
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(
-                UserLoggedInTuple.tupleType(), selector=dict(deviceToken=deviceToken)
+                UserLoggedInTuple.tupleType(),
+                selector=dict(deviceToken=deviceToken),
             )
         )
 
@@ -199,6 +212,7 @@ class LoginLogoutController:
         """
 
         userName = loginTuple.userName
+        userKey = loginTuple.userName.lower()
         password = loginTuple.password
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
         deviceToken = loginTuple.deviceToken
@@ -217,8 +231,25 @@ class LoginLogoutController:
         if not deviceToken:
             raise Exception("peekToken must be supplied")
 
-        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(deviceToken)
+        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
+            deviceToken
+        )
 
+        userDetail = self._infoApi.userByUserKeyBlocking(userKey)
+
+        # user not found
+        if not userDetail:
+            responseTuple.setFailed()
+            return responseTuple
+
+        userName = userDetail.userName
+        userKey = userDetail.userKey
+        userUuid = userDetail.userUuid
+        loginTuple.userName = userDetail.userName
+        responseTuple.userName = userDetail.userName
+        responseTuple.userDetail = userDetail
+
+        # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
             groups = self._checkPassBlocking(
@@ -226,12 +257,10 @@ class LoginLogoutController:
             )
             self._checkGroupBlocking(ormSession, groups)
 
-            responseTuple.userDetail = self._infoApi.userBlocking(userName, ormSession)
-
             # Find any current login sessions
             userLoggedIn = (
                 ormSession.query(UserLoggedIn)
-                .filter(UserLoggedIn.userName == userName)
+                .filter(UserLoggedIn.userUuid == userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
@@ -240,17 +269,20 @@ class LoginLogoutController:
             loggedInElsewhere = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken != deviceToken)
-                .filter(UserLoggedIn.userName == userName)
+                .filter(UserLoggedIn.userUuid == userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
 
             if allowMultipleLogins and len(loggedInElsewhere) not in (0, 1):
                 raise Exception(
-                    "Found more than 1 ClientDevice for" + (" token %s" % deviceToken)
+                    "Found more than 1 ClientDevice for"
+                    + (" token %s" % deviceToken)
                 )
 
-            loggedInElsewhere = loggedInElsewhere[0] if loggedInElsewhere else None
+            loggedInElsewhere = (
+                loggedInElsewhere[0] if loggedInElsewhere else None
+            )
 
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
@@ -258,13 +290,15 @@ class LoginLogoutController:
             if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
-                        ormSession, userName, loggedInElsewhere.deviceToken
+                        ormSession, userUuid, loggedInElsewhere.deviceToken
                     )
                     userLoggedIn = False
 
                 else:
-                    otherDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
-                        loggedInElsewhere.deviceToken
+                    otherDeviceDescription = (
+                        self._deviceApi.deviceDescriptionBlocking(
+                            loggedInElsewhere.deviceToken
+                        )
                     )
 
                     # This is false if the logged in device has been removed from
@@ -283,14 +317,16 @@ class LoginLogoutController:
                     # Just let them login to the same device.
                     self._forceLogout(
                         ormSession,
-                        loggedInElsewhere.userName,
+                        loggedInElsewhere.userUuid,
                         loggedInElsewhere.deviceToken,
                     )
 
             # If we're logging into the same device, but already logged in
             if sameDevice:  # Logging into the same device
-                sameDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
-                    userLoggedIn.deviceToken
+                sameDeviceDescription = (
+                    self._deviceApi.deviceDescriptionBlocking(
+                        userLoggedIn.deviceToken
+                    )
                 )
 
                 responseTuple.deviceToken = userLoggedIn.deviceToken
@@ -301,7 +337,7 @@ class LoginLogoutController:
             anotherUserOnThatDevice = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken == deviceToken)
-                .filter(UserLoggedIn.userName != userName)
+                .filter(UserLoggedIn.userUuid != userUuid)
                 .all()
             )
 
@@ -310,7 +346,7 @@ class LoginLogoutController:
                 if DEVICE_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
                         ormSession,
-                        anotherUserOnThatDevice.userName,
+                        anotherUserOnThatDevice.userUuid,
                         anotherUserOnThatDevice.deviceToken,
                     )
 
@@ -319,7 +355,10 @@ class LoginLogoutController:
                     responseTuple.addWarning(
                         DEVICE_ALREADY_LOGGED_ON_KEY,
                         "User %s is currently logged into this device : %s"
-                        % (anotherUserOnThatDevice.userName, thisDeviceDescription),
+                        % (
+                            anotherUserOnThatDevice.userName,
+                            thisDeviceDescription,
+                        ),
                     )
 
                     return responseTuple
@@ -328,6 +367,8 @@ class LoginLogoutController:
 
             newUser = UserLoggedIn(
                 userName=userName,
+                userKey=userKey,
+                userUuid=userUuid,
                 loggedInDateTime=datetime.now(pytz.utc),
                 deviceToken=deviceToken,
                 vehicle=vehicle,
@@ -351,9 +392,6 @@ class LoginLogoutController:
         Returns Deferred[UserLoginResponseTuple]
 
         """
-        # make login username case insensitive
-        loginTuple.userName = loginTuple.userName.lower()
-
         loginResponse = None
         try:
             loginResponse = yield self._loginInDb(loginTuple)
@@ -398,14 +436,17 @@ class LoginLogoutController:
 
         return loginResponse
 
-    def _forceLogout(self, ormSession, userName, deviceToken):
+    def _forceLogout(self, ormSession, userUuid, deviceToken):
 
-        ormSession.query(UserLoggedIn).filter(UserLoggedIn.userName == userName).filter(
-            UserLoggedIn.deviceToken == deviceToken
-        ).delete(synchronize_session=False)
+        ormSession.query(UserLoggedIn).filter(
+            UserLoggedIn.userUuid == userUuid
+        ).filter(UserLoggedIn.deviceToken == deviceToken).delete(
+            synchronize_session=False
+        )
 
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(
-                UserLoggedInTuple.tupleType(), selector=dict(deviceToken=deviceToken)
+                UserLoggedInTuple.tupleType(),
+                selector=dict(deviceToken=deviceToken),
             )
         )
