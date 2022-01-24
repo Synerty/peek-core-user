@@ -12,7 +12,9 @@ from peek_plugin_base.worker import CeleryDbConn
 from peek_core_user._private.server.controller.PasswordUpdateController import (
     PasswordUpdateController,
 )
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.tuples.InternalUserImportResultTuple import (
     InternalUserImportResultTuple,
@@ -54,31 +56,39 @@ def importInternalUsers(
         errors = []
 
         # This will remove duplicates
-        allNames = [i.userName for i in importUsers]
+        allUuids = [i.userUuid for i in importUsers]
 
-        if not allNames:
-            existingUsersByName = {}
+        if not allUuids:
+            existingUsersByUuid = {}
 
         else:
-            existingUsersByName = {
-                g.userName: g
+            existingUsersByUuid = {
+                g.userUuid: g
                 for g in session.query(InternalUserTuple)
-                .filter(InternalUserTuple.userName.in_(allNames))
+                .filter(InternalUserTuple.userUuid.in_(allUuids))
                 .filter(InternalUserTuple.importHash == importHash)
                 .options(subqueryload(InternalUserTuple.groups))
                 .all()
             }
 
-        groupsByName = {g.groupName: g for g in session.query(InternalGroupTuple).all()}
+        groupsByName = {
+            g.groupName: g for g in session.query(InternalGroupTuple).all()
+        }
 
         for importUser in importUsers:
             try:
-                existingUser = existingUsersByName.pop(importUser.userName, None)
+                existingUser = existingUsersByUuid.pop(
+                    importUser.userUuid, None
+                )
                 if existingUser:
-                    _updateUser(existingUser, groupsByName, importUser, same, updates)
+                    _updateUser(
+                        existingUser, groupsByName, importUser, same, updates
+                    )
 
                 else:
-                    _insertUser(session, groupsByName, importUser, importHash, inserts)
+                    _insertUser(
+                        session, groupsByName, importUser, importHash, inserts
+                    )
 
                 session.commit()
 
@@ -86,7 +96,7 @@ def importInternalUsers(
                 errors.append(str(e))
                 session.rollback()
 
-        for oldUser in existingUsersByName.values():
+        for oldUser in existingUsersByUuid.values():
             deleteIds.append(oldUser.id)
             session.delete(oldUser)
 
@@ -123,7 +133,11 @@ def _insertUser(session, groupsByName, importUser, importHash, inserts):
     newUser.importHash = importHash
 
     for fieldName in ImportInternalUserTuple.tupleFieldNames():
-        setattr(newUser, fieldName, getattr(importUser, fieldName))
+        value = getattr(importUser, fieldName)
+        if fieldName == "userName":
+            # fill 'userKey' as well
+            setattr(newUser, "userKey", value.lower())
+        setattr(newUser, fieldName, value)
 
     if importUser.groupKeys is not None:
         for groupKey in importUser.groupKeys:
@@ -136,10 +150,11 @@ def _insertUser(session, groupsByName, importUser, importHash, inserts):
 
 
 def _updateUser(existingUser, groupsByName, importUser, same, updates):
-    excludeFieldNames = ("groupKeys", "password")
+    excludeFieldNames = ("groupKeys", "password", "userUuid")
 
     copyFields = filter(
-        lambda f: f not in excludeFieldNames, ImportInternalUserTuple.tupleFieldNames()
+        lambda f: f not in excludeFieldNames,
+        ImportInternalUserTuple.tupleFieldNames(),
     )
 
     updated = False
@@ -152,11 +167,16 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
 
             else:
                 setattr(existingUser, fieldName, newVal)
+                # update userKey as well when 'userName' changes
+                if fieldName == "userName":
+                    setattr(existingUser, "userKey", newVal.lower())
                 updated = True
 
     # The password is an optional field
     if importUser.password is not None:
-        existingUser.password = PasswordUpdateController.hashPass(importUser.password)
+        existingUser.password = PasswordUpdateController.hashPass(
+            importUser.password
+        )
         updated = True
 
     # If there are NONE groups, then don't make any changes

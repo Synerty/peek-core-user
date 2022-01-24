@@ -55,7 +55,12 @@ class UserInfoApi(UserInfoApiABC):
     def userBlocking(
         self, userName, ormSession=None
     ) -> Optional[UserDetailTuple]:
+        filter_ = InternalUserTuple.userName == userName
+        return self._userInfoByFilter(filter_, ormSession)
 
+    def _userInfoByFilter(
+        self, filter_: bool, ormSession=None
+    ) -> Optional[UserDetailTuple]:
         if ormSession:
             close = False
 
@@ -64,11 +69,7 @@ class UserInfoApi(UserInfoApiABC):
             close = True
 
         try:
-            user = (
-                ormSession.query(InternalUserTuple)
-                .filter(InternalUserTuple.userName == userName)
-                .one()
-            )
+            user = ormSession.query(InternalUserTuple).filter(filter_).one()
 
             return self._makeUserDetails(user)
 
@@ -78,6 +79,12 @@ class UserInfoApi(UserInfoApiABC):
         finally:
             if close:
                 ormSession.close()
+
+    def userByUserKeyBlocking(
+        self, userKey, ormSession=None
+    ) -> Optional[UserDetailTuple]:
+        filter_ = InternalUserTuple.userKey == userKey
+        return self._userInfoByFilter(filter_, ormSession)
 
     @deferToThreadWrapWithLogger(logger)
     def users(

@@ -19,7 +19,9 @@ from vortex.Tuple import Tuple, addTupleType, TupleField
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.storage.DeclarativeBase import DeclarativeBase
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.storage.InternalUserGroupTuple import (
     InternalUserGroupTuple,
 )
@@ -40,6 +42,7 @@ class InternalUserTuple(Tuple, DeclarativeBase):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     userName = Column(String, unique=True, nullable=False)
+    userKey = Column(String, unique=True, nullable=True)
     userTitle = Column(String, unique=True, nullable=False)
     userUuid = Column(String, unique=True, nullable=False)
 
