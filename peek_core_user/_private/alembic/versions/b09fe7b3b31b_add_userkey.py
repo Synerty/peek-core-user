@@ -70,10 +70,19 @@ def upgrade():
 
     op.execute(
         """
-         UPDATE "core_user"."UserLoggedIn" SET "userUuid" = iu."userUuid"
-         FROM "core_user"."UserLoggedIn" uli
-         INNER JOIN "core_user"."InternalUser" iu
-         	ON uli."userName" = iu."userName";
+        -- delete users that are no longer in `InternalUser` table
+        DELETE FROM "core_user"."UserLoggedIn" uli
+        WHERE uli."userName" in (
+        SELECT uli."userName" FROM "core_user"."UserLoggedIn" uli
+            LEFT OUTER JOIN "core_user"."InternalUser" iu
+                ON iu."userName" = uli."userName"
+            WHERE uli."userName" IS NOT NULL AND iu."userName" IS NULL
+        );  
+
+        -- add `userUuid` to logged in users
+        UPDATE "core_user"."UserLoggedIn" uli SET "userUuid" = iu."userUuid"
+        FROM "core_user"."InternalUser" iu
+        WHERE iu."userName" = uli."userName";
         """
     )
     op.alter_column(
