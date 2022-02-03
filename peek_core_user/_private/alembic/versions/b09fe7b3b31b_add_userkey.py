@@ -45,7 +45,7 @@ def upgrade():
         sa.Column(
             "userKey",
             sa.String(length=50),
-            unique=True,
+            unique=False,
             nullable=True,
         ),
         schema="core_user",
@@ -56,7 +56,7 @@ def upgrade():
         sa.Column(
             "userUuid",
             sa.String(length=50),
-            unique=True,
+            unique=False,
             nullable=True,
         ),
         schema="core_user",
