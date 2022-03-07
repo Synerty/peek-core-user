@@ -237,17 +237,13 @@ class LoginLogoutController:
 
         userDetail = self._infoApi.userByUserKeyBlocking(userKey)
 
-        # user not found
-        if not userDetail:
-            responseTuple.setFailed()
-            return responseTuple
-
-        userName = userDetail.userName
-        userKey = userDetail.userKey
-        userUuid = userDetail.userUuid
-        loginTuple.userName = userDetail.userName
-        responseTuple.userName = userDetail.userName
-        responseTuple.userDetail = userDetail
+        if userDetail:
+            userName = userDetail.userName
+            userKey = userDetail.userKey
+            userUuid = userDetail.userUuid
+            loginTuple.userName = userDetail.userName
+            responseTuple.userName = userDetail.userName
+            responseTuple.userDetail = userDetail
 
         # check user group and user password
         ormSession = self._dbSessionCreator()
