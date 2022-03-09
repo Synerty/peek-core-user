@@ -228,6 +228,7 @@ class LdapAuth:
 
         newInternalUser = InternalUserTuple(
             userName=userName,
+            userKey=userName.lower(),
             userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
             email=email,
