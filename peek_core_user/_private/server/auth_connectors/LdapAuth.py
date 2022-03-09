@@ -175,7 +175,9 @@ class LdapAuth:
         userDetails = userDetails[0][1]
 
         groups = []
-        for memberOf in userDetails["memberOf"]:
+        # python-ldap doesn't include key `memberOf` in search result
+        #  if the user doesn't belong to any groups.
+        for memberOf in userDetails.get("memberOf", []):
             group = memberOf.decode().split(",")[0]
             if "=" in group:
                 group = group.split("=")[1]
