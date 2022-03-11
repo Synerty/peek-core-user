@@ -133,7 +133,7 @@ class PluginLogicEntryHook(
         # ----------------
         # Login / Logout Controller
         loginLogoutController = LoginLogoutController(deviceApi, self.dbSessionCreator)
-        self._handlers.append(importController)
+        self._handlers.append(loginLogoutController)
 
         # ----------------
         # Login / Logout Controller

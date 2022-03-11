@@ -71,24 +71,16 @@ def importInternalUsers(
                 .all()
             }
 
-        groupsByName = {
-            g.groupName: g for g in session.query(InternalGroupTuple).all()
-        }
+        groupsByName = {g.groupName: g for g in session.query(InternalGroupTuple).all()}
 
         for importUser in importUsers:
             try:
-                existingUser = existingUsersByUuid.pop(
-                    importUser.userUuid, None
-                )
+                existingUser = existingUsersByUuid.pop(importUser.userUuid, None)
                 if existingUser:
-                    _updateUser(
-                        existingUser, groupsByName, importUser, same, updates
-                    )
+                    _updateUser(existingUser, groupsByName, importUser, same, updates)
 
                 else:
-                    _insertUser(
-                        session, groupsByName, importUser, importHash, inserts
-                    )
+                    _insertUser(session, groupsByName, importUser, importHash, inserts)
 
                 session.commit()
 
@@ -134,6 +126,7 @@ def _insertUser(session, groupsByName, importUser, importHash, inserts):
 
     for fieldName in ImportInternalUserTuple.tupleFieldNames():
         value = getattr(importUser, fieldName)
+
         if fieldName == "userName":
             # fill 'userKey' as well
             setattr(newUser, "userKey", value.lower())
@@ -174,9 +167,7 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
 
     # The password is an optional field
     if importUser.password is not None:
-        existingUser.password = PasswordUpdateController.hashPass(
-            importUser.password
-        )
+        existingUser.password = PasswordUpdateController.hashPass(importUser.password)
         updated = True
 
     # If there are NONE groups, then don't make any changes

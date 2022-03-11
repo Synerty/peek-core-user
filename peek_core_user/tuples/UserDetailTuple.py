@@ -29,6 +29,13 @@ class UserDetailTuple(Tuple):
     #: A field for additional data
     data: Optional[Dict] = TupleField()
 
+    #: user creation stream
+    importSource: str = TupleField()
+
+    #: user authenticator target - a value from
+    #  `peek_core_user.tuples.UserAuthTargetEnum`
+    authenticationTarget: str = TupleField()
+
     @property
     def userKey(self):
         return self.userName.lower()

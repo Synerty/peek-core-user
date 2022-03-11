@@ -34,9 +34,10 @@ class AdminAuthController:
             # TRY INTERNAL IF ITS ENABLED
             try:
                 if globalSetting(ormSession, INTERNAL_AUTH_ENABLED_FOR_ADMIN):
-                    return InternalAuth().checkPassBlocking(
+                    groupNames, _ = InternalAuth().checkPassBlocking(
                         ormSession, userName, password, InternalAuth.FOR_ADMIN
                     )
+                    return groupNames
 
             except Exception as e:
                 lastException = e
