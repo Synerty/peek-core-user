@@ -35,9 +35,7 @@ class __CrudHandler(OrmCrudHandler):
             tuples = (
                 session.query(InternalUserTuple)
                 .options(subqueryload(InternalUserTuple.groups))
-                .filter(
-                    InternalUserTuple.userTitle.ilike("%" + likeTitle + "%")
-                )
+                .filter(InternalUserTuple.userTitle.ilike("%" + likeTitle + "%"))
                 .all()
             )
 
@@ -112,7 +110,5 @@ def makeInternalUserTableHandler(tupleObservable, dbSessionCreator):
     )
 
     logger.debug("Started")
-    handler.addExtension(
-        InternalUserTuple, __ExtUpdateObservable(tupleObservable)
-    )
+    handler.addExtension(InternalUserTuple, __ExtUpdateObservable(tupleObservable))
     return handler
