@@ -14,6 +14,7 @@ import { InternalUserTuple } from "../tuples/InternalUserTuple";
 import { InternalUserUpdatePasswordAction } from "../tuples/InternalUserUpdatePasswordAction";
 import { BalloonMsgService } from "@synerty/peek-plugin-base-js";
 import { GroupDetailTuple } from "@peek/peek_core_user/tuples/GroupDetailTuple";
+import { UserAuthTargetEnum } from "../tuples/constants/UserAuthTargetEnum";
 
 @Component({
     selector: "pl-user-edit-internal-user",
@@ -88,6 +89,10 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
         let t = new InternalUserTuple();
         // Add any values needed for this list here, EG, for a lookup list you might add:
         // t.lookupName = this.lookupName;
+        
+        // label user creation source 'PEEK' when Peek admin adds a user
+        t.importSource = "PEEK_ADMIN";
+        t.authenticationTarget = UserAuthTargetEnum.INTERNAL;
         this.items.push(t);
     }
 

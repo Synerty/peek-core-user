@@ -25,6 +25,12 @@ export class InternalUserTuple extends Tuple {
 
     //  The display name of the user
     groupIds: number[];
+    
+    // The user import source stream - arbitrary string
+    importSource: string;
+    
+    // The user authentication target - value from class `UserAuthTargetEnum`
+    authenticationTarget: string;
 
     constructor() {
         super(InternalUserTuple.tupleName);

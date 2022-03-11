@@ -1,16 +1,22 @@
 import hashlib
 import logging
 from typing import List
+from typing import Tuple
 
-from peek_core_user._private.server.auth_connectors.InternalAuth import (
-    InternalAuth,
-)
+from peek_core_user._private.PluginNames import userPluginTuplePrefix
+
+from peek_core_user._private.server.auth_connectors.AuthABC import AuthABC
+
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.LdapSetting import LdapSetting
 from peek_core_user._private.storage.Setting import (
     globalSetting,
     LDAP_VERIFY_SSL,
 )
+from peek_core_user.tuples.constants.UserAuthTargetEnum import (
+    UserAuthTargetEnum,
+)
+
 from twisted.cred.error import LoginFailed
 
 __author__ = "synerty"
@@ -50,14 +56,8 @@ class LdapNotEnabledError(Exception):
     pass
 
 
-class LdapAuth:
-    FOR_ADMIN = InternalAuth.FOR_ADMIN
-    FOR_OFFICE = InternalAuth.FOR_OFFICE
-    FOR_FIELD = InternalAuth.FOR_FIELD
-
-    def checkPassBlocking(
-        self, dbSession, userName, password, forService: int
-    ) -> List[str]:
+class LdapAuth(AuthABC):
+    def checkPassBlocking(self, dbSession, userName, password, forService):
         """Login User
 
         :param forService:
@@ -75,7 +75,7 @@ class LdapAuth:
             ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
 
         if not ldapSettings:
-            raise Exception("No LDAP servers configured.")
+            raise Exception("LDAPAuth: No LDAP servers configured.")
 
         firstException = None
 
@@ -93,9 +93,7 @@ class LdapAuth:
                     continue
 
             else:
-                raise Exception(
-                    "InternalAuth:Unhandled forService type %s" % forService
-                )
+                raise Exception("LDAPAuth: Unhandled forService type %s" % forService)
 
             try:
                 return self._tryLdap(dbSession, userName, password, ldapSetting)
@@ -108,11 +106,11 @@ class LdapAuth:
         if firstException:
             raise firstException
 
-        raise LoginFailed("No LDAP providers found for this service")
+        raise LoginFailed("LDAPAuth: No LDAP providers found for this service")
 
     def _tryLdap(
         self, dbSession, userName, password, ldapSetting: LdapSetting
-    ) -> List[str]:
+    ) -> Tuple[List[str], InternalUserTuple]:
         try:
 
             conn = ldap.initialize(ldapSetting.ldapUri)
@@ -120,9 +118,7 @@ class LdapAuth:
             conn.set_option(ldap.OPT_REFERRALS, 0)
 
             # make the connection
-            conn.simple_bind_s(
-                "%s@%s" % (userName, ldapSetting.ldapDomain), password
-            )
+            conn.simple_bind_s("%s@%s" % (userName, ldapSetting.ldapDomain), password)
             ldapFilter = (
                 "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
                 % userName
@@ -143,7 +139,9 @@ class LdapAuth:
                 )
 
             if not ldapBases:
-                raise LoginFailed("LDAP OU and/or CN search paths must be set.")
+                raise LoginFailed(
+                    "LDAPAuth: LDAP OU and/or CN search paths must be set."
+                )
 
             userDetails = None
             for ldapBase in ldapBases:
@@ -163,19 +161,22 @@ class LdapAuth:
 
         except ldap.NO_SUCH_OBJECT:
             raise LoginFailed(
-                "An internal error occurred, ask admin to check Attune logs"
+                "LDAPAuth: An internal error occurred, ask admin to check "
+                "Attune logs"
             )
 
         except ldap.INVALID_CREDENTIALS:
-            raise LoginFailed("Username or password is incorrect")
+            raise LoginFailed("LDAPAuth: Username or password is incorrect")
 
         if not userDetails:
-            raise LoginFailed("User doesn't belong to the correct CN/OUs")
+            raise LoginFailed("LDAPAuth: User doesn't belong to the correct CN/OUs")
 
         userDetails = userDetails[0][1]
 
         groups = []
-        for memberOf in userDetails["memberOf"]:
+        # python-ldap doesn't include key `memberOf` in search result
+        #  if the user doesn't belong to any groups.
+        for memberOf in userDetails.get("memberOf", []):
             group = memberOf.decode().split(",")[0]
             if "=" in group:
                 group = group.split("=")[1]
@@ -195,14 +196,12 @@ class LdapAuth:
             userUuid = str(md5Hash.hexdigest())
 
         if ldapSetting.ldapGroups:
-            ldapGroups = set(
-                [s.strip() for s in ldapSetting.ldapGroups.split(",")]
-            )
+            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
 
             if not ldapGroups & set(groups):
                 raise LoginFailed("User is not apart of an authorised group")
 
-        self._makeOrCreateInternalUserBlocking(
+        newInternalUser = self._maybeCreateInternalUserBlocking(
             dbSession,
             userName,
             userTitle,
@@ -211,30 +210,37 @@ class LdapAuth:
             ldapSetting.ldapTitle,
         )
 
-        return groups
+        return groups, newInternalUser
 
-    def _makeOrCreateInternalUserBlocking(
+    def _maybeCreateInternalUserBlocking(
         self, dbSession, userName, userTitle, userUuid, email, ldapName
-    ):
+    ) -> InternalUserTuple:
 
         internalUser = (
             dbSession.query(InternalUserTuple)
             .filter(InternalUserTuple.userUuid == userUuid)
-            .all()
+            .first()
         )
 
+        # do no create, return the existing user
         if internalUser:
-            return
+            return internalUser
 
         newInternalUser = InternalUserTuple(
             userName=userName,
+            userKey=userName.lower(),
             userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
             email=email,
+            authenticationTarget=UserAuthTargetEnum.LDAP,
+            importSource="LDAP",
+            # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
+            importHash=f"{userPluginTuplePrefix}{self.__class__.__name__}:{userUuid}",
         )
 
         dbSession.add(newInternalUser)
         dbSession.commit()
+        return newInternalUser
 
     def _makeLdapBase(self, ldapFolders, userName, propertyName):
         try:

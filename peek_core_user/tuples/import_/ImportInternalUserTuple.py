@@ -31,3 +31,10 @@ class ImportInternalUserTuple(Tuple):
 
     #: The email address of the user
     email: Optional[str] = TupleField()
+
+    #: The user creation stream - arbitrary string
+    importSource: str = TupleField()
+
+    #: The user authentication target
+    #  INTERNAL or LDAP from `UserAuthTargetEnum`
+    authenticationTarget: str = TupleField()

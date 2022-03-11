@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from typing import List
+from typing import Tuple
 
 import pytz
 from twisted.cred.error import LoginFailed
@@ -17,6 +18,7 @@ from peek_core_user._private.server.auth_connectors.InternalAuth import (
     InternalAuth,
 )
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
+from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.Setting import (
     globalSetting,
     INTERNAL_AUTH_ENABLED_FOR_FIELD,
@@ -40,6 +42,10 @@ from peek_core_user.tuples.login.UserLogoutResponseTuple import (
     UserLogoutResponseTuple,
 )
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
+from peek_core_user.server.UserDbErrors import (
+    UserNotFoundException,
+    UserPasswordNotSetException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +54,7 @@ DEVICE_ALREADY_LOGGED_ON_KEY = "pl-user.DEVICE_ALREADY_LOGGED_ON_KEY"
 
 
 class LoginLogoutController:
-    def __init__(
-        self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator
-    ):
+    def __init__(self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator):
         self._deviceApi: DeviceApiABC = deviceApi
         self._fieldServiceHookApi: UserFieldHookApi = None
         self._infoApi: UserInfoApi = None
@@ -77,7 +81,7 @@ class LoginLogoutController:
 
     def _checkPassBlocking(
         self, ormSession, userName, password, isFieldService: bool
-    ) -> List[str]:
+    ) -> Tuple[List[str], InternalUserTuple]:
         if not password:
             raise LoginFailed("Password is empty")
 
@@ -105,7 +109,14 @@ class LoginLogoutController:
                     ormSession, userName, password, forService
                 )
 
-        except Exception as e:
+        except (UserPasswordNotSetException, LoginFailed) as e:
+            # finish the checkpass
+            #  when user is found with InternalAuth, but failed to log in
+            raise e
+
+        except (UserNotFoundException, Exception) as e:
+            # carry the exception and may try to log in with LDAP
+            #  when user is not found with IneternalAuth
             lastException = e
 
         # TRY LDAP IF ITS ENABLED
@@ -186,9 +197,7 @@ class LoginLogoutController:
         finally:
             # Delay this, otherwise the user gets kicked off before getting
             # the nice success message
-            reactor.callLater(
-                0.05, self._sendLogoutUpdate, logoutTuple.deviceToken
-            )
+            reactor.callLater(0.05, self._sendLogoutUpdate, logoutTuple.deviceToken)
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
             LoggedInUserStatusTuple.tupleType()
@@ -231,24 +240,12 @@ class LoginLogoutController:
         if not deviceToken:
             raise Exception("peekToken must be supplied")
 
-        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
-            deviceToken
-        )
-
-        userDetail = self._infoApi.userByUserKeyBlocking(userKey)
-
-        if userDetail:
-            userName = userDetail.userName
-            userKey = userDetail.userKey
-            userUuid = userDetail.userUuid
-            loginTuple.userName = userDetail.userName
-            responseTuple.userName = userDetail.userName
-            responseTuple.userDetail = userDetail
+        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(deviceToken)
 
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
-            groups = self._checkPassBlocking(
+            groups, userDetail = self._checkPassBlocking(
                 ormSession, userName, password, allowMultipleLogins
             )
             self._checkGroupBlocking(ormSession, groups)
@@ -256,7 +253,7 @@ class LoginLogoutController:
             # Find any current login sessions
             userLoggedIn = (
                 ormSession.query(UserLoggedIn)
-                .filter(UserLoggedIn.userUuid == userUuid)
+                .filter(UserLoggedIn.userUuid == userDetail.userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
@@ -265,20 +262,17 @@ class LoginLogoutController:
             loggedInElsewhere = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken != deviceToken)
-                .filter(UserLoggedIn.userUuid == userUuid)
+                .filter(UserLoggedIn.userUuid == userDetail.userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
 
             if allowMultipleLogins and len(loggedInElsewhere) not in (0, 1):
                 raise Exception(
-                    "Found more than 1 ClientDevice for"
-                    + (" token %s" % deviceToken)
+                    "Found more than 1 ClientDevice for" + (" token %s" % deviceToken)
                 )
 
-            loggedInElsewhere = (
-                loggedInElsewhere[0] if loggedInElsewhere else None
-            )
+            loggedInElsewhere = loggedInElsewhere[0] if loggedInElsewhere else None
 
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
@@ -286,15 +280,13 @@ class LoginLogoutController:
             if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
-                        ormSession, userUuid, loggedInElsewhere.deviceToken
+                        ormSession, userDetail.userUuid, loggedInElsewhere.deviceToken
                     )
                     userLoggedIn = False
 
                 else:
-                    otherDeviceDescription = (
-                        self._deviceApi.deviceDescriptionBlocking(
-                            loggedInElsewhere.deviceToken
-                        )
+                    otherDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
+                        loggedInElsewhere.deviceToken
                     )
 
                     # This is false if the logged in device has been removed from
@@ -319,10 +311,8 @@ class LoginLogoutController:
 
             # If we're logging into the same device, but already logged in
             if sameDevice:  # Logging into the same device
-                sameDeviceDescription = (
-                    self._deviceApi.deviceDescriptionBlocking(
-                        userLoggedIn.deviceToken
-                    )
+                sameDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
+                    userLoggedIn.deviceToken
                 )
 
                 responseTuple.deviceToken = userLoggedIn.deviceToken
@@ -333,7 +323,7 @@ class LoginLogoutController:
             anotherUserOnThatDevice = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken == deviceToken)
-                .filter(UserLoggedIn.userUuid != userUuid)
+                .filter(UserLoggedIn.userUuid != userDetail.userUuid)
                 .all()
             )
 
@@ -364,7 +354,7 @@ class LoginLogoutController:
             newUser = UserLoggedIn(
                 userName=userName,
                 userKey=userKey,
-                userUuid=userUuid,
+                userUuid=userDetail.userUuid,
                 loggedInDateTime=datetime.now(pytz.utc),
                 deviceToken=deviceToken,
                 vehicle=vehicle,
@@ -434,11 +424,9 @@ class LoginLogoutController:
 
     def _forceLogout(self, ormSession, userUuid, deviceToken):
 
-        ormSession.query(UserLoggedIn).filter(
-            UserLoggedIn.userUuid == userUuid
-        ).filter(UserLoggedIn.deviceToken == deviceToken).delete(
-            synchronize_session=False
-        )
+        ormSession.query(UserLoggedIn).filter(UserLoggedIn.userUuid == userUuid).filter(
+            UserLoggedIn.deviceToken == deviceToken
+        ).delete(synchronize_session=False)
 
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(
