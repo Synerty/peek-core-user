@@ -11,6 +11,7 @@
 import logging
 
 from sqlalchemy import Column
+from sqlalchemy import Enum
 from sqlalchemy import Integer, String, Index
 from sqlalchemy.orm import relationship
 
@@ -45,6 +46,11 @@ class InternalUserTuple(Tuple, DeclarativeBase):
     userKey = Column(String, unique=True, nullable=True)
     userTitle = Column(String, unique=True, nullable=False)
     userUuid = Column(String, unique=True, nullable=False)
+    # `authenticationTarget` is a custom type in postgres, see migration script
+    #  43df0e05c728_added_user_import_source.py
+    authenticationTarget = Column(String, nullable=False)
+    # an arbitrary string of user import source
+    importSource = Column(String, nullable=False)
 
     importHash = Column(String)
 
