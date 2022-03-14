@@ -44,7 +44,7 @@ class InternalAuth(AuthABC):
         )
 
         # if user not found
-        if not authenticatedUser.InternalUserTuple:
+        if not authenticatedUser or not authenticatedUser.InternalUserTuple:
             raise UserNotFoundException(userName)
 
         # if user found but user is created by LDAP
