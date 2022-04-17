@@ -17,6 +17,10 @@ from vortex.sqla_orm.OrmCrudHandler import (
     OrmCrudHandlerExtension,
 )
 
+from peek_core_user.tuples.constants.UserAuthTargetEnum import (
+    UserAuthTargetEnum,
+)
+
 logger = logging.getLogger(__name__)
 
 # This dict matches the definition in the Admin angular app.
@@ -35,7 +39,9 @@ class __CrudHandler(OrmCrudHandler):
             tuples = (
                 session.query(InternalUserTuple)
                 .options(subqueryload(InternalUserTuple.groups))
-                .filter(InternalUserTuple.userTitle.ilike("%" + likeTitle + "%"))
+                .filter(
+                    InternalUserTuple.userTitle.ilike("%" + likeTitle + "%")
+                )
                 .all()
             )
 
@@ -91,6 +97,9 @@ class __ExtUpdateObservable(OrmCrudHandlerExtension):
     def beforeUpdate(self, tuple_, tuples, session, payloadFilt):
         for t in tuples:
             t.userKey = t.userName.lower()
+            if t.importSource is None:
+                t.importSource = "PEEK_ADMIN"
+                t.authenticationTarget = UserAuthTargetEnum.INTERNAL
         return True
 
     def middleUpdate(self, tuple_, tuples, session, payloadFilt):
@@ -110,5 +119,7 @@ def makeInternalUserTableHandler(tupleObservable, dbSessionCreator):
     )
 
     logger.debug("Started")
-    handler.addExtension(InternalUserTuple, __ExtUpdateObservable(tupleObservable))
+    handler.addExtension(
+        InternalUserTuple, __ExtUpdateObservable(tupleObservable)
+    )
     return handler

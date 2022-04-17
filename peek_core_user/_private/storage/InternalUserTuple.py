@@ -75,4 +75,6 @@ class InternalUserTuple(Tuple, DeclarativeBase):
             email=self.email,
             groupNames=None,
             data=None,
+            authenticationTarget=self.authenticationTarget,
+            importSource=self.importSource,
         )
