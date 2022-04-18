@@ -54,7 +54,9 @@ DEVICE_ALREADY_LOGGED_ON_KEY = "pl-user.DEVICE_ALREADY_LOGGED_ON_KEY"
 
 
 class LoginLogoutController:
-    def __init__(self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator):
+    def __init__(
+        self, deviceApi: DeviceApiABC, dbSessionCreator: DbSessionCreator
+    ):
         self._deviceApi: DeviceApiABC = deviceApi
         self._fieldServiceHookApi: UserFieldHookApi = None
         self._infoApi: UserInfoApi = None
@@ -197,7 +199,9 @@ class LoginLogoutController:
         finally:
             # Delay this, otherwise the user gets kicked off before getting
             # the nice success message
-            reactor.callLater(0.05, self._sendLogoutUpdate, logoutTuple.deviceToken)
+            reactor.callLater(
+                0.05, self._sendLogoutUpdate, logoutTuple.deviceToken
+            )
 
         self._adminTupleObservable.notifyOfTupleUpdateForTuple(
             LoggedInUserStatusTuple.tupleType()
@@ -240,7 +244,9 @@ class LoginLogoutController:
         if not deviceToken:
             raise Exception("peekToken must be supplied")
 
-        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(deviceToken)
+        thisDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
+            deviceToken
+        )
 
         # check user group and user password
         ormSession = self._dbSessionCreator()
@@ -269,10 +275,13 @@ class LoginLogoutController:
 
             if allowMultipleLogins and len(loggedInElsewhere) not in (0, 1):
                 raise Exception(
-                    "Found more than 1 ClientDevice for" + (" token %s" % deviceToken)
+                    "Found more than 1 ClientDevice for"
+                    + (" token %s" % deviceToken)
                 )
 
-            loggedInElsewhere = loggedInElsewhere[0] if loggedInElsewhere else None
+            loggedInElsewhere = (
+                loggedInElsewhere[0] if loggedInElsewhere else None
+            )
 
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
@@ -280,13 +289,17 @@ class LoginLogoutController:
             if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
-                        ormSession, userDetail.userUuid, loggedInElsewhere.deviceToken
+                        ormSession,
+                        userDetail.userUuid,
+                        loggedInElsewhere.deviceToken,
                     )
                     userLoggedIn = False
 
                 else:
-                    otherDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
-                        loggedInElsewhere.deviceToken
+                    otherDeviceDescription = (
+                        self._deviceApi.deviceDescriptionBlocking(
+                            loggedInElsewhere.deviceToken
+                        )
                     )
 
                     # This is false if the logged in device has been removed from
@@ -311,8 +324,10 @@ class LoginLogoutController:
 
             # If we're logging into the same device, but already logged in
             if sameDevice:  # Logging into the same device
-                sameDeviceDescription = self._deviceApi.deviceDescriptionBlocking(
-                    userLoggedIn.deviceToken
+                sameDeviceDescription = (
+                    self._deviceApi.deviceDescriptionBlocking(
+                        userLoggedIn.deviceToken
+                    )
                 )
 
                 responseTuple.deviceToken = userLoggedIn.deviceToken
@@ -424,9 +439,11 @@ class LoginLogoutController:
 
     def _forceLogout(self, ormSession, userUuid, deviceToken):
 
-        ormSession.query(UserLoggedIn).filter(UserLoggedIn.userUuid == userUuid).filter(
-            UserLoggedIn.deviceToken == deviceToken
-        ).delete(synchronize_session=False)
+        ormSession.query(UserLoggedIn).filter(
+            UserLoggedIn.userUuid == userUuid
+        ).filter(UserLoggedIn.deviceToken == deviceToken).delete(
+            synchronize_session=False
+        )
 
         self._clientTupleObservable.notifyOfTupleUpdate(
             TupleSelector(

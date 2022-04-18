@@ -22,10 +22,14 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
 
         from peek_core_user.server.UserApiABC import UserApiABC
 
-        assert isinstance(self._ourApi, UserApiABC), "We didn't get a UserApiABC"
+        assert isinstance(
+            self._ourApi, UserApiABC
+        ), "We didn't get a UserApiABC"
 
     @deferToThreadWrapWithLogger(logger)
-    def makeVortexMsg(self, filt: dict, tupleSelector: TupleSelector) -> Deferred:
+    def makeVortexMsg(
+        self, filt: dict, tupleSelector: TupleSelector
+    ) -> Deferred:
         deviceToken = tupleSelector.selector["deviceToken"]
 
         session = self._dbSessionCreator()
@@ -38,7 +42,7 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
 
             internalUserTuple = (
                 session.query(InternalUserTuple)
-                .filter(InternalUserTuple.userName == userLoggedIn.userName)
+                .filter(InternalUserTuple.userUuid == userLoggedIn.userUuid)
                 .one()
             )
 
@@ -53,8 +57,12 @@ class UserLoggedInTupleProvider(TuplesProviderABC):
         finally:
             session.close()
 
-        tuples = [UserLoggedInTuple(deviceToken=deviceToken, userDetails=userDetails)]
+        tuples = [
+            UserLoggedInTuple(deviceToken=deviceToken, userDetails=userDetails)
+        ]
 
-        payloadEnvelope = Payload(filt=filt, tuples=tuples).makePayloadEnvelope()
+        payloadEnvelope = Payload(
+            filt=filt, tuples=tuples
+        ).makePayloadEnvelope()
         vortexMsg = payloadEnvelope.toVortexMsg()
         return vortexMsg
