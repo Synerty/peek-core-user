@@ -93,7 +93,9 @@ class LdapAuth(AuthABC):
                     continue
 
             else:
-                raise Exception("LDAPAuth: Unhandled forService type %s" % forService)
+                raise Exception(
+                    "LDAPAuth: Unhandled forService type %s" % forService
+                )
 
             try:
                 return self._tryLdap(dbSession, userName, password, ldapSetting)
@@ -118,7 +120,9 @@ class LdapAuth(AuthABC):
             conn.set_option(ldap.OPT_REFERRALS, 0)
 
             # make the connection
-            conn.simple_bind_s("%s@%s" % (userName, ldapSetting.ldapDomain), password)
+            conn.simple_bind_s(
+                "%s@%s" % (userName, ldapSetting.ldapDomain), password
+            )
             ldapFilter = (
                 "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
                 % userName
@@ -169,14 +173,53 @@ class LdapAuth(AuthABC):
             raise LoginFailed("LDAPAuth: Username or password is incorrect")
 
         if not userDetails:
-            raise LoginFailed("LDAPAuth: User doesn't belong to the correct CN/OUs")
+            raise LoginFailed(
+                "LDAPAuth: User doesn't belong to the correct CN/OUs"
+            )
 
         userDetails = userDetails[0][1]
 
-        groups = []
+        distinguishedName = userDetails.get("distinguishedName")[0].decode()
+        primaryGroupId = userDetails.get("primaryGroupID")[0].decode()
+        objectSid = userDetails.get("objectSid")[0]
         # python-ldap doesn't include key `memberOf` in search result
         #  if the user doesn't belong to any groups.
-        for memberOf in userDetails.get("memberOf", []):
+        memberOfSet = set(userDetails.get("memberOf", []))
+
+        decodedSid = LdapAuth._decodeSid(objectSid)
+        primaryGroupSid = (
+            "-".join(decodedSid.split("-")[:-1]) + "-" + primaryGroupId
+        )
+
+        ldapFilter = "(objectSid=%s)" % primaryGroupSid
+        primGroupDetails = conn.search_st(
+            dcParts, ldap.SCOPE_SUBTREE, ldapFilter, None, 0, 10
+        )
+        memberOfSet.add(primGroupDetails[0][1].get("distinguishedName")[0])
+
+        # find all it's groups and groups of those groups
+        # The magic number in this filter allows us to fetch the groups of
+        # a group.
+        ldapFilter = (
+            "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=%s))"
+            % (distinguishedName,)
+        )
+        groupDetails = conn.search_st(
+            ",".join(distinguishedName.split(",")[1:]),
+            ldap.SCOPE_SUBTREE,
+            ldapFilter,
+            None,
+            0,
+            10,
+        )
+
+        if groupDetails:
+            for group in groupDetails:
+                groupMemberOf = group[1].get("memberOf", [])
+                memberOfSet.update(groupMemberOf)
+
+        groups = []
+        for memberOf in memberOfSet:
             group = memberOf.decode().split(",")[0]
             if "=" in group:
                 group = group.split("=")[1]
@@ -196,7 +239,9 @@ class LdapAuth(AuthABC):
             userUuid = str(md5Hash.hexdigest())
 
         if ldapSetting.ldapGroups:
-            ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
+            ldapGroups = set(
+                [s.strip() for s in ldapSetting.ldapGroups.split(",")]
+            )
 
             if not ldapGroups & set(groups):
                 raise LoginFailed("User is not apart of an authorised group")
@@ -211,6 +256,30 @@ class LdapAuth(AuthABC):
         )
 
         return groups, newInternalUser
+
+    def _decodeSid(sid: [bytes]) -> str:
+        strSid = "S-"
+        sid = iter(sid)
+
+        # Byte 0 is the revision
+        revision = next(sid)
+        strSid += "%s" % (revision,)
+
+        # Byte 1 is the count of sub-authorities
+        countSubAuths = next(sid)
+
+        # Byte 2-7 (big endian) form the 48-bit authority code
+        bytes27 = [next(sid) for _ in range(2, 8)]
+        authority = int.from_bytes(bytes27, byteorder="big")
+        strSid += "-%s" % (authority,)
+
+        for _ in range(countSubAuths):
+            # Each is 4 bytes (32-bits) in little endian
+            subAuthBytes = [next(sid) for _ in range(4)]
+            subAuth = int.from_bytes(subAuthBytes, byteorder="little")
+            strSid += "-%s" % (subAuth,)
+
+        return strSid
 
     def _maybeCreateInternalUserBlocking(
         self, dbSession, userName, userTitle, userUuid, email, ldapName
