@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from typing import List
-from typing import Tuple
 
 import pytz
 from twisted.cred.error import LoginFailed
@@ -18,7 +17,6 @@ from peek_core_user._private.server.auth_connectors.InternalAuth import (
     InternalAuth,
 )
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
-from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.Setting import (
     globalSetting,
     INTERNAL_AUTH_ENABLED_FOR_FIELD,
@@ -42,15 +40,32 @@ from peek_core_user.tuples.login.UserLogoutResponseTuple import (
     UserLogoutResponseTuple,
 )
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
-from peek_core_user.server.UserDbErrors import (
-    UserNotFoundException,
-    UserPasswordNotSetException,
-)
 
 logger = logging.getLogger(__name__)
 
 USER_ALREADY_LOGGED_ON_KEY = "pl-user.USER_ALREADY_LOGGED_ON"
 DEVICE_ALREADY_LOGGED_ON_KEY = "pl-user.DEVICE_ALREADY_LOGGED_ON_KEY"
+
+
+class _ForceLogout:
+    def __init__(self, userUuid, deviceToken):
+        self._userUuid = userUuid
+        self._deviceToken = deviceToken
+
+    def forceDbLogout(self, ormSession):
+        ormSession.query(UserLoggedIn).filter(
+            UserLoggedIn.userUuid == self._userUuid
+        ).filter(UserLoggedIn.deviceToken == self._deviceToken).delete(
+            synchronize_session=False
+        )
+
+    def notify(self, clientTupleObservable):
+        clientTupleObservable.notifyOfTupleUpdate(
+            TupleSelector(
+                UserLoggedInTuple.tupleType(),
+                selector=dict(deviceToken=self._deviceToken),
+            )
+        )
 
 
 class LoginLogoutController:
@@ -83,7 +98,7 @@ class LoginLogoutController:
 
     def _checkPassBlocking(
         self, ormSession, userName, password, isFieldService: bool
-    ) -> Tuple[List[str], InternalUserTuple]:
+    ) -> List[str]:
         if not password:
             raise LoginFailed("Password is empty")
 
@@ -111,14 +126,7 @@ class LoginLogoutController:
                     ormSession, userName, password, forService
                 )
 
-        except (UserPasswordNotSetException, LoginFailed) as e:
-            # finish the checkpass
-            #  when user is found with InternalAuth, but failed to log in
-            raise e
-
-        except (UserNotFoundException, Exception) as e:
-            # carry the exception and may try to log in with LDAP
-            #  when user is not found with IneternalAuth
+        except Exception as e:
             lastException = e
 
         # TRY LDAP IF ITS ENABLED
@@ -233,6 +241,8 @@ class LoginLogoutController:
         isFieldService = loginTuple.isFieldService
         allowMultipleLogins = isFieldService
 
+        forceLogouter = None
+
         responseTuple = UserLoginResponseTuple(
             userName=userName,
             userToken="Not implemented",
@@ -248,10 +258,24 @@ class LoginLogoutController:
             deviceToken
         )
 
+        userDetail = self._infoApi.userByUserKeyBlocking(userKey)
+
+        # user not found
+        if not userDetail:
+            responseTuple.setFailed()
+            return responseTuple
+
+        userName = userDetail.userName
+        userKey = userDetail.userKey
+        userUuid = userDetail.userUuid
+        loginTuple.userName = userDetail.userName
+        responseTuple.userName = userDetail.userName
+        responseTuple.userDetail = userDetail
+
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
-            groups, userDetail = self._checkPassBlocking(
+            groups = self._checkPassBlocking(
                 ormSession, userName, password, allowMultipleLogins
             )
             self._checkGroupBlocking(ormSession, groups)
@@ -259,7 +283,7 @@ class LoginLogoutController:
             # Find any current login sessions
             userLoggedIn = (
                 ormSession.query(UserLoggedIn)
-                .filter(UserLoggedIn.userUuid == userDetail.userUuid)
+                .filter(UserLoggedIn.userUuid == userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
@@ -268,7 +292,7 @@ class LoginLogoutController:
             loggedInElsewhere = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken != deviceToken)
-                .filter(UserLoggedIn.userUuid == userDetail.userUuid)
+                .filter(UserLoggedIn.userUuid == userUuid)
                 .filter(UserLoggedIn.isFieldLogin == isFieldService)
                 .all()
             )
@@ -289,10 +313,11 @@ class LoginLogoutController:
             if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
-                        ormSession,
-                        userDetail.userUuid,
-                        loggedInElsewhere.deviceToken,
+                        ormSession, userUuid, loggedInElsewhere.deviceToken
+                    forceLogouter = _ForceLogout(
+                        userUuid, loggedInElsewhere.deviceToken
                     )
+                    forceLogouter.forceDbLogout(ormSession)
                     userLoggedIn = False
 
                 else:
@@ -318,9 +343,12 @@ class LoginLogoutController:
                     # Just let them login to the same device.
                     self._forceLogout(
                         ormSession,
+
+                    forceLogouter = _ForceLogout(
                         loggedInElsewhere.userUuid,
                         loggedInElsewhere.deviceToken,
                     )
+                    forceLogouter.forceDbLogout(ormSession)
 
             # If we're logging into the same device, but already logged in
             if sameDevice:  # Logging into the same device
@@ -338,7 +366,7 @@ class LoginLogoutController:
             anotherUserOnThatDevice = (
                 ormSession.query(UserLoggedIn)
                 .filter(UserLoggedIn.deviceToken == deviceToken)
-                .filter(UserLoggedIn.userUuid != userDetail.userUuid)
+                .filter(UserLoggedIn.userUuid != userUuid)
                 .all()
             )
 
@@ -347,9 +375,11 @@ class LoginLogoutController:
                 if DEVICE_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
                     self._forceLogout(
                         ormSession,
+                    forceLogouter = _ForceLogout(
                         anotherUserOnThatDevice.userUuid,
                         anotherUserOnThatDevice.deviceToken,
                     )
+                    forceLogouter.forceDbLogout(ormSession)
 
                 else:
                     responseTuple.setFailed()
@@ -369,7 +399,7 @@ class LoginLogoutController:
             newUser = UserLoggedIn(
                 userName=userName,
                 userKey=userKey,
-                userUuid=userDetail.userUuid,
+                userUuid=userUuid,
                 loggedInDateTime=datetime.now(pytz.utc),
                 deviceToken=deviceToken,
                 vehicle=vehicle,
@@ -386,6 +416,9 @@ class LoginLogoutController:
 
         finally:
             ormSession.close()
+
+            if forceLogouter:
+                forceLogouter.notify(self._clientTupleObservable)
 
     @inlineCallbacks
     def login(self, loginTuple: UserLoginAction):
@@ -451,3 +484,4 @@ class LoginLogoutController:
                 selector=dict(deviceToken=deviceToken),
             )
         )
+
