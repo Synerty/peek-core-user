@@ -3,14 +3,15 @@ from datetime import datetime
 from typing import List
 
 import pytz
+from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from twisted.cred.error import LoginFailed
 from twisted.internet import reactor
-from twisted.internet.defer import Deferred, inlineCallbacks
+from twisted.internet.defer import Deferred
+from twisted.internet.defer import inlineCallbacks
 from vortex.DeferUtil import deferToThreadWrapWithLogger
 from vortex.TupleSelector import TupleSelector
 from vortex.handler.TupleDataObservableHandler import TupleDataObservableHandler
 
-from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_core_user._private.server.api.UserFieldHookApi import UserFieldHookApi
 from peek_core_user._private.server.api.UserInfoApi import UserInfoApi
 from peek_core_user._private.server.auth_connectors.InternalAuth import (
@@ -18,11 +19,13 @@ from peek_core_user._private.server.auth_connectors.InternalAuth import (
 )
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
 from peek_core_user._private.storage.Setting import (
-    globalSetting,
     INTERNAL_AUTH_ENABLED_FOR_FIELD,
-    LDAP_AUTH_ENABLED,
+)
+from peek_core_user._private.storage.Setting import (
     INTERNAL_AUTH_ENABLED_FOR_OFFICE,
 )
+from peek_core_user._private.storage.Setting import LDAP_AUTH_ENABLED
+from peek_core_user._private.storage.Setting import globalSetting
 from peek_core_user._private.storage.UserLoggedIn import UserLoggedIn
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import (
     LoggedInUserStatusTuple,
@@ -312,12 +315,13 @@ class LoginLogoutController:
             # If the user is logged in, but not to this client device, raise exception
             if allowMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
-                    self._forceLogout(
-                        ormSession, userUuid, loggedInElsewhere.deviceToken
+
                     forceLogouter = _ForceLogout(
                         userUuid, loggedInElsewhere.deviceToken
                     )
+
                     forceLogouter.forceDbLogout(ormSession)
+
                     userLoggedIn = False
 
                 else:
@@ -341,8 +345,6 @@ class LoginLogoutController:
 
                     # Else, The old device has been deleted,
                     # Just let them login to the same device.
-                    self._forceLogout(
-                        ormSession,
 
                     forceLogouter = _ForceLogout(
                         loggedInElsewhere.userUuid,
@@ -373,8 +375,6 @@ class LoginLogoutController:
             if anotherUserOnThatDevice:
                 anotherUserOnThatDevice = anotherUserOnThatDevice[0]
                 if DEVICE_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
-                    self._forceLogout(
-                        ormSession,
                     forceLogouter = _ForceLogout(
                         anotherUserOnThatDevice.userUuid,
                         anotherUserOnThatDevice.deviceToken,
@@ -484,4 +484,3 @@ class LoginLogoutController:
                 selector=dict(deviceToken=deviceToken),
             )
         )
-
