@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from typing import List
+from typing import Tuple
 
 import pytz
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
@@ -18,6 +19,7 @@ from peek_core_user._private.server.auth_connectors.InternalAuth import (
     InternalAuth,
 )
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
+from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.Setting import (
     INTERNAL_AUTH_ENABLED_FOR_FIELD,
 )
@@ -101,7 +103,7 @@ class LoginLogoutController:
 
     def _checkPassBlocking(
         self, ormSession, userName, password, isFieldService: bool
-    ) -> List[str]:
+    ) -> Tuple[List[str], InternalUserTuple]:
         if not password:
             raise LoginFailed("Password is empty")
 
@@ -236,7 +238,6 @@ class LoginLogoutController:
         """
 
         userName = loginTuple.userName
-        userKey = loginTuple.userName.lower()
         password = loginTuple.password
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
         deviceToken = loginTuple.deviceToken
@@ -261,27 +262,33 @@ class LoginLogoutController:
             deviceToken
         )
 
-        userDetail = self._infoApi.userByUserKeyBlocking(userKey)
+        userDetail = self._infoApi.userBlocking(userName)
 
         # user not found
-        if not userDetail:
+        if not userDetail and isFieldService:
             responseTuple.setFailed()
             return responseTuple
-
-        userName = userDetail.userName
-        userKey = userDetail.userKey
-        userUuid = userDetail.userUuid
-        loginTuple.userName = userDetail.userName
-        responseTuple.userName = userDetail.userName
-        responseTuple.userDetail = userDetail
 
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
-            groups = self._checkPassBlocking(
+            # This will login from the internal user if one already exists or
+            # login from LDAP and create a user if an internal does not exist
+            groups, _ = self._checkPassBlocking(
                 ormSession, userName, password, allowMultipleLogins
             )
             self._checkGroupBlocking(ormSession, groups)
+
+            userDetail = self._infoApi.userBlocking(userName)
+            if not userDetail:
+                responseTuple.setFailed()
+                return responseTuple
+
+            userKey = userDetail.userKey
+            userUuid = userDetail.userUuid
+            loginTuple.userName = userDetail.userName
+            responseTuple.userName = userDetail.userName
+            responseTuple.userDetail = userDetail
 
             # Find any current login sessions
             userLoggedIn = (

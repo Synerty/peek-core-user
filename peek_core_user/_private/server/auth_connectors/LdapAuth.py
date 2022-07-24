@@ -97,6 +97,12 @@ class LdapAuth(AuthABC):
                     "LDAPAuth: Unhandled forService type %s" % forService
                 )
 
+            if (
+                "@" in userName
+                and userName.split("@")[1] != ldapSetting.ldapDomain
+            ):
+                continue
+
             try:
                 return self._tryLdap(dbSession, userName, password, ldapSetting)
             except LoginFailed as e:
@@ -121,11 +127,12 @@ class LdapAuth(AuthABC):
 
             # make the connection
             conn.simple_bind_s(
-                "%s@%s" % (userName, ldapSetting.ldapDomain), password
+                "%s@%s" % (userName.split("@")[0], ldapSetting.ldapDomain),
+                password,
             )
             ldapFilter = (
                 "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
-                % userName
+                % userName.split("@")[0]
             )
 
             dcParts = ",".join(
@@ -293,11 +300,29 @@ class LdapAuth(AuthABC):
 
         # do no create, return the existing user
         if internalUser:
+            if "@" not in internalUser.userKey:
+                internalUser.userKey = (
+                    internalUser.userName
+                    if "@" in internalUser.userName
+                    else (
+                        "%s@%s"
+                        % (
+                            internalUser.userName,
+                            internalUser.email.split("@")[1],
+                        )
+                    )
+                )
+                dbSession.merge(internalUser)
+                dbSession.commit()
             return internalUser
 
         newInternalUser = InternalUserTuple(
             userName=userName,
-            userKey=userName.lower(),
+            userKey=(
+                userName
+                if "@" in userName
+                else ("%s@%s" % (userName, email.split("@")[1]))
+            ),
             userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
             email=email,

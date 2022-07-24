@@ -39,7 +39,7 @@ class InternalAuth(AuthABC):
         authenticatedUser = (
             dbSession.query(InternalUserTuple, InternalUserPassword)
             .join(InternalUserPassword, isouter=True)  # effectively `LEFT JOIN`
-            .filter(InternalUserTuple.userKey == userName.lower())
+            .filter(InternalUserTuple.userName == userName)
             .first()
         )
 
@@ -62,7 +62,9 @@ class InternalAuth(AuthABC):
 
         passObj = authenticatedUser.InternalUserPassword
         if passObj.password != PasswordUpdateController.hashPass(password):
-            raise LoginFailed("Peek InternalAuth: Username or password is incorrect")
+            raise LoginFailed(
+                "Peek InternalAuth: Username or password is incorrect"
+            )
 
         groups = (
             dbSession.query(InternalGroupTuple)

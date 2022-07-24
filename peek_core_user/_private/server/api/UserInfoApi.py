@@ -70,9 +70,7 @@ class UserInfoApi(UserInfoApiABC):
 
         try:
             user = ormSession.query(InternalUserTuple).filter(filter_).one()
-
             return self._makeUserDetails(user)
-
         except NoResultFound:
             return None
 
