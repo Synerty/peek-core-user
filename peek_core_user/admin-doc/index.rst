@@ -10,5 +10,6 @@ profiles.
     :caption: Contents:
 
     overview
-    admin-ui/admin-ui
+    logged_in/logged_in
+    configuration/configuration
 

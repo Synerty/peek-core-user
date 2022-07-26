@@ -1,22 +1,7 @@
-.. _core_device_admin_ui_settings:
+.. _core_user_configuration:
 
-Admin UI Settings
------------------
-
-Home
-````
-
-Configure the General Settings to configure the user plugin.
-
-.. image:: home.png
-
-Logged In Users
-```````````````
-
-This screen shows the logged in users in Peek. Administrators can logout users from
-from this screen.
-
-.. image:: manage-logged-in-users.png
+Configuration
+-------------
 
 Edit Internal Users
 ```````````````````
@@ -29,6 +14,25 @@ When LDAP is enabled, users will appear in this screen when they first login.
 
 .. image:: edit-internal-user.png
 
+To Create an Internal User
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Click on **Add**
+#. Enter the **User Details**
+#. Enter a **Password**
+#. Click on the **Plus** icon.
+#. Select a **group** for the user
+#. Click **Save**
+
+.. note:: Users can be in multiple groups.
+
+.. image:: add_user.png
+
+To Delete an Internal User
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Click on the **minus** icon next to the user.
+
 Edit Internal Groups
 ````````````````````
 
@@ -38,8 +42,22 @@ Internal groups are not used when the authentication is set to LDAP.
 
 .. note:: Internal groups can be imported from other systems.
 
-
 .. image:: edit-internal-groups.png
+
+To Add an Internal Group
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Click on **Add**
+#. Enter the group **Name**
+#. Enter the group **Title**
+#. Click **Save**
+
+.. image:: add_group.png
+
+To Delete and Internal Group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Click on the **minus** icon next to the group.
 
 Edit General Settings
 `````````````````````
