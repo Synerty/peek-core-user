@@ -17,6 +17,11 @@ Navigate to the login screen, then:
 #. Enter your password into the second field
 #. Click **Login**
 
+.. note:: When logging in using identical LDAP credentials
+    from different servers, you need to specify which domain to use. For example,
+    if the user name is *bradn* and the domain is *synerty.com*, the peek
+    internal username will be bradn@synerty.com
+
 .. image:: login.png
     :align: center
 
