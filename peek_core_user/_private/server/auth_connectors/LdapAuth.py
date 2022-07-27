@@ -224,7 +224,7 @@ class LdapAuth(AuthABC):
         # a group.
         ldapFilter = (
             "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=%s))"
-            % (distinguishedName,)
+            % (LdapAuth._escapeParensForLdapFilter(distinguishedName),)
         )
         groupDetails = conn.search_st(
             ",".join(distinguishedName.split(",")[1:]),
@@ -303,6 +303,18 @@ class LdapAuth(AuthABC):
             strSid += "-%s" % (subAuth,)
 
         return strSid
+
+    def _escapeParensForLdapFilter(value: str) -> str:
+        """Escape parenthesis () in a string
+
+        Escape parenthesis in a string to be able to use it as a value in an
+        LDAP filter. `(` are replaced with \28 and `)` are replaced with \29
+
+        :return: Escaped string
+        """
+        value = value.replace("(", "\\28")
+        value = value.replace(")", "\\29")
+        return value
 
     def _maybeCreateInternalUserBlocking(
         self,
