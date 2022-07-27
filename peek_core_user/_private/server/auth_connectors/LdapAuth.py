@@ -377,7 +377,13 @@ class LdapAuth(AuthABC):
             objectSid=LdapAuth._decodeSid(objectSid),
         )
 
-        dbSession.add(newInternalUser)
+        try:
+            dbSession.add(newInternalUser)
+        except Exception as e:
+            logger.info(e)
+            raise LoginFailed(
+                "Failed to create Internal User. Use the full name <username>@<ldap-domain> to login"
+            )
         dbSession.commit()
         return newInternalUser
 
