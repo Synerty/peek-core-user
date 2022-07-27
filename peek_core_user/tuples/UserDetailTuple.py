@@ -36,6 +36,8 @@ class UserDetailTuple(Tuple):
     #  `peek_core_user.tuples.UserAuthTargetEnum`
     authenticationTarget: str = TupleField()
 
+    objectSid: Optional[str] = TupleField()
+
     @property
     def userKey(self):
         return self.userName.lower()

@@ -102,7 +102,12 @@ class LoginLogoutController:
         self._infoApi = None
 
     def _checkPassBlocking(
-        self, ormSession, userName, password, isFieldService: bool
+        self,
+        ormSession,
+        userName,
+        password,
+        isFieldService: bool,
+        objectSid=None,
     ) -> Tuple[List[str], InternalUserTuple]:
         if not password:
             raise LoginFailed("Password is empty")
@@ -138,7 +143,7 @@ class LoginLogoutController:
         try:
             if globalSetting(ormSession, LDAP_AUTH_ENABLED):
                 return LdapAuth().checkPassBlocking(
-                    ormSession, userName, password, forService
+                    ormSession, userName, password, forService, objectSid
                 )
 
         except Exception as e:
@@ -275,7 +280,11 @@ class LoginLogoutController:
             # This will login from the internal user if one already exists or
             # login from LDAP and create a user if an internal does not exist
             groups, _ = self._checkPassBlocking(
-                ormSession, userName, password, allowMultipleLogins
+                ormSession,
+                userName,
+                password,
+                allowMultipleLogins,
+                userDetail.objectSid if userDetail else None,
             )
             self._checkGroupBlocking(ormSession, groups)
 

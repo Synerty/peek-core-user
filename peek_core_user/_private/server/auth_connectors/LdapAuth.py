@@ -57,7 +57,9 @@ class LdapNotEnabledError(Exception):
 
 
 class LdapAuth(AuthABC):
-    def checkPassBlocking(self, dbSession, userName, password, forService):
+    def checkPassBlocking(
+        self, dbSession, userName, password, forService, objectSid=None
+    ):
         """Login User
 
         :param forService:
@@ -104,7 +106,9 @@ class LdapAuth(AuthABC):
                 continue
 
             try:
-                return self._tryLdap(dbSession, userName, password, ldapSetting)
+                return self._tryLdap(
+                    dbSession, userName, password, ldapSetting, objectSid
+                )
             except LoginFailed as e:
                 if not firstException:
                     firstException = e
@@ -117,7 +121,12 @@ class LdapAuth(AuthABC):
         raise LoginFailed("LDAPAuth: No LDAP providers found for this service")
 
     def _tryLdap(
-        self, dbSession, userName, password, ldapSetting: LdapSetting
+        self,
+        dbSession,
+        userName,
+        password,
+        ldapSetting: LdapSetting,
+        objectSid=None,
     ) -> Tuple[List[str], InternalUserTuple]:
         try:
 
@@ -130,10 +139,16 @@ class LdapAuth(AuthABC):
                 "%s@%s" % (userName.split("@")[0], ldapSetting.ldapDomain),
                 password,
             )
-            ldapFilter = (
-                "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
-                % userName.split("@")[0]
-            )
+            if objectSid:
+                ldapFilter = (
+                    "(&(objectCategory=person)(objectClass=user)(objectSid=%s))"
+                    % objectSid
+                )
+            else:
+                ldapFilter = (
+                    "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
+                    % userName.split("@")[0]
+                )
 
             dcParts = ",".join(
                 ["DC=%s" % part for part in ldapSetting.ldapDomain.split(".")]
@@ -260,6 +275,7 @@ class LdapAuth(AuthABC):
             userUuid,
             email,
             ldapSetting.ldapTitle,
+            objectSid,
         )
 
         return groups, newInternalUser
@@ -289,7 +305,14 @@ class LdapAuth(AuthABC):
         return strSid
 
     def _maybeCreateInternalUserBlocking(
-        self, dbSession, userName, userTitle, userUuid, email, ldapName
+        self,
+        dbSession,
+        userName,
+        userTitle,
+        userUuid,
+        email,
+        ldapName,
+        objectSid,
     ) -> InternalUserTuple:
 
         internalUser = (
@@ -300,6 +323,7 @@ class LdapAuth(AuthABC):
 
         # do no create, return the existing user
         if internalUser:
+            commitChanges = False
             if "@" not in internalUser.userKey:
                 internalUser.userKey = (
                     internalUser.userName
@@ -312,8 +336,16 @@ class LdapAuth(AuthABC):
                         )
                     )
                 )
+                commitChanges = True
+
+            if not internalUser.objectSid:
+                internalUser.objectSid = LdapAuth._decodeSid(objectSid)
+                commitChanges = True
+
+            if commitChanges:
                 dbSession.merge(internalUser)
                 dbSession.commit()
+
             return internalUser
 
         newInternalUser = InternalUserTuple(
@@ -330,6 +362,7 @@ class LdapAuth(AuthABC):
             importSource="LDAP",
             # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
             importHash=f"{userPluginTuplePrefix}{self.__class__.__name__}:{userUuid}",
+            objectSid=LdapAuth._decodeSid(objectSid),
         )
 
         dbSession.add(newInternalUser)

@@ -46,6 +46,7 @@ class InternalUserTuple(Tuple, DeclarativeBase):
     userKey = Column(String, unique=True, nullable=True)
     userTitle = Column(String, unique=True, nullable=False)
     userUuid = Column(String, unique=True, nullable=False)
+    objectSid = Column(String, unique=True, nullable=True)
     # `authenticationTarget` is a custom type in postgres, see migration script
     #  43df0e05c728_added_user_import_source.py
     authenticationTarget = Column(String, nullable=False)
