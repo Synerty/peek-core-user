@@ -58,7 +58,7 @@ class LdapNotEnabledError(Exception):
 
 class LdapAuth(AuthABC):
     def checkPassBlocking(
-        self, dbSession, userName, password, forService, objectSid=None
+        self, dbSession, userName, password, forService, userUuid=None
     ):
         """Login User
 
@@ -66,6 +66,7 @@ class LdapAuth(AuthABC):
         :param dbSession:
         :param userName: The username of the user.
         :param password: The users secret password.
+        :param userUuid: The decoded objectSid of the user from LDAP
         :rtype
         """
 
@@ -107,7 +108,7 @@ class LdapAuth(AuthABC):
 
             try:
                 return self._tryLdap(
-                    dbSession, userName, password, ldapSetting, objectSid
+                    dbSession, userName, password, ldapSetting, userUuid
                 )
             except LoginFailed as e:
                 if not firstException:
@@ -126,7 +127,7 @@ class LdapAuth(AuthABC):
         userName,
         password,
         ldapSetting: LdapSetting,
-        objectSid=None,
+        userUuid=None,
     ) -> Tuple[List[str], InternalUserTuple]:
         try:
 
@@ -139,10 +140,10 @@ class LdapAuth(AuthABC):
                 "%s@%s" % (userName.split("@")[0], ldapSetting.ldapDomain),
                 password,
             )
-            if objectSid:
+            if userUuid:
                 ldapFilter = (
                     "(&(objectCategory=person)(objectClass=user)(objectSid=%s))"
-                    % objectSid
+                    % userUuid
                 )
             else:
                 ldapFilter = (
@@ -255,10 +256,8 @@ class LdapAuth(AuthABC):
         if userDetails["userPrincipalName"]:
             email = userDetails["userPrincipalName"][0].decode()
 
-        userUuid = None
-        if userDetails["objectGUID"]:
-            md5Hash = hashlib.md5(userDetails["objectGUID"][0])
-            userUuid = str(md5Hash.hexdigest())
+        if not userUuid:
+            userUuid = LdapAuth._decodeSid(objectSid)
 
         if ldapSetting.ldapGroups:
             ldapGroups = set(
@@ -343,7 +342,6 @@ class LdapAuth(AuthABC):
 
         # do no create, return the existing user
         if internalUser:
-            commitChanges = False
             if "@" not in internalUser.userKey:
                 internalUser.userKey = (
                     internalUser.userName
@@ -356,13 +354,6 @@ class LdapAuth(AuthABC):
                         )
                     )
                 )
-                commitChanges = True
-
-            if not internalUser.objectSid:
-                internalUser.objectSid = LdapAuth._decodeSid(objectSid)
-                commitChanges = True
-
-            if commitChanges:
                 dbSession.merge(internalUser)
                 dbSession.commit()
 
@@ -382,7 +373,6 @@ class LdapAuth(AuthABC):
             importSource="LDAP",
             # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
             importHash=f"{userPluginTuplePrefix}{self.__class__.__name__}:{userUuid}",
-            objectSid=LdapAuth._decodeSid(objectSid),
         )
 
         try:

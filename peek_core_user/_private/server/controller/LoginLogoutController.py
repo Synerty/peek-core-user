@@ -107,7 +107,7 @@ class LoginLogoutController:
         userName,
         password,
         isFieldService: bool,
-        objectSid=None,
+        userUuid=None,
     ) -> Tuple[List[str], InternalUserTuple]:
         if not password:
             raise LoginFailed("Password is empty")
@@ -143,7 +143,7 @@ class LoginLogoutController:
         try:
             if globalSetting(ormSession, LDAP_AUTH_ENABLED):
                 return LdapAuth().checkPassBlocking(
-                    ormSession, userName, password, forService, objectSid
+                    ormSession, userName, password, forService, userUuid
                 )
 
         except Exception as e:
@@ -284,7 +284,7 @@ class LoginLogoutController:
                 userName,
                 password,
                 allowMultipleLogins,
-                userDetail.objectSid if userDetail else None,
+                userDetail.userUuid if userDetail else None,
             )
             self._checkGroupBlocking(ormSession, groups)
 
