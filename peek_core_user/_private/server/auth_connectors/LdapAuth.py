@@ -266,7 +266,7 @@ class LdapAuth(AuthABC):
             )
 
             if not ldapGroups & set(groups):
-                raise LoginFailed("User is not apart of an authorised group")
+                raise LoginFailed("User is not a member of an authorised group")
 
         newInternalUser = self._maybeCreateInternalUserBlocking(
             dbSession,
