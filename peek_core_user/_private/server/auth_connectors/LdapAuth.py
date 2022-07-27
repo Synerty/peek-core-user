@@ -307,13 +307,21 @@ class LdapAuth(AuthABC):
     def _escapeParensForLdapFilter(value: str) -> str:
         """Escape parenthesis () in a string
 
-        Escape parenthesis in a string to be able to use it as a value in an
-        LDAP filter. `(` are replaced with \28 and `)` are replaced with \29
+        Escape special characters in a string to be able to use it as a value
+        in an LDAP filter. `(` are replaced with \28 and `)` are replaced
+        with \29 and so on.
+
+        Reference: https://tools.ietf.org/search/rfc2254#page-5
 
         :return: Escaped string
         """
+        # The \ character must always be escaped first
+        value = value.replace("\\", "\\5C")
+
         value = value.replace("(", "\\28")
         value = value.replace(")", "\\29")
+        value = value.replace("*", "\\2A")
+        value = value.replace("\0", "\\00")
         return value
 
     def _maybeCreateInternalUserBlocking(
