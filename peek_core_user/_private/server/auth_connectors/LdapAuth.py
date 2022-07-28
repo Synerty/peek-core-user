@@ -57,13 +57,16 @@ class LdapNotEnabledError(Exception):
 
 
 class LdapAuth(AuthABC):
-    def checkPassBlocking(self, dbSession, userName, password, forService):
+    def checkPassBlocking(
+        self, dbSession, userName, password, forService, userUuid=None
+    ):
         """Login User
 
         :param forService:
         :param dbSession:
         :param userName: The username of the user.
         :param password: The users secret password.
+        :param userUuid: The decoded objectSid of the user from LDAP
         :rtype
         """
 
@@ -104,7 +107,9 @@ class LdapAuth(AuthABC):
                 continue
 
             try:
-                return self._tryLdap(dbSession, userName, password, ldapSetting)
+                return self._tryLdap(
+                    dbSession, userName, password, ldapSetting, userUuid
+                )
             except LoginFailed as e:
                 if not firstException:
                     firstException = e
@@ -117,7 +122,12 @@ class LdapAuth(AuthABC):
         raise LoginFailed("LDAPAuth: No LDAP providers found for this service")
 
     def _tryLdap(
-        self, dbSession, userName, password, ldapSetting: LdapSetting
+        self,
+        dbSession,
+        userName,
+        password,
+        ldapSetting: LdapSetting,
+        userUuid=None,
     ) -> Tuple[List[str], InternalUserTuple]:
         try:
 
@@ -130,10 +140,16 @@ class LdapAuth(AuthABC):
                 "%s@%s" % (userName.split("@")[0], ldapSetting.ldapDomain),
                 password,
             )
-            ldapFilter = (
-                "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
-                % userName.split("@")[0]
-            )
+            if userUuid:
+                ldapFilter = (
+                    "(&(objectCategory=person)(objectClass=user)(objectSid=%s))"
+                    % userUuid
+                )
+            else:
+                ldapFilter = (
+                    "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
+                    % userName.split("@")[0]
+                )
 
             dcParts = ",".join(
                 ["DC=%s" % part for part in ldapSetting.ldapDomain.split(".")]
@@ -209,7 +225,7 @@ class LdapAuth(AuthABC):
         # a group.
         ldapFilter = (
             "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=%s))"
-            % (distinguishedName,)
+            % (LdapAuth._escapeParensForLdapFilter(distinguishedName),)
         )
         groupDetails = conn.search_st(
             ",".join(distinguishedName.split(",")[1:]),
@@ -240,10 +256,8 @@ class LdapAuth(AuthABC):
         if userDetails["userPrincipalName"]:
             email = userDetails["userPrincipalName"][0].decode()
 
-        userUuid = None
-        if userDetails["objectGUID"]:
-            md5Hash = hashlib.md5(userDetails["objectGUID"][0])
-            userUuid = str(md5Hash.hexdigest())
+        if not userUuid:
+            userUuid = LdapAuth._decodeSid(objectSid)
 
         if ldapSetting.ldapGroups:
             ldapGroups = set(
@@ -251,7 +265,7 @@ class LdapAuth(AuthABC):
             )
 
             if not ldapGroups & set(groups):
-                raise LoginFailed("User is not apart of an authorised group")
+                raise LoginFailed("User is not a member of an authorised group")
 
         newInternalUser = self._maybeCreateInternalUserBlocking(
             dbSession,
@@ -260,6 +274,7 @@ class LdapAuth(AuthABC):
             userUuid,
             email,
             ldapSetting.ldapTitle,
+            objectSid,
         )
 
         return groups, newInternalUser
@@ -288,8 +303,35 @@ class LdapAuth(AuthABC):
 
         return strSid
 
+    def _escapeParensForLdapFilter(value: str) -> str:
+        """Escape parenthesis () in a string
+
+        Escape special characters in a string to be able to use it as a value
+        in an LDAP filter. `(` are replaced with \28 and `)` are replaced
+        with \29 and so on.
+
+        Reference: https://tools.ietf.org/search/rfc2254#page-5
+
+        :return: Escaped string
+        """
+        # The \ character must always be escaped first
+        value = value.replace("\\", "\\5C")
+
+        value = value.replace("(", "\\28")
+        value = value.replace(")", "\\29")
+        value = value.replace("*", "\\2A")
+        value = value.replace("\0", "\\00")
+        return value
+
     def _maybeCreateInternalUserBlocking(
-        self, dbSession, userName, userTitle, userUuid, email, ldapName
+        self,
+        dbSession,
+        userName,
+        userTitle,
+        userUuid,
+        email,
+        ldapName,
+        objectSid,
     ) -> InternalUserTuple:
 
         internalUser = (
@@ -314,6 +356,7 @@ class LdapAuth(AuthABC):
                 )
                 dbSession.merge(internalUser)
                 dbSession.commit()
+
             return internalUser
 
         newInternalUser = InternalUserTuple(
@@ -332,7 +375,13 @@ class LdapAuth(AuthABC):
             importHash=f"{userPluginTuplePrefix}{self.__class__.__name__}:{userUuid}",
         )
 
-        dbSession.add(newInternalUser)
+        try:
+            dbSession.add(newInternalUser)
+        except Exception as e:
+            logger.info(e)
+            raise LoginFailed(
+                "Failed to create Internal User. Use the full name <username>@<ldap-domain> to login"
+            )
         dbSession.commit()
         return newInternalUser
 
