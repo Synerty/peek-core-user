@@ -107,6 +107,7 @@ class LdapAuth(AuthABC):
                 continue
 
             try:
+                logger.info("Trying LDAP login for %s", ldapSetting.ldapDomain)
                 return self._tryLdap(
                     dbSession, userName, password, ldapSetting, userUuid
                 )
@@ -140,6 +141,8 @@ class LdapAuth(AuthABC):
                 "%s@%s" % (userName.split("@")[0], ldapSetting.ldapDomain),
                 password,
             )
+            logger.info("Connected to LDAP server %s", ldapSetting.ldapDomain)
+
             if userUuid:
                 ldapFilter = (
                     "(&(objectCategory=person)(objectClass=user)(objectSid=%s))"
@@ -173,6 +176,7 @@ class LdapAuth(AuthABC):
             userDetails = None
             for ldapBase in ldapBases:
                 ldapBase = "%s,%s" % (ldapBase, dcParts)
+                logger.debug("LDAP Base: %s", ldapBase)
 
                 try:
                     # Example Base : 'CN=atuser1,CN=Users,DC=synad,DC=synerty,DC=com'
@@ -227,6 +231,7 @@ class LdapAuth(AuthABC):
             "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=%s))"
             % (LdapAuth._escapeParensForLdapFilter(distinguishedName),)
         )
+        logger.info("Fetching groups from the LDAP server")
         groupDetails = conn.search_st(
             ",".join(distinguishedName.split(",")[1:]),
             ldap.SCOPE_SUBTREE,
@@ -342,6 +347,7 @@ class LdapAuth(AuthABC):
 
         # do no create, return the existing user
         if internalUser:
+            logger.info("Found existing internal user for the LDAP user")
             if "@" not in internalUser.userKey:
                 internalUser.userKey = (
                     internalUser.userName
@@ -359,6 +365,7 @@ class LdapAuth(AuthABC):
 
             return internalUser
 
+        logger.info("Creating new internal user entry for the user")
         newInternalUser = InternalUserTuple(
             userName=userName,
             userKey=(
