@@ -269,11 +269,6 @@ class LoginLogoutController:
 
         userDetail = self._infoApi.userBlocking(userName)
 
-        # user not found
-        if not userDetail and isFieldService:
-            responseTuple.setFailed()
-            return responseTuple
-
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
