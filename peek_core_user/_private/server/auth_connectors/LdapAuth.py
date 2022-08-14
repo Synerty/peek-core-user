@@ -280,6 +280,7 @@ class LdapAuth(AuthABC):
             email,
             ldapSetting.ldapTitle,
             objectSid,
+            ldapSetting.ldapDomain,
         )
 
         return groups, newInternalUser
@@ -337,6 +338,7 @@ class LdapAuth(AuthABC):
         email,
         ldapName,
         objectSid,
+        ldapDomain
     ) -> InternalUserTuple:
 
         internalUser = (
@@ -347,7 +349,7 @@ class LdapAuth(AuthABC):
 
         # do no create, return the existing user
         if internalUser:
-            logger.info("Found existing internal user for the LDAP user")
+            logger.info("Found existing internal user %s", internalUser.userKey)
             if "@" not in internalUser.userKey:
                 internalUser.userKey = (
                     internalUser.userName
@@ -356,7 +358,7 @@ class LdapAuth(AuthABC):
                         "%s@%s"
                         % (
                             internalUser.userName,
-                            internalUser.email.split("@")[1],
+                            ldapDomain,
                         )
                     )
                 )
@@ -365,13 +367,14 @@ class LdapAuth(AuthABC):
 
             return internalUser
 
-        logger.info("Creating new internal user entry for the user")
+        userKey = "%s@%s" % userName, ldapDomain
+        logger.info("Creating new internal user: %s", userKey)
         newInternalUser = InternalUserTuple(
             userName=userName,
             userKey=(
                 userName
                 if "@" in userName
-                else ("%s@%s" % (userName, email.split("@")[1]))
+                else userKey
             ),
             userTitle="%s (%s)" % (userTitle, ldapName),
             userUuid=userUuid,
