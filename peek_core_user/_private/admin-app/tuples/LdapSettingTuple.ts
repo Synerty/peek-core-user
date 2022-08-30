@@ -19,6 +19,8 @@ export class LdapSettingTuple extends Tuple {
     desktopEnabled: boolean;
     mobileEnabled: boolean;
 
+    agentHost: string;
+
     constructor() {
         super(LdapSettingTuple.tupleName);
     }

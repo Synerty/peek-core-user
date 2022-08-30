@@ -1,20 +1,21 @@
 import logging
 from typing import List
 
+from sqlalchemy.orm.exc import NoResultFound
+from twisted.cred.error import LoginFailed
+from twisted.internet.defer import inlineCallbacks
+
 from peek_core_user._private.server.auth_connectors.InternalAuth import (
     InternalAuth,
 )
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.Setting import (
-    globalSetting,
-    LDAP_AUTH_ENABLED,
     INTERNAL_AUTH_ENABLED_FOR_ADMIN,
 )
+from peek_core_user._private.storage.Setting import LDAP_AUTH_ENABLED
+from peek_core_user._private.storage.Setting import globalSetting
 from peek_plugin_base.storage.DbConnection import DbSessionCreator
-from twisted.cred.error import LoginFailed
-from vortex.DeferUtil import deferToThreadWrapWithLogger
-from sqlalchemy.orm.exc import NoResultFound
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class AdminAuthController:
     def shutdown(self):
         pass
 
-    @deferToThreadWrapWithLogger(logger)
+    @inlineCallbacks
     def check(self, userName, password) -> List[str]:
         if not password:
             raise LoginFailed("Password is empty")
@@ -60,12 +61,14 @@ class AdminAuthController:
                     except NoResultFound:
                         userUuid = None
 
-                    return LdapAuth().checkPassBlocking(
-                        ormSession,
-                        userName,
-                        password,
-                        LdapAuth.FOR_ADMIN,
-                        userUuid,
+                    return (
+                        yield LdapAuth().checkPassBlocking(
+                            ormSession,
+                            userName,
+                            password,
+                            LdapAuth.FOR_ADMIN,
+                            userUuid,
+                        )
                     )
 
             except Exception as e:
