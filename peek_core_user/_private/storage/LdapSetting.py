@@ -1,8 +1,11 @@
 import logging
 
-from sqlalchemy import Column, Boolean
-from sqlalchemy import Integer, String
-from vortex.Tuple import Tuple, addTupleType
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from vortex.Tuple import Tuple
+from vortex.Tuple import addTupleType
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.storage.DeclarativeBase import DeclarativeBase
@@ -14,7 +17,7 @@ logger = logging.getLogger(__name__)
 class LdapSetting(Tuple, DeclarativeBase):
     """LdapSetting
 
-    This table stores connetions and settings to LDAP servers
+    This table stores connections and settings to LDAP servers
 
     """
 
@@ -32,3 +35,5 @@ class LdapSetting(Tuple, DeclarativeBase):
     adminEnabled = Column(Boolean, nullable=False, server_default="0")
     desktopEnabled = Column(Boolean, nullable=False, server_default="0")
     mobileEnabled = Column(Boolean, nullable=False, server_default="0")
+
+    agentHost = Column(String, nullable=True)
