@@ -9,7 +9,9 @@ from peek_core_user._private.server.controller.AdminAuthController import (
 from sqlalchemy import MetaData
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
-from peek_plugin_base.server.PluginLogicEntryHookABC import PluginLogicEntryHookABC
+from peek_plugin_base.server.PluginLogicEntryHookABC import (
+    PluginLogicEntryHookABC,
+)
 from peek_plugin_base.server.PluginServerStorageEntryHookABC import (
     PluginServerStorageEntryHookABC,
 )
@@ -25,13 +27,19 @@ from peek_core_user._private.server.ClientTupleActionProcessor import (
 from peek_core_user._private.server.ClientTupleDataObservable import (
     makeTupleDataObservableHandler,
 )
-from peek_core_user._private.server.admin_backend import makeAdminBackendHandlers
+from peek_core_user._private.server.admin_backend import (
+    makeAdminBackendHandlers,
+)
 from peek_core_user._private.server.api.UserApi import UserApi
-from peek_core_user._private.server.controller.ImportController import ImportController
+from peek_core_user._private.server.controller.ImportController import (
+    ImportController,
+)
 from peek_core_user._private.server.controller.LoginLogoutController import (
     LoginLogoutController,
 )
-from peek_core_user._private.server.controller.MainController import MainController
+from peek_core_user._private.server.controller.MainController import (
+    MainController,
+)
 from peek_core_user._private.tuples.LoggedInUserStatusTuple import (
     LoggedInUserStatusTuple,
 )
@@ -104,7 +112,9 @@ class PluginLogicEntryHook(
 
         loadPrivateTuples()
 
-        from peek_core_user._private.storage.DeclarativeBase import loadStorageTuples
+        from peek_core_user._private.storage.DeclarativeBase import (
+            loadStorageTuples,
+        )
 
         loadStorageTuples()
 
@@ -123,7 +133,9 @@ class PluginLogicEntryHook(
         """
         # ----------------
         # Setup the APIs
-        deviceApi: DeviceApiABC = self.platform.getOtherPluginApi("peek_core_device")
+        deviceApi: DeviceApiABC = self.platform.getOtherPluginApi(
+            "peek_core_device"
+        )
 
         # ----------------
         # Import Controller
@@ -132,7 +144,9 @@ class PluginLogicEntryHook(
 
         # ----------------
         # Login / Logout Controller
-        loginLogoutController = LoginLogoutController(deviceApi, self.dbSessionCreator)
+        loginLogoutController = LoginLogoutController(
+            deviceApi, self.dbSessionCreator
+        )
         self._handlers.append(loginLogoutController)
 
         # ----------------
@@ -194,7 +208,9 @@ class PluginLogicEntryHook(
         # ----------------
         # Setup admin backend
         self._handlers.extend(
-            makeAdminBackendHandlers(clientTupleObservable, self.dbSessionCreator)
+            makeAdminBackendHandlers(
+                clientTupleObservable, self.dbSessionCreator
+            )
         )
 
         logger.debug("started")
@@ -203,7 +219,8 @@ class PluginLogicEntryHook(
         for handler in self._handlers:
             handler.shutdown()
 
-        self._userApi.shutdown()
+        if self._userApi:
+            self._userApi.shutdown()
 
         logger.debug("stopped")
 
