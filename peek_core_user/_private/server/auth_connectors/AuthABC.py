@@ -65,7 +65,7 @@ class AuthABC(metaclass=ABCMeta):
                     InternalUserPassword, isouter=True
                 )  # effectively `LEFT JOIN`
                 .filter(InternalUserTuple.userName == userName)
-                .first()
+                .all()
             )
             session.expunge_all()
 
