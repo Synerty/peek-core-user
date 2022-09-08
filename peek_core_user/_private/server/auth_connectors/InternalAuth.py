@@ -1,5 +1,9 @@
 import logging
 
+from twisted.cred.error import LoginFailed
+from twisted.internet.defer import inlineCallbacks
+from vortex.DeferUtil import deferToThreadWrapWithLogger
+
 from peek_core_user._private.server.auth_connectors.AuthABC import AuthABC
 from peek_core_user._private.server.auth_connectors.LdapAuth import LdapAuth
 from peek_core_user._private.server.controller.PasswordUpdateController import (
@@ -11,94 +15,124 @@ from peek_core_user._private.storage.InternalGroupTuple import (
 from peek_core_user._private.storage.InternalUserGroupTuple import (
     InternalUserGroupTuple,
 )
-from peek_core_user._private.storage.InternalUserPassword import (
-    InternalUserPassword,
+from peek_core_user._private.storage.Setting import ADMIN_LOGIN_GROUP
+from peek_core_user._private.storage.Setting import (
+    INTERNAL_AUTH_ENABLED_FOR_ADMIN,
 )
+from peek_core_user._private.storage.Setting import MOBILE_LOGIN_GROUP
+from peek_core_user._private.storage.Setting import OFFICE_LOGIN_GROUP
+from peek_core_user._private.storage.Setting import globalSetting
+from peek_core_user.server.UserDbErrors import UserNotFoundException
+from peek_core_user.server.UserDbErrors import UserPasswordNotSetException
 from peek_core_user.tuples.constants.UserAuthTargetEnum import (
     UserAuthTargetEnum,
 )
-from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
-from peek_core_user._private.storage.Setting import (
-    globalSetting,
-    ADMIN_LOGIN_GROUP,
-    OFFICE_LOGIN_GROUP,
-    MOBILE_LOGIN_GROUP,
-)
-from peek_core_user.server.UserDbErrors import (
-    UserPasswordNotSetException,
-    UserNotFoundException,
-)
-from twisted.cred.error import LoginFailed
 
 logger = logging.getLogger(__name__)
 
 
 class InternalAuth(AuthABC):
-    def checkPassBlocking(self, dbSession, userName, password, forService):
-
-        authenticatedUser = (
-            dbSession.query(InternalUserTuple, InternalUserPassword)
-            .join(InternalUserPassword, isouter=True)  # effectively `LEFT JOIN`
-            .filter(InternalUserTuple.userName == userName)
-            .first()
+    @inlineCallbacks
+    def checkPassAsync(self, userName, password, forService):
+        authenticatedUserPassword = yield self.getInternalUserAndPassword(
+            userName
         )
 
         # if user not found
-        if not authenticatedUser or not authenticatedUser.InternalUserTuple:
+        if (
+            not authenticatedUserPassword
+            or not authenticatedUserPassword.InternalUserTuple
+        ):
             raise UserNotFoundException(userName)
 
         # if user found but user is created by LDAP
         if (
-            authenticatedUser.InternalUserTuple.authenticationTarget
+            authenticatedUserPassword.InternalUserTuple.authenticationTarget
             == UserAuthTargetEnum.LDAP
         ):
             # delegate to LDAPAuth
-            return LdapAuth().checkPassBlocking(
-                dbSession, userName, password, forService
+            return (
+                yield LdapAuth(self._dbSessionCreator).checkPassAsync(
+                    userName, password, forService
+                )
             )
 
-        if not authenticatedUser.InternalUserPassword:
+        if not authenticatedUserPassword.InternalUserPassword:
             raise UserPasswordNotSetException(userName)
 
-        passObj = authenticatedUser.InternalUserPassword
-        if passObj.password != PasswordUpdateController.hashPass(password):
-            raise LoginFailed(
-                "Peek InternalAuth: Username or password is incorrect"
+        #     def checkPassAsync(self, userName, password, forService):
+        #
+        # Check if the user is actually logged into this device.
+        return (
+            yield self._checkInternalPass(
+                authenticatedUserPassword, password, forService
             )
-
-        groups = (
-            dbSession.query(InternalGroupTuple)
-            .join(InternalUserGroupTuple)
-            .filter(InternalUserGroupTuple.userId == passObj.userId)
-            .all()
         )
 
-        groupNames = [g.groupName for g in groups]
+    @deferToThreadWrapWithLogger(logger)
+    def _checkInternalPass(self, authenticatedUser, password, forService):
 
-        if forService == self.FOR_ADMIN:
-            adminGroup = globalSetting(dbSession, ADMIN_LOGIN_GROUP)
-            if adminGroup not in set(groupNames):
+        dbSession = self._dbSessionCreator()
+        try:
+
+            passObj = authenticatedUser.InternalUserPassword
+            if passObj.password != PasswordUpdateController.hashPass(password):
                 raise LoginFailed(
-                    "Peek InternalAuth: User is not apart of an authorised group"
+                    "Peek InternalAuth: Username or password is incorrect"
                 )
 
-        elif forService == self.FOR_OFFICE:
-            officeGroup = globalSetting(dbSession, OFFICE_LOGIN_GROUP)
-            if officeGroup not in set(groupNames):
-                raise LoginFailed(
-                    "Peek InternalAuth: User is not apart of an authorised group"
-                )
-
-        elif forService == self.FOR_FIELD:
-            fieldGroup = globalSetting(dbSession, MOBILE_LOGIN_GROUP)
-            if fieldGroup not in set(groupNames):
-                raise LoginFailed(
-                    "Peek InternalAuth: User is not apart of an authorised group"
-                )
-
-        else:
-            raise Exception(
-                "Peek InternalAuth: Unhandled forService type %s" % forService
+            groups = (
+                dbSession.query(InternalGroupTuple)
+                .join(InternalUserGroupTuple)
+                .filter(InternalUserGroupTuple.userId == passObj.userId)
+                .all()
             )
 
-        return groupNames, authenticatedUser.InternalUserTuple
+            groupNames = [g.groupName for g in groups]
+
+            if forService == self.FOR_ADMIN:
+                adminGroup = globalSetting(dbSession, ADMIN_LOGIN_GROUP)
+                if adminGroup not in set(groupNames):
+                    raise LoginFailed(
+                        "Peek InternalAuth:"
+                        " User is not a member of an authorised group"
+                    )
+
+            elif forService == self.FOR_OFFICE:
+                officeGroup = globalSetting(dbSession, OFFICE_LOGIN_GROUP)
+                if officeGroup not in set(groupNames):
+                    raise LoginFailed(
+                        "Peek InternalAuth:"
+                        " User is not a member of an authorised group"
+                    )
+
+            elif forService == self.FOR_FIELD:
+                fieldGroup = globalSetting(dbSession, MOBILE_LOGIN_GROUP)
+                if fieldGroup not in set(groupNames):
+                    raise LoginFailed(
+                        "Peek InternalAuth:"
+                        " User is not a member of an authorised group"
+                    )
+
+            else:
+                raise Exception(
+                    "Peek InternalAuth: Unhandled forService type %s"
+                    % forService
+                )
+
+            # No commit needed, we only query
+
+            return groupNames, authenticatedUser.InternalUserTuple
+
+        finally:
+            dbSession.close()
+
+    @deferToThreadWrapWithLogger(logger)
+    def isInternalAuthEnabled(self):
+        session = self._dbSessionCreator()
+        try:
+            return globalSetting(session, INTERNAL_AUTH_ENABLED_FOR_ADMIN)
+            # No commit needed, we only query
+
+        finally:
+            session.close()

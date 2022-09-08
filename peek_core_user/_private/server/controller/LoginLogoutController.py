@@ -1,10 +1,16 @@
 import logging
+from collections import namedtuple
 from datetime import datetime
 from typing import List
 from typing import Tuple
 
 import pytz
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
+
+from peek_core_user._private.server.auth_connectors.AuthABC import AuthABC
+from peek_core_user._private.storage.Setting import (
+    INTERNAL_AUTH_ENABLED_FOR_ADMIN,
+)
 from twisted.cred.error import LoginFailed
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred
@@ -50,6 +56,16 @@ logger = logging.getLogger(__name__)
 
 USER_ALREADY_LOGGED_ON_KEY = "pl-user.USER_ALREADY_LOGGED_ON"
 DEVICE_ALREADY_LOGGED_ON_KEY = "pl-user.DEVICE_ALREADY_LOGGED_ON_KEY"
+
+_AuthSettings = namedtuple(
+    "_AuthSettings",
+    [
+        "internalFieldEnabled",
+        "internalOfficeEnabled",
+        "internalAdminEnabled",
+        "ldapAuthEnabled",
+    ],
+)
 
 
 class _ForceLogout:
@@ -101,13 +117,9 @@ class LoginLogoutController:
         self._fieldServiceHookApi = None
         self._infoApi = None
 
-    def _checkPassBlocking(
-        self,
-        ormSession,
-        userName,
-        password,
-        isFieldService: bool,
-        userUuid=None,
+    @inlineCallbacks
+    def _checkPassAsync(
+        self, userName, password, isFieldService: bool, userUuid=None
     ) -> Tuple[List[str], InternalUserTuple]:
         if not password:
             raise LoginFailed("Password is empty")
@@ -116,24 +128,33 @@ class LoginLogoutController:
 
         lastException = None
 
-        forService = InternalAuth.FOR_OFFICE
+        forService = AuthABC.FOR_OFFICE
         if isFieldService:
-            forService = InternalAuth.FOR_FIELD
+            forService = AuthABC.FOR_FIELD
+
+        authSettings = yield self._getAuthsEnabled()
 
         # TRY INTERNAL IF ITS ENABLED
         try:
-            if forService == InternalAuth.FOR_FIELD and globalSetting(
-                ormSession, INTERNAL_AUTH_ENABLED_FOR_FIELD
+            internalAuth = InternalAuth(self._dbSessionCreator)
+            if (
+                forService == AuthABC.FOR_FIELD
+                and authSettings.internalFieldEnabled
             ):
-                return InternalAuth().checkPassBlocking(
-                    ormSession, userName, password, forService
+                return (
+                    yield internalAuth.checkPassAsync(
+                        userName, password, forService
+                    )
                 )
 
-            if forService == InternalAuth.FOR_OFFICE and globalSetting(
-                ormSession, INTERNAL_AUTH_ENABLED_FOR_OFFICE
+            if (
+                forService == AuthABC.FOR_OFFICE
+                and authSettings.internalOfficeEnabled
             ):
-                return InternalAuth().checkPassBlocking(
-                    ormSession, userName, password, forService
+                return (
+                    yield internalAuth.checkPassAsync(
+                        userName, password, forService
+                    )
                 )
 
         except Exception as e:
@@ -141,9 +162,12 @@ class LoginLogoutController:
 
         # TRY LDAP IF ITS ENABLED
         try:
-            if globalSetting(ormSession, LDAP_AUTH_ENABLED):
-                return LdapAuth().checkPassBlocking(
-                    ormSession, userName, password, forService, userUuid
+            ldapAuth = LdapAuth(self._dbSessionCreator)
+            if authSettings.ldapAuthEnabled:
+                return (
+                    yield ldapAuth.checkPassAsync(
+                        userName, password, forService, userUuid
+                    )
                 )
 
         except Exception as e:
@@ -156,11 +180,10 @@ class LoginLogoutController:
             "No authentication handlers are enabled, enable one in settings"
         )
 
-    def _checkGroupBlocking(self, ormSession, groups: List[str]):
-        pass
-
     @deferToThreadWrapWithLogger(logger)
-    def _logoutInDb(self, logoutTuple: UserLogoutAction):
+    def _logoutInDb(
+        self, logoutTuple: UserLogoutAction, raiseNotLoggedInException=True
+    ):
         """
         Returns Deferred[UserLogoutResponseTuple]
         """
@@ -175,10 +198,36 @@ class LoginLogoutController:
             )
 
             if qry.count() == 0:
-                raise UserIsNotLoggedInToThisDeviceError(logoutTuple.userName)
+                if raiseNotLoggedInException:
+                    raise UserIsNotLoggedInToThisDeviceError(
+                        logoutTuple.userName
+                    )
+                else:
+                    return
 
             session.delete(qry.one())
             session.commit()
+
+        finally:
+            session.close()
+
+    @deferToThreadWrapWithLogger(logger)
+    def _getAuthsEnabled(self) -> _AuthSettings:
+        """
+        Returns Deferred[UserLogoutResponseTuple]
+        """
+
+        session = self._dbSessionCreator()
+        try:
+            settings = globalSetting(session)
+            return _AuthSettings(
+                internalFieldEnabled=settings[INTERNAL_AUTH_ENABLED_FOR_FIELD],
+                internalOfficeEnabled=settings[
+                    INTERNAL_AUTH_ENABLED_FOR_OFFICE
+                ],
+                internalAdminEnabled=settings[INTERNAL_AUTH_ENABLED_FOR_ADMIN],
+                ldapAuthEnabled=settings[LDAP_AUTH_ENABLED],
+            )
 
         finally:
             session.close()
@@ -235,20 +284,35 @@ class LoginLogoutController:
             )
         )
 
-    @deferToThreadWrapWithLogger(logger)
+    @inlineCallbacks
     def _loginInDb(self, loginTuple: UserLoginAction):
+        blockMultipleLogins = loginTuple.isFieldService
+
+        userDetail = yield self._infoApi.user(loginTuple.userName)
+
+        # This will login from the internal user if one already exists or
+        # login from LDAP and create a user if an internal does not exist
+        groups, _ = yield self._checkPassAsync(
+            loginTuple.userName,
+            loginTuple.password,
+            blockMultipleLogins,
+            userDetail.userUuid if userDetail else None,
+        )
+        return (yield self._loginInDbInThread(loginTuple, groups))
+
+    @deferToThreadWrapWithLogger(logger)
+    def _loginInDbInThread(self, loginTuple: UserLoginAction, groups):
         """
         Returns Deferred[UserLoginResponseTuple]
 
         """
 
         userName = loginTuple.userName
-        password = loginTuple.password
         acceptedWarningKeys = set(loginTuple.acceptedWarningKeys)
         deviceToken = loginTuple.deviceToken
         vehicle = loginTuple.vehicleId
         isFieldService = loginTuple.isFieldService
-        allowMultipleLogins = isFieldService
+        blockMultipleLogins = isFieldService
 
         forceLogouter = None
 
@@ -272,18 +336,7 @@ class LoginLogoutController:
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
-            # This will login from the internal user if one already exists or
-            # login from LDAP and create a user if an internal does not exist
-            groups, _ = self._checkPassBlocking(
-                ormSession,
-                userName,
-                password,
-                allowMultipleLogins,
-                userDetail.userUuid if userDetail else None,
-            )
-            self._checkGroupBlocking(ormSession, groups)
 
-            userDetail = self._infoApi.userBlocking(userName)
             if not userDetail:
                 responseTuple.setFailed()
                 return responseTuple
@@ -311,7 +364,7 @@ class LoginLogoutController:
                 .all()
             )
 
-            if allowMultipleLogins and len(loggedInElsewhere) not in (0, 1):
+            if blockMultipleLogins and len(loggedInElsewhere) not in (0, 1):
                 raise Exception(
                     "Found more than 1 ClientDevice for"
                     + (" token %s" % deviceToken)
@@ -324,7 +377,7 @@ class LoginLogoutController:
             sameDevice = userLoggedIn and loggedInElsewhere is None
 
             # If the user is logged in, but not to this client device, raise exception
-            if allowMultipleLogins and userLoggedIn and not sameDevice:
+            if blockMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
 
                     forceLogouter = _ForceLogout(
@@ -462,7 +515,9 @@ class LoginLogoutController:
 
             # Force logout, we don't care if it works or not.
             try:
-                yield self._logoutInDb(logoutTuple)
+                yield self._logoutInDb(
+                    logoutTuple, raiseNotLoggedInException=False
+                )
             except UserIsNotLoggedInToThisDeviceError:
                 pass
 
