@@ -96,7 +96,11 @@ class LdapAuth(AuthABC):
             try:
                 logger.info("Trying LDAP login for %s", ldapSetting.ldapDomain)
 
-                if ldapSetting.agentHost is None:
+                # None, zero length string and just spaces.
+                if (
+                    not ldapSetting.agentHost
+                    or not ldapSetting.agentHost.strip()
+                ):
                     logger.debug("Trying LDAP on Logic Service")
                     (groups, ldapLoggedInUser) = checkLdapAuth(
                         userName, password, ldapSetting, userUuid
