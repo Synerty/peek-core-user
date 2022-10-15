@@ -1,7 +1,6 @@
 import logging
 from typing import List
 
-from sqlalchemy.orm.exc import NoResultFound
 from twisted.cred.error import LoginFailed
 from twisted.internet.defer import inlineCallbacks
 
@@ -45,18 +44,16 @@ class AdminAuthController:
             ldapAuth = LdapAuth(self._dbSessionCreator)
             if (yield ldapAuth.isLdapAuthEnabled()):
                 # TODO Make the client tell us if it's for office or field
-                try:
-                    internalUser = yield ldapAuth.getInternalUser(userName)
-                    userUuid = internalUser.userUuid
-
-                except NoResultFound:
-                    userUuid = None
-
-                return (
-                    yield ldapAuth.checkPassAsync(
-                        userName, password, LdapAuth.FOR_ADMIN, userUuid
-                    )
+                internalUser = yield ldapAuth.getInternalUser(
+                    userName, raiseNotLoggedInException=False
                 )
+                userUuid = internalUser.userUuid if internalUser else None
+
+                groups, ldapLoggedInUser = yield ldapAuth.checkPassAsync(
+                    userName, password, LdapAuth.FOR_ADMIN, userUuid
+                )
+
+                return groups, ldapLoggedInUser
 
         except Exception as e:
             lastException = e

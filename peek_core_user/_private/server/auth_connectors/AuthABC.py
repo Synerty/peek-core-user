@@ -2,6 +2,7 @@ import logging
 from abc import ABCMeta
 from abc import abstractmethod
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -31,7 +32,9 @@ class AuthABC(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @deferToThreadWrapWithLogger(logger)
-    def getInternalUser(self, userName):
+    def getInternalUser(
+        self, userName, raiseNotLoggedInException=True
+    ) -> Optional[InternalUserTuple]:
 
         session = self._dbSessionCreator()
         try:
@@ -43,10 +46,16 @@ class AuthABC(metaclass=ABCMeta):
             session.expunge_all()
 
             if len(authenticatedUsers) == 0:
-                raise NoResultFound()
+                if raiseNotLoggedInException:
+                    raise NoResultFound()
+                else:
+                    return None
 
             if len(authenticatedUsers) != 1:
-                raise Exception("Too many users found")
+                if raiseNotLoggedInException:
+                    raise Exception("Too many users found")
+                else:
+                    return None
 
             return authenticatedUsers[0]
 
