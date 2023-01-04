@@ -56,9 +56,9 @@ def checkLdapAuth(
             "%s@%s" % (username.split("@")[0], ldapSetting.ldapDomain), password
         )
         logger.info(
-            "Connected to LDAP server %s for user %s",
-            ldapSetting.ldapDomain,
+            "User=%s, Connected to LDAP server %s",
             username,
+            ldapSetting.ldapDomain,
         )
 
         if userUuid:
@@ -71,6 +71,7 @@ def checkLdapAuth(
                 "(&(objectCategory=person)(objectClass=user)(sAMAccountName=%s))"
                 % username.split("@")[0]
             )
+        logger.debug("User=%s, LDAP user query: %s", username, ldapFilter)
 
         dcParts = ",".join(
             ["DC=%s" % part for part in ldapSetting.ldapDomain.split(".")]
@@ -87,6 +88,9 @@ def checkLdapAuth(
             )
 
         if not ldapBases:
+            logger.debug(
+                "User=%s, LDAP OU and/or CN search paths must be set.", username
+            )
             raise LoginFailed(
                 "LDAPAuth: LDAP OU and/or CN search paths must be set."
             )
@@ -94,7 +98,10 @@ def checkLdapAuth(
         userDetails = None
         for ldapBase in ldapBases:
             ldapBase = "%s,%s" % (ldapBase, dcParts)
-            logger.debug("LDAP Base: %s", ldapBase)
+            logger.debug(
+                    "User=%s, Searching in LDAP Base: %s, for LDAP Filter: %s",
+                    userName, ldapBase, ldapFilter
+            )
 
             try:
                 # Example Base: 'CN=atuser1,CN=Users,DC=synad,DC=synerty,DC=com'
@@ -105,20 +112,34 @@ def checkLdapAuth(
                 if userDetails:
                     break
 
+                logger.debug(
+                    "User=%s, Checking next, user was not found in: %s",
+                    username,
+                    ldapBase
+                )
+
             except ldap.NO_SUCH_OBJECT:
-                logger.warning("CN or OU doesn't exist : %s", ldapBase)
+                logger.warning("User=%s, CN or OU doesn't exist : %s",  username, ldapBase)
 
     except ldap.NO_SUCH_OBJECT:
+        logger.info("User=%s, was not found in any LDAP bases, NO_SUCH_OBJECT", username)
         raise LoginFailed(
-            "LDAPAuth: An internal error occurred, ask admin to check "
-            "Attune logs"
+            "LDAPAuth: A user with username %s was not found, ask admin to "
+            "check Peek logs" %
+            username,
         )
 
     except ldap.INVALID_CREDENTIALS:
-        raise LoginFailed("LDAPAuth: Username or password is incorrect")
+        logger.info("User=%s, provided an incorrect username or password, INVALID_CREDENTIALS")
+        raise LoginFailed(
+            "LDAPAuth: Username or password is incorrect for %s" % username
+        )
 
     if not userDetails:
-        raise LoginFailed("LDAPAuth: User doesn't belong to the correct CN/OUs")
+        logger.info("User=%s, was not found in any LDAP bases, 'not userDetails'", username)
+        raise LoginFailed(
+            "LDAPAuth: User %s doesn't belong to the correct CN/OUs" % username
+        )
 
     userDetails = userDetails[0][1]
 
@@ -135,6 +156,11 @@ def checkLdapAuth(
     )
 
     ldapFilter = "(objectSid=%s)" % primaryGroupSid
+    logger.debug(
+        "User=%s, Primary group details LDAP filter: %s",
+        username,
+        ldapFilter,
+    )
     primGroupDetails = conn.search_st(
         dcParts, ldap.SCOPE_SUBTREE, ldapFilter, None, 0, 10
     )
@@ -146,6 +172,9 @@ def checkLdapAuth(
     ldapFilter = (
         "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=%s))"
         % (_escapeParensForLdapFilter(distinguishedName),)
+    )
+    logger.debug(
+        "User=%s, Using recursive groups filter: %s", username, ldapFilter
     )
     logger.info("Fetching groups from the LDAP server for user %s", username)
     groupDetails = conn.search_st(
@@ -169,6 +198,8 @@ def checkLdapAuth(
             group = group.split("=")[1]
         groups.append(group)
 
+    logger.debug("User %s, is a member of groups: %s", username, groups)
+
     userTitle = None
     if userDetails["displayName"]:
         userTitle = userDetails["displayName"][0].decode()
@@ -183,8 +214,18 @@ def checkLdapAuth(
     if ldapSetting.ldapGroups:
         ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
 
+        logger.debug("User=%s, Checking if user is a member of groups: %s", username, groups)
+
         if not ldapGroups & set(groups):
-            raise LoginFailed("User is not a member of an authorised group")
+            logger.info("User=%s, is not a member of any authorised group, 'not ldapGroups & set(groups)'", username)
+            raise LoginFailed(
+                "User %s is not a member of an authorised group" % username
+            )
+
+        logger.debug(
+            "User=%s, is a member of specified groups. Proceeding with login",
+            username,
+        )
 
     ldapLoggedInUser = LdapLoggedInUserTuple(
         username=username,
