@@ -5,7 +5,8 @@ from typing import List
 from twisted.cred.error import LoginFailed
 from twisted.internet.defer import inlineCallbacks
 from vortex.DeferUtil import deferToThreadWrapWithLogger
-from vortex.VortexFactory import VortexFactory, NoVortexException
+from vortex.VortexFactory import NoVortexException
+from vortex.VortexFactory import VortexFactory
 
 from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.agent.RpcForLogic import RpcForLogic
@@ -14,6 +15,7 @@ from peek_core_user._private.server.auth_connectors.AuthABC import AuthABC
 from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.storage.LdapSetting import LdapSetting
 from peek_core_user._private.storage.Setting import LDAP_AUTH_ENABLED
+from peek_core_user._private.storage.Setting import LDAP_ENABLE_DOMAIN_SUPPORT
 from peek_core_user._private.storage.Setting import LDAP_VERIFY_SSL
 from peek_core_user._private.storage.Setting import globalSetting
 from peek_platform.file_config.PeekFileConfigABC import PEEK_AGENT_SERVICE
@@ -37,7 +39,7 @@ class LdapNotEnabledError(Exception):
 
 
 _LdapAuthSettings = namedtuple(
-    "_LdapAuthSettings", ["ldapSettings", "ldapVerifySsl"]
+    "_LdapAuthSettings", ["ldapSettings", "ldapVerifySsl", "ldapEnableDomain"]
 )
 
 
@@ -60,6 +62,12 @@ class LdapAuth(AuthABC):
         ), "Unhandled authentication for service type"
 
         authSettings: _LdapAuthSettings = yield self._getSettings()
+
+        if not authSettings.ldapEnableDomain and "@" in userName:
+            raise Exception(
+                "Login with email is disabled. Login with a "
+                "username or enable @domain support from settings"
+            )
 
         if not authSettings.ldapVerifySsl:
             ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
@@ -255,11 +263,16 @@ class LdapAuth(AuthABC):
             # Check if the user is actually logged into this device.
             ldapSettings = session.query(LdapSetting).all()
             ldapVerifySsl = globalSetting(session, LDAP_VERIFY_SSL)
+            ldapEnableDomain = globalSetting(
+                session, LDAP_ENABLE_DOMAIN_SUPPORT
+            )
 
             session.expunge_all()
 
             return _LdapAuthSettings(
-                ldapSettings=ldapSettings, ldapVerifySsl=ldapVerifySsl
+                ldapSettings=ldapSettings,
+                ldapVerifySsl=ldapVerifySsl,
+                ldapEnableDomain=ldapEnableDomain,
             )
 
             # No commit needed, we only query

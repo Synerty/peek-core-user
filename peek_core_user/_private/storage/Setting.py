@@ -1,13 +1,19 @@
-from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.sql.expression import cast, null, case
+from sqlalchemy.schema import Column
+from sqlalchemy.schema import ForeignKey
+from sqlalchemy.sql.expression import case
+from sqlalchemy.sql.expression import cast
+from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.schema import Index
-from sqlalchemy.types import Integer, String, Boolean
-from vortex.Tuple import Tuple, addTupleType
+from sqlalchemy.types import Boolean
+from sqlalchemy.types import Integer
+from sqlalchemy.types import String
+from vortex.Tuple import Tuple
+from vortex.Tuple import addTupleType
 
+from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from .DeclarativeBase import DeclarativeBase
 
 """Mapping a polymorphic-valued vertical table as a dictionary.
@@ -232,7 +238,10 @@ def _getSetting(ormSession, name, propertyDict, key=None, value=None):
         return setting
 
     # Make sure the propery is defined for this setting
-    assert str(key) in propertyDict, "Key %s is not defined in setting %s" % (key, name)
+    assert str(key) in propertyDict, "Key %s is not defined in setting %s" % (
+        key,
+        name,
+    )
 
     if value is None:
         return setting[key]
@@ -252,7 +261,9 @@ globalProperties = {}
 
 
 def globalSetting(ormSession, key=None, value=None):
-    return _getSetting(ormSession, "Global", globalProperties, key=key, value=value)
+    return _getSetting(
+        ormSession, "Global", globalProperties, key=key, value=value
+    )
 
 
 MOBILE_LOGIN_GROUP = PropertyKey(
@@ -293,4 +304,8 @@ LDAP_AUTH_ENABLED = PropertyKey(
 
 LDAP_VERIFY_SSL = PropertyKey(
     "LDAP Verify SSL Certificates", True, propertyDict=globalProperties
+)
+
+LDAP_ENABLE_DOMAIN_SUPPORT = PropertyKey(
+    "LDAP Enable @domain Support for Login", True, propertyDict=globalProperties
 )
