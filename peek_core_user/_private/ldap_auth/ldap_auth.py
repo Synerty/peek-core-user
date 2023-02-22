@@ -31,9 +31,14 @@ from typing import Tuple
 import ldap
 from twisted.cred.error import LoginFailed
 
+from peek_core_user._private.PluginNames import userPluginTuplePrefix
 from peek_core_user._private.storage import LdapSetting
+from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
 from peek_core_user._private.tuples.LdapLoggedInUserTuple import (
     LdapLoggedInUserTuple,
+)
+from peek_core_user.tuples.constants.UserAuthTargetEnum import (
+    UserAuthTargetEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,8 +104,10 @@ def checkLdapAuth(
         for ldapBase in ldapBases:
             ldapBase = "%s,%s" % (ldapBase, dcParts)
             logger.debug(
-                    "User=%s, Searching in LDAP Base: %s, for LDAP Filter: %s",
-                    userName, ldapBase, ldapFilter
+                "User=%s, Searching in LDAP Base: %s, for LDAP Filter: %s",
+                username,
+                ldapBase,
+                ldapFilter,
             )
 
             try:
@@ -115,28 +122,36 @@ def checkLdapAuth(
                 logger.debug(
                     "User=%s, Checking next, user was not found in: %s",
                     username,
-                    ldapBase
+                    ldapBase,
                 )
 
             except ldap.NO_SUCH_OBJECT:
-                logger.warning("User=%s, CN or OU doesn't exist : %s",  username, ldapBase)
+                logger.warning(
+                    "User=%s, CN or OU doesn't exist : %s", username, ldapBase
+                )
 
     except ldap.NO_SUCH_OBJECT:
-        logger.info("User=%s, was not found in any LDAP bases, NO_SUCH_OBJECT", username)
+        logger.info(
+            "User=%s, was not found in any LDAP bases, NO_SUCH_OBJECT", username
+        )
         raise LoginFailed(
             "LDAPAuth: A user with username %s was not found, ask admin to "
-            "check Peek logs" %
-            username,
+            "check Peek logs" % username,
         )
 
     except ldap.INVALID_CREDENTIALS:
-        logger.info("User=%s, provided an incorrect username or password, INVALID_CREDENTIALS")
+        logger.info(
+            "User=%s, provided an incorrect username or password, INVALID_CREDENTIALS"
+        )
         raise LoginFailed(
             "LDAPAuth: Username or password is incorrect for %s" % username
         )
 
     if not userDetails:
-        logger.info("User=%s, was not found in any LDAP bases, 'not userDetails'", username)
+        logger.info(
+            "User=%s, was not found in any LDAP bases, 'not userDetails'",
+            username,
+        )
         raise LoginFailed(
             "LDAPAuth: User %s doesn't belong to the correct CN/OUs" % username
         )
@@ -214,10 +229,17 @@ def checkLdapAuth(
     if ldapSetting.ldapGroups:
         ldapGroups = set([s.strip() for s in ldapSetting.ldapGroups.split(",")])
 
-        logger.debug("User=%s, Checking if user is a member of groups: %s", username, groups)
+        logger.debug(
+            "User=%s, Checking if user is a member of groups: %s",
+            username,
+            groups,
+        )
 
         if not ldapGroups & set(groups):
-            logger.info("User=%s, is not a member of any authorised group, 'not ldapGroups & set(groups)'", username)
+            logger.info(
+                "User=%s, is not a member of any authorised group, 'not ldapGroups & set(groups)'",
+                username,
+            )
             raise LoginFailed(
                 "User %s is not a member of an authorised group" % username
             )
