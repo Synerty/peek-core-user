@@ -1,6 +1,6 @@
 """
 {'objectClass': [b'top', b'person', b'organizationalPerson', b'user'], 'cn': [b'attest'],
- 'givenName': [b'attest'],‰
+ 'givenName': [b'attest'],
  'distinguishedName': [b'CN=attest,OU=testou,DC=synad,DC=synerty,DC=com'],
  'instanceType': [b'4'], 'whenCreated': [b'20170505160836.0Z'],
  'whenChanged': [b'20190606130621.0Z'], 'displayName': [b'attest'],
@@ -284,6 +284,67 @@ def _escapeParensForLdapFilter(value: str) -> str:
     value = value.replace("*", "\\2A")
     value = value.replace("\0", "\\00")
     return value
+
+
+def maybeCreateInternalUserBlocking(
+    dbSession, ldapLoggedInUser: LdapLoggedInUserTuple
+) -> InternalUserTuple:
+    internalUser = (
+        dbSession.query(InternalUserTuple)
+        .filter(InternalUserTuple.userUuid == ldapLoggedInUser.userUuid)
+        .first()
+    )
+
+    # do no create, return the existing user
+    if internalUser:
+        logger.info("Found existing internal user %s", internalUser.userKey)
+        if "@" not in internalUser.userKey:
+            internalUser.userKey = (
+                internalUser.userName.lower()
+                if "@" in internalUser.userName
+                else (
+                    "%s@%s"
+                    % (
+                        internalUser.userName,
+                        ldapLoggedInUser.ldapDomain,
+                    )
+                ).lower()
+            )
+            dbSession.merge(internalUser)
+            dbSession.commit()
+
+        return internalUser
+
+    userKey = (
+        "%s@%s" % (ldapLoggedInUser.username, ldapLoggedInUser.ldapDomain)
+    ).lower()
+    logger.info("Creating new internal user: %s", userKey)
+    newInternalUser = InternalUserTuple(
+        userName=ldapLoggedInUser.username.lower(),
+        userKey=(
+            ldapLoggedInUser.username.lower()
+            if "@" in ldapLoggedInUser.username
+            else userKey
+        ),
+        userTitle="%s (%s)"
+        % (ldapLoggedInUser.userTitle, ldapLoggedInUser.ldapName),
+        userUuid=ldapLoggedInUser.userUuid,
+        email=ldapLoggedInUser.email,
+        authenticationTarget=UserAuthTargetEnum.LDAP,
+        importSource="LDAP",
+        # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
+        importHash=f"{userPluginTuplePrefix}LDAPAuth:{ldapLoggedInUser.userUuid}",
+    )
+
+    try:
+        dbSession.add(newInternalUser)
+    except Exception as e:
+        logger.info(e)
+        raise LoginFailed(
+            "Failed to create Internal User. Use the full name <username>@<ldap-domain> to login"
+        )
+    dbSession.commit()
+    return newInternalUser
 
 
 def _makeLdapBase(ldapFolders, userName, propertyName):
