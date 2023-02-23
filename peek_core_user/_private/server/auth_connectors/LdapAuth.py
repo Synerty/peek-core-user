@@ -65,8 +65,7 @@ class LdapAuth(AuthABC):
 
         if not authSettings.ldapEnableDomain and "@" in userName:
             raise Exception(
-                "Login with email is disabled. Login with a "
-                "username or enable @domain support from settings"
+                "Please login with a username, not an email address"
             )
 
         if not authSettings.ldapVerifySsl:
