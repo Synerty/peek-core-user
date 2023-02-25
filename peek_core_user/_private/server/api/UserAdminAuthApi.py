@@ -11,11 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class UserAdminAuthApi(UserAdminAuthApiABC):
-    def __init__(self, adminAuthController: AdminAuthController):
+    def __init__(self):
+        self._adminAuthController = None
+
+    def setStartValues(self, adminAuthController: AdminAuthController):
         self._adminAuthController = adminAuthController
 
     def shutdown(self):
-        pass
+        self._adminAuthController = None
 
     def check(self, username: str, password: str) -> Deferred:
         return self._adminAuthController.check(username, password)

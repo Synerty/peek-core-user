@@ -9,7 +9,9 @@ from peek_core_user._private.server.api.UserLoginApi import UserLoginApi
 from peek_core_user._private.server.controller.AdminAuthController import (
     AdminAuthController,
 )
-from peek_core_user._private.server.controller.ImportController import ImportController
+from peek_core_user._private.server.controller.ImportController import (
+    ImportController,
+)
 from peek_core_user._private.server.controller.LoginLogoutController import (
     LoginLogoutController,
 )
@@ -19,25 +21,35 @@ logger = logging.getLogger(__name__)
 
 
 class UserApi(UserApiABC):
-    def __init__(
+    def __init__(self):
+        self._hookApi = UserFieldHookApi()
+        self._importApi = UserImportApi()
+        self._infoApi = UserInfoApi()
+        self._loginApi = UserLoginApi()
+        self._adminAuthApi = UserAdminAuthApi()
+
+    def setStartValues(
         self,
-        deviceApi: DeviceApiABC,
         dbSessionCreator,
+        deviceApi: DeviceApiABC,
         importController: ImportController,
         loginLogoutController: LoginLogoutController,
         adminAuthController: AdminAuthController,
     ):
-        self._hookApi = UserFieldHookApi()
 
-        self._importApi = UserImportApi(importController=importController)
+        self._importApi.setStartValues(importController=importController)
 
-        self._infoApi = UserInfoApi(
+        self._infoApi.setStartValues(
             deviceApi=deviceApi, dbSessionCreator=dbSessionCreator
         )
 
-        self._loginApi = UserLoginApi(loginLogoutController=loginLogoutController)
+        self._loginApi.setStartValues(
+            loginLogoutController=loginLogoutController
+        )
 
-        self._adminAuthApi = UserAdminAuthApi(adminAuthController=adminAuthController)
+        self._adminAuthApi.setStartValues(
+            adminAuthController=adminAuthController
+        )
 
     def shutdown(self):
         self._loginApi.shutdown()

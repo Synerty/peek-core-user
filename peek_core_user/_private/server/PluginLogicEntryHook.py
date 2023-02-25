@@ -122,6 +122,10 @@ class PluginLogicEntryHook(
 
         loadPublicTuples()
 
+        # ----------------
+        # Setup our API
+        self._userApi = UserApi()
+
         logger.debug("loaded")
 
     def start(self):
@@ -156,9 +160,9 @@ class PluginLogicEntryHook(
 
         # ----------------
         # Setup our API
-        self._userApi = UserApi(
-            deviceApi,
+        self._userApi.setStartValues(
             self.dbSessionCreator,
+            deviceApi,
             importController,
             loginLogoutController,
             adminAuthController,

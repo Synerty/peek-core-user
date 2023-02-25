@@ -2,18 +2,23 @@ import logging
 
 from twisted.internet.defer import Deferred
 
-from peek_core_user._private.server.controller.ImportController import ImportController
+from peek_core_user._private.server.controller.ImportController import (
+    ImportController,
+)
 from peek_core_user.server.UserImportApiABC import UserImportApiABC
 
 logger = logging.getLogger(__name__)
 
 
 class UserImportApi(UserImportApiABC):
-    def __init__(self, importController: ImportController):
+    def __init__(self):
+        self._importController = None
+
+    def setStartValues(self, importController: ImportController):
         self._importController = importController
 
     def shutdown(self):
-        pass
+        self._importController = None
 
     def importInternalUsers(
         self, importHash: str, usersEncodedPayload: bytes

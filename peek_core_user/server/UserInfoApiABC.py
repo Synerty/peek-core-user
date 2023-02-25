@@ -110,9 +110,14 @@ class UserInfoApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def userLoggedInInfo(self, userName: str, isFieldDevice: bool) -> Deferred:
+    def userLoggedInInfo(
+        self,
+        userName: Optional[str] = None,
+        isFieldDevice: Optional[bool] = None,
+    ) -> Deferred:
         """Peek logged-in field device info by userName
 
         :param userName: The username / userid of the user, EG C917
+        :param isFieldDevice:
         :return: A list of user LoggedIn Info
         """

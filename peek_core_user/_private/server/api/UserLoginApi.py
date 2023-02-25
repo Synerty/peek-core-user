@@ -17,11 +17,14 @@ class UserLoginApi(UserLoginApiABC):
     #: A reference to the core device plugins API
     _deviceApi: DeviceApiABC
 
-    def __init__(self, loginLogoutController: LoginLogoutController):
+    def __init__(self):
+        self._loginLogoutController = None
+
+    def setStartValues(self, loginLogoutController: LoginLogoutController):
         self._loginLogoutController = loginLogoutController
 
     def shutdown(self):
-        pass
+        self._loginLogoutController = None
 
     def logout(self, logoutTuple: UserLogoutAction) -> Deferred:
         return self._loginLogoutController.logout(logoutTuple)

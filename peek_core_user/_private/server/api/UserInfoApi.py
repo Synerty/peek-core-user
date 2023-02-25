@@ -38,12 +38,17 @@ class UserInfoApi(UserInfoApiABC):
         InternalGroupTuple.tupleFieldNames()
     )
 
-    def __init__(self, deviceApi: DeviceApiABC, dbSessionCreator):
+    def __init__(self):
+        self._deviceApi = None
+        self._dbSessionCreator = None
+
+    def setStartValues(self, deviceApi: DeviceApiABC, dbSessionCreator):
         self._deviceApi = deviceApi
         self._dbSessionCreator = dbSessionCreator
 
     def shutdown(self):
-        pass
+        self._deviceApi = None
+        self._dbSessionCreator = None
 
     @deferToThreadWrapWithLogger(logger)
     def user(self, userName: str):
@@ -259,14 +264,19 @@ class UserInfoApi(UserInfoApiABC):
 
     @deferToThreadWrapWithLogger(logger)
     def userLoggedInInfo(
-        self, userName: str, isFieldDevice: bool
+        self,
+        userName: Optional[str] = None,
+        isFieldDevice: Optional[bool] = None,
     ) -> List[UserLoggedIn]:
         session = self._dbSessionCreator()
         try:
-            query = session.query(UserLoggedIn).filter(
-                UserLoggedIn.isFieldLogin == isFieldDevice,
-                UserLoggedIn.userName == userName,
-            )
+            query = session.query(UserLoggedIn)
+            if userName:
+                query = query.filter(UserLoggedIn.userName == userName)
+
+            if isFieldDevice:
+                query = query.filter(UserLoggedIn.isFieldLogin == isFieldDevice)
+
             return [row.toTuple() for row in query.all()]
         finally:
             session.close()
