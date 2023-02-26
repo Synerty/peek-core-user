@@ -214,11 +214,11 @@ def checkLdapAuth(
     logger.debug("User %s, is a member of groups: %s", username, groups)
 
     userTitle = None
-    if userDetails["displayName"]:
+    if userDetails.get("displayName"):
         userTitle = userDetails["displayName"][0].decode()
 
     email = None
-    if userDetails["userPrincipalName"]:
+    if userDetails.get("userPrincipalName"):
         email = userDetails["userPrincipalName"][0].decode()
 
     if not userUuid:
