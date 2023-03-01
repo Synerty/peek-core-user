@@ -6,7 +6,9 @@ import pytz
 from txcelery.defer import DeferrableTask
 
 from peek_plugin_base.worker import CeleryDbConn
-from peek_core_user._private.storage.InternalGroupTuple import InternalGroupTuple
+from peek_core_user._private.storage.InternalGroupTuple import (
+    InternalGroupTuple,
+)
 from peek_core_user._private.tuples.InternalGroupImportResultTuple import (
     InternalGroupImportResultTuple,
 )
@@ -76,7 +78,9 @@ def importInternalGroups(
                 newGroup = InternalGroupTuple()
 
                 for fieldName in ImportInternalGroupTuple.tupleFieldNames():
-                    setattr(newGroup, fieldName, getattr(importGroup, fieldName))
+                    setattr(
+                        newGroup, fieldName, getattr(importGroup, fieldName)
+                    )
 
                 session.add(newGroup)
                 inserts.append(newGroup)

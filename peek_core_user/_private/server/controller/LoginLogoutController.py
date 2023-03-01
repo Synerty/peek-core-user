@@ -336,7 +336,6 @@ class LoginLogoutController:
         # check user group and user password
         ormSession = self._dbSessionCreator()
         try:
-
             if not userDetail:
                 responseTuple.setFailed()
                 return responseTuple
@@ -379,7 +378,6 @@ class LoginLogoutController:
             # If the user is logged in, but not to this client device, raise exception
             if blockMultipleLogins and userLoggedIn and not sameDevice:
                 if USER_ALREADY_LOGGED_ON_KEY in acceptedWarningKeys:
-
                     forceLogouter = _ForceLogout(
                         userUuid, loggedInElsewhere.deviceToken
                     )
@@ -461,8 +459,8 @@ class LoginLogoutController:
             # Create the user logged in entry
 
             newUser = UserLoggedIn(
-                userName=userName,
-                userKey=userKey,
+                userName=userName.lower(),
+                userKey=userKey.lower(),
                 userUuid=userUuid,
                 loggedInDateTime=datetime.now(pytz.utc),
                 deviceToken=deviceToken,
@@ -507,7 +505,6 @@ class LoginLogoutController:
         #     pass
 
         except Exception as e:
-
             # Log the user out again if the hooks fail
             logoutTuple = UserLogoutAction(
                 userName=loginTuple.userName, deviceToken=loginTuple.deviceToken
@@ -521,6 +518,7 @@ class LoginLogoutController:
             except UserIsNotLoggedInToThisDeviceError:
                 pass
 
+            logger.debug(f"User login failed: {e}")
             raise e
 
         self._clientTupleObservable.notifyOfTupleUpdate(
@@ -537,7 +535,6 @@ class LoginLogoutController:
         return loginResponse
 
     def _forceLogout(self, ormSession, userUuid, deviceToken):
-
         ormSession.query(UserLoggedIn).filter(
             UserLoggedIn.userUuid == userUuid
         ).filter(UserLoggedIn.deviceToken == deviceToken).delete(

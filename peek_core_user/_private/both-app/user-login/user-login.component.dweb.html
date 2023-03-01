@@ -5,10 +5,10 @@
         <fieldset [disabled]="isAuthenticating$ | async">
             <div class="form-group">
                 <input
-                    [(ngModel)]="selectedUser.userName"
+                    [(ngModel)]="typedUserName"
                     class="form-control"
                     id="username"
-                    name="password"
+                    name="username"
                     placeholder="Username"
                     type="text"
                 />

@@ -180,7 +180,6 @@ class LdapAuth(AuthABC):
     def _getOrCreateInternalUserAsync(
         self, ldapLoggedInUser: LdapLoggedInUserTuple
     ) -> List[LdapSetting]:
-
         session = self._dbSessionCreator()
         try:
             internalUser = self._getOrCreateInternalUserBlocking(
@@ -198,7 +197,6 @@ class LdapAuth(AuthABC):
     def _getOrCreateInternalUserBlocking(
         self, dbSession, ldapLoggedInUser: LdapLoggedInUserTuple
     ) -> InternalUserTuple:
-
         internalUser = (
             dbSession.query(InternalUserTuple)
             .filter(InternalUserTuple.userUuid == ldapLoggedInUser.userUuid)
@@ -228,16 +226,16 @@ class LdapAuth(AuthABC):
         )
         logger.info("Creating new internal user: %s", userKey)
         newInternalUser = InternalUserTuple(
-            userName=ldapLoggedInUser.username,
+            userName=ldapLoggedInUser.username.lower(),
             userKey=(
                 ldapLoggedInUser.username
                 if "@" in ldapLoggedInUser.username
                 else userKey
-            ),
+            ).lower(),
             userTitle="%s (%s)"
             % (ldapLoggedInUser.userTitle, ldapLoggedInUser.ldapName),
             userUuid=ldapLoggedInUser.userUuid,
-            email=ldapLoggedInUser.email,
+            email=ldapLoggedInUser.email.lower(),
             authenticationTarget=UserAuthTargetEnum.LDAP,
             importSource="LDAP",
             # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
@@ -256,7 +254,6 @@ class LdapAuth(AuthABC):
 
     @deferToThreadWrapWithLogger(logger)
     def _getSettings(self) -> _LdapAuthSettings:
-
         session = self._dbSessionCreator()
         try:
             # Check if the user is actually logged into this device.

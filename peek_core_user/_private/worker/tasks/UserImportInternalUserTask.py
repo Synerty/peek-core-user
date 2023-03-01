@@ -71,16 +71,24 @@ def importInternalUsers(
                 .all()
             }
 
-        groupsByName = {g.groupName: g for g in session.query(InternalGroupTuple).all()}
+        groupsByName = {
+            g.groupName: g for g in session.query(InternalGroupTuple).all()
+        }
 
         for importUser in importUsers:
             try:
-                existingUser = existingUsersByUuid.pop(importUser.userUuid, None)
+                existingUser = existingUsersByUuid.pop(
+                    importUser.userUuid, None
+                )
                 if existingUser:
-                    _updateUser(existingUser, groupsByName, importUser, same, updates)
+                    _updateUser(
+                        existingUser, groupsByName, importUser, same, updates
+                    )
 
                 else:
-                    _insertUser(session, groupsByName, importUser, importHash, inserts)
+                    _insertUser(
+                        session, groupsByName, importUser, importHash, inserts
+                    )
 
                 session.commit()
 
@@ -138,6 +146,9 @@ def _insertUser(session, groupsByName, importUser, importHash, inserts):
 
     newUser.password = PasswordUpdateController.hashPass(str(uuid.uuid4()))
 
+    newUser.userKey = newUser.userKey.lower()
+    newUser.userName = newUser.userName.lower()
+
     session.add(newUser)
     inserts.append(newUser)
 
@@ -156,7 +167,7 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
         existingVal = getattr(existingUser, fieldName)
         if existingVal != newVal:
             if existingVal and not newVal:
-                """ Don't wipe out values if they already exist """
+                """Don't wipe out values if they already exist"""
 
             else:
                 setattr(existingUser, fieldName, newVal)
@@ -167,7 +178,9 @@ def _updateUser(existingUser, groupsByName, importUser, same, updates):
 
     # The password is an optional field
     if importUser.password is not None:
-        existingUser.password = PasswordUpdateController.hashPass(importUser.password)
+        existingUser.password = PasswordUpdateController.hashPass(
+            importUser.password
+        )
         updated = True
 
     # If there are NONE groups, then don't make any changes

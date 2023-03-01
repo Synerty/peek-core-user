@@ -1,17 +1,18 @@
+import hashlib
 import logging
 
-import hashlib
 from sqlalchemy.orm.exc import NoResultFound
 from twisted.internet.defer import Deferred
-
-from peek_core_user._private.storage.InternalUserPassword import InternalUserPassword
-from peek_core_user._private.storage.InternalUserTuple import InternalUserTuple
-from peek_core_user._private.tuples.InternalUserUpdatePasswordAction import (
-    InternalUserUpdatePasswordAction,
-)
 from vortex.DeferUtil import deferToThreadWrapWithLogger
 from vortex.TupleAction import TupleActionABC
 from vortex.handler.TupleActionProcessor import TupleActionProcessorDelegateABC
+
+from peek_core_user._private.storage.InternalUserPassword import (
+    InternalUserPassword,
+)
+from peek_core_user._private.tuples.InternalUserUpdatePasswordAction import (
+    InternalUserUpdatePasswordAction,
+)
 
 logger = logging.getLogger(__name__)
 

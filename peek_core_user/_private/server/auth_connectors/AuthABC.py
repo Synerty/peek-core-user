@@ -5,6 +5,7 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm.exc import NoResultFound
 from vortex.DeferUtil import deferToThreadWrapWithLogger
 
@@ -35,7 +36,6 @@ class AuthABC(metaclass=ABCMeta):
     def getInternalUser(
         self, userName, raiseNotLoggedInException=True
     ) -> Optional[InternalUserTuple]:
-
         session = self._dbSessionCreator()
         try:
             authenticatedUsers = (
@@ -65,7 +65,6 @@ class AuthABC(metaclass=ABCMeta):
 
     @deferToThreadWrapWithLogger(logger)
     def getInternalUserAndPassword(self, userName):
-
         session = self._dbSessionCreator()
         try:
             authenticatedUserPasswords = (
@@ -73,7 +72,9 @@ class AuthABC(metaclass=ABCMeta):
                 .join(
                     InternalUserPassword, isouter=True
                 )  # effectively `LEFT JOIN`
-                .filter(InternalUserTuple.userName == userName)
+                .filter(
+                    func.lower(InternalUserTuple.userName) == userName.lower()
+                )
                 .all()
             )
             session.expunge_all()

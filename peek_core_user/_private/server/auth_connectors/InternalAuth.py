@@ -1,5 +1,6 @@
 import logging
 
+from sqlalchemy.orm.exc import NoResultFound
 from twisted.cred.error import LoginFailed
 from twisted.internet.defer import inlineCallbacks
 from vortex.DeferUtil import deferToThreadWrapWithLogger
@@ -34,9 +35,12 @@ logger = logging.getLogger(__name__)
 class InternalAuth(AuthABC):
     @inlineCallbacks
     def checkPassAsync(self, userName, password, forService):
-        authenticatedUserPassword = yield self.getInternalUserAndPassword(
-            userName
-        )
+        try:
+            authenticatedUserPassword = yield self.getInternalUserAndPassword(
+                userName
+            )
+        except NoResultFound:
+            authenticatedUserPassword = None
 
         # if user not found
         if (
@@ -71,10 +75,8 @@ class InternalAuth(AuthABC):
 
     @deferToThreadWrapWithLogger(logger)
     def _checkInternalPass(self, authenticatedUser, password, forService):
-
         dbSession = self._dbSessionCreator()
         try:
-
             passObj = authenticatedUser.InternalUserPassword
             if passObj.password != PasswordUpdateController.hashPass(password):
                 raise LoginFailed(

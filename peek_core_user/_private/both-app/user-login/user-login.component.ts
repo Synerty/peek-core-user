@@ -57,6 +57,14 @@ export class UserLoginComponent extends NgLifeCycleEvents {
             });
     }
 
+    get typedUserName(): string {
+        return this.selectedUser.userName;
+    }
+
+    set typedUserName(value: string) {
+        this.selectedUser.userName = value.toLowerCase();
+    }
+
     get isAuthenticating(): boolean {
         return this.isAuthenticating$.getValue();
     }
