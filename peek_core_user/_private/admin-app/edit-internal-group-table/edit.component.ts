@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import {
-    extend,
     NgLifeCycleEvents,
     TupleLoader,
     VortexService,
@@ -31,7 +30,7 @@ export class EditInternalGroupComponent extends NgLifeCycleEvents {
 
         this.loader = vortexService.createTupleLoader(
             this,
-            extend({}, this.filt, userFilt)
+            Object.assign({}, this.filt, userFilt)
         );
 
         this.loader.observable.subscribe((tuples: InternalGroupTuple[]) => {
