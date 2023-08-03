@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class LdapSetting(Tuple, DeclarativeBase):
+class LdapSetting(DeclarativeBase, Tuple):
     """LdapSetting
 
     This table stores connections and settings to LDAP servers

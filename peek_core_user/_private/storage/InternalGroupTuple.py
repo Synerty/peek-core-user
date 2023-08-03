@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class InternalGroupTuple(Tuple, DeclarativeBase):
+class InternalGroupTuple(DeclarativeBase, Tuple):
     """Group Table
 
     This table contains the user plugin groups, for the internal directory.

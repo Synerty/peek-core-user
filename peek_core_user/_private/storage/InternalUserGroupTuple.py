@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class InternalUserGroupTuple(Tuple, DeclarativeBase):
+class InternalUserGroupTuple(DeclarativeBase, Tuple):
     """Internal User Group Tuple
 
     This table stores the relationships between the users and the groups.

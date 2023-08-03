@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class DirectoryTuple(Tuple, DeclarativeBase):
+class DirectoryTuple(DeclarativeBase, Tuple):
     """ Directory Table
 
     This table contains different directories that can be authenticated against.

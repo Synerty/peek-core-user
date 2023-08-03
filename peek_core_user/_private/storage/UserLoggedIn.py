@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class UserLoggedIn(Tuple, DeclarativeBase):
+class UserLoggedIn(DeclarativeBase, Tuple):
     """UserLoggedIn
 
     This table stores which users are logged into which devices
