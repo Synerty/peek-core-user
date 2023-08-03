@@ -70,6 +70,10 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
             });
     }
 
+    getValueFromEvent(event: Event): string {
+        return (event.target as HTMLInputElement).value;
+    }
+
     needFilter(): boolean {
         return this.likeTitle == null || this.likeTitle.length < 3;
     }
