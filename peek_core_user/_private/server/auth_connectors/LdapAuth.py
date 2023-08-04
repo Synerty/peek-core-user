@@ -235,7 +235,11 @@ class LdapAuth(AuthABC):
             userTitle="%s (%s)"
             % (ldapLoggedInUser.userTitle, ldapLoggedInUser.ldapName),
             userUuid=ldapLoggedInUser.userUuid,
-            email=ldapLoggedInUser.email.lower(),
+            email=(
+                ldapLoggedInUser.email.lower()
+                if ldapLoggedInUser.email
+                else None
+            ),
             authenticationTarget=UserAuthTargetEnum.LDAP,
             importSource="LDAP",
             # importHash e.g. 'peek_core_user.LDAPAuth:<md5 hash>'
