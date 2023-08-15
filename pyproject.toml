@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peek-core-user"
+version = "0.0.0"
+authors = [{name = "Synerty", email = "contact@synerty.com"}]
+description = "Peek Plugin ENAMC Email Incidents."
+keywords = ["Peek", "Python", "Platform", "synerty"]
+classifiers = []
+dependencies = [
+    "peek-plugin-base==0.0.*,>=0.0.0",
+    "python-ldap",
+]
+
+[project.urls]
+Homepage = "https://bitbucket.org/synerty/peek-core-user"
+Download = "https://bitbucket.org/synerty/peek-core-user/get/0.0.0.zip"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.packages.find]
+exclude = ["*.tests"] # *.tests.*; tests.*; tests
+namespaces = false
