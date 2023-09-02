@@ -1,6 +1,6 @@
 import logging
 
-from rx.subjects import Subject
+from reactivex.subject import Subject
 from twisted.internet.defer import inlineCallbacks
 
 from peek_core_user.server.UserApiABC import (
@@ -8,15 +8,18 @@ from peek_core_user.server.UserApiABC import (
     UserPostLogoutHookCallable,
 )
 from peek_core_user.server.UserFieldHookApiABC import UserFieldHookApiABC
-from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
-from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
+from peek_core_user.tuples.login.UserLoginResponseTuple import (
+    UserLoginResponseTuple,
+)
+from peek_core_user.tuples.login.UserLogoutResponseTuple import (
+    UserLogoutResponseTuple,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class UserFieldHookApi(UserFieldHookApiABC):
     def __init__(self):
-
         self._postLoginHooks = []
         self._postLoginSubject = Subject()
 
@@ -38,7 +41,9 @@ class UserFieldHookApi(UserFieldHookApiABC):
     def addPostLogoutHook(self, callable: UserPostLogoutHookCallable) -> None:
         self._postLogoutHooks.append(callable)
 
-    def removePostLogoutHook(self, callable: UserPostLogoutHookCallable) -> None:
+    def removePostLogoutHook(
+        self, callable: UserPostLogoutHookCallable
+    ) -> None:
         self._postLogoutHooks.remove(callable)
 
     def postLogoffObservable(self) -> Subject:

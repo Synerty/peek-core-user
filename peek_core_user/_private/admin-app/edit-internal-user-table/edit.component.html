@@ -125,7 +125,9 @@
                     <th>Group</th>
                     <td *ngIf="groupId == null">
                         <select
-                            (change)="updateGroup(item, i, $event.target.value)"
+                            (change)="
+                                updateGroup(item, i, getValueFromEvent($event))
+                            "
                             class="form-control input-sm"
                         >
                             <option value="">-- Select --</option>

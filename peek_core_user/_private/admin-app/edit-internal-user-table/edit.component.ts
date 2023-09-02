@@ -1,7 +1,6 @@
 import { takeUntil } from "rxjs/operators";
 import { Component, NgZone } from "@angular/core";
 import {
-    extend,
     NgLifeCycleEvents,
     TupleActionPushService,
     TupleDataObserverService,
@@ -43,7 +42,11 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
         super();
 
         this.loader = vortexService.createTupleLoader(this, () => {
-            return extend({ likeTitle: this.likeTitle }, this.filt, userFilt);
+            return Object.assign(
+                { likeTitle: this.likeTitle },
+                this.filt,
+                userFilt
+            );
         });
 
         this.loader.observable
@@ -65,6 +68,10 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
                     this.groupsById[tuple.id] = tuple;
                 }
             });
+    }
+
+    getValueFromEvent(event: Event): string {
+        return (event.target as HTMLInputElement).value;
     }
 
     needFilter(): boolean {
@@ -89,7 +96,7 @@ export class EditInternalUserComponent extends NgLifeCycleEvents {
         let t = new InternalUserTuple();
         // Add any values needed for this list here, EG, for a lookup list you might add:
         // t.lookupName = this.lookupName;
-        
+
         // label user creation source 'PEEK' when Peek admin adds a user
         t.importSource = "PEEK_ADMIN";
         t.authenticationTarget = UserAuthTargetEnum.INTERNAL;

@@ -1,11 +1,15 @@
 from typing import Callable
 
 from abc import ABCMeta, abstractmethod
-from rx.subjects import Subject
+from reactivex.subject import Subject
 from twisted.internet.defer import Deferred
 
-from peek_core_user.tuples.login.UserLoginResponseTuple import UserLoginResponseTuple
-from peek_core_user.tuples.login.UserLogoutResponseTuple import UserLogoutResponseTuple
+from peek_core_user.tuples.login.UserLoginResponseTuple import (
+    UserLoginResponseTuple,
+)
+from peek_core_user.tuples.login.UserLogoutResponseTuple import (
+    UserLogoutResponseTuple,
+)
 
 UserPostLoginHookCallable = Callable[[UserLoginResponseTuple], Deferred]
 
@@ -53,7 +57,9 @@ class UserFieldHookApiABC(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def removePostLogoutHook(self, callable: UserPostLogoutHookCallable) -> None:
+    def removePostLogoutHook(
+        self, callable: UserPostLogoutHookCallable
+    ) -> None:
         """Remove Post Logout Hook
 
         :param callable: This callable to remove from the hooks

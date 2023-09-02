@@ -1,8 +1,9 @@
 import { UserLoginComponent } from "./user-login/user-login.component";
 import { LoggedInGuard, LoggedOutGuard } from "@peek/peek_core_user";
 import { UserLogoutComponent } from "./user-logout/user-logout.component";
+import { Route } from "@angular/router";
 
-export const pluginRoutes = [
+export const pluginRoutes: Route[] = [
     {
         path: "",
         pathMatch: "full",

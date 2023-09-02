@@ -31,7 +31,7 @@ def upgrade():
             sa.String(),
             nullable=True,
         ),
-        "core_user",
+        schema="core_user",
     )
 
     # this migration does not work if there're existing users created by LDAP.
@@ -56,7 +56,7 @@ def upgrade():
             sa.String(),
             nullable=True,
         ),
-        "core_user",
+        schema="core_user",
     )
 
     # START of labeling user import sources

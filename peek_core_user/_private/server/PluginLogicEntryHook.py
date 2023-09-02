@@ -6,7 +6,7 @@ from jsoncfg.value_mappers import require_string
 from peek_core_user._private.server.controller.AdminAuthController import (
     AdminAuthController,
 )
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 
 from peek_core_device.server.DeviceApiABC import DeviceApiABC
 from peek_plugin_base.server.PluginLogicEntryHookABC import (
@@ -80,7 +80,7 @@ class PluginLogicEntryHook(
         )
 
         # Rename the plugin schema to core.
-        renameToCoreSql = """
+        renameToCoreSql = text("""
             DO $$
             BEGIN
                 IF EXISTS(
@@ -94,7 +94,7 @@ class PluginLogicEntryHook(
                 END IF;
             END
             $$;
-        """
+        """)
 
         dbSession = dbConn.ormSessionCreator()
         try:

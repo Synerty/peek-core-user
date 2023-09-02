@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { RouterModule, Route, Routes } from "@angular/router";
 import { EditInternalUserComponent } from "./edit-internal-user-table/edit.component";
 import { EditInternalGroupComponent } from "./edit-internal-group-table/edit.component";
 import { EditSettingComponent } from "./edit-setting-table/edit.component";

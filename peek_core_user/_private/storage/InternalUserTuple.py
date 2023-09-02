@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @addTupleType
-class InternalUserTuple(Tuple, DeclarativeBase):
+class InternalUserTuple(DeclarativeBase, Tuple):
     """Internal
 
     This table doesn't do anything
