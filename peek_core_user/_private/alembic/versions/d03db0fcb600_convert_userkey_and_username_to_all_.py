@@ -19,6 +19,36 @@ from alembic import op
 
 def upgrade():
     op.execute(
+        """DELETE FROM core_user."InternalUser"
+        WHERE id in (
+            SELECT id
+            FROM core_user."InternalUser"
+            WHERE lower("userKey") in (
+                SELECT lower("userKey")
+                FROM core_user."InternalUser"
+                GROUP BY lower("userKey")
+                HAVING count(lower("userKey")) > 1
+            )
+        )
+        """
+    )
+
+    op.execute(
+        """DELETE FROM core_user."InternalUser"
+        WHERE id in (
+            SELECT id
+            FROM core_user."InternalUser"
+            WHERE lower("userName") in (
+                SELECT lower("userName")
+                FROM core_user."InternalUser"
+                GROUP BY lower("userName")
+                HAVING count(lower("userName")) > 1
+            )
+        )
+        """
+    )
+
+    op.execute(
         'UPDATE core_user."InternalUser" SET "userKey" = LOWER("userKey")'
     )
     op.execute(
